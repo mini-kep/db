@@ -1,8 +1,43 @@
 # -*- coding: utf-8 -*-
 """Prototype for central database in PonyORM."""
 
+from pprint import pprint
+
 from pony import orm
 import pandas as pd
+
+
+
+#the design
+
+# better be a class?
+def get_parser_result(parser_param):
+    pass
+
+# database PUT method
+def to_database(datapoints):
+    pass
+
+# database GET method
+def from_database(query_dict):
+    pass
+
+def as_user_json(result_dict):
+    pass
+
+# write into database
+parser_param_1 = dict()
+parser_result_1 = get_parser_result(parser_param_1)
+to_database(parser_result_1)
+
+# read from database
+user_query = dict()
+reponse = as_user_json(from_database(user_query))
+
+
+
+
+# boilerplate
 
 db = orm.Database()
 db.bind(provider='sqlite', filename=':memory:')
@@ -12,14 +47,19 @@ class Datapoint(db.Entity):
      name = orm.Required(str)     
      date = orm.Required(str)
      value = orm.Required(float)  
-     # TODO: make unique key freq, name, date        
+     # TODO: make unique key freq, name, date 
+     # orm.PrimaryKey(freq, name, date)
      
 db.generate_mapping(create_tables=True)
 
 orm.sql_debug(False)
-# end of boilerplate
 
-# Example setup - minics state of database before parser import 
+# read from database
+
+
+
+
+# Example setup - mimics state of database before parser import 
 with orm.db_session:
      x = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
      # this datapoint will overlap:
@@ -118,5 +158,5 @@ assert user_df.equals(ref_df)
 # Screen after 
 with orm.db_session:    
     res = orm.select((p.name, p.freq, p.date, p.value) for p in Datapoint)[:]
-#pprint(res)
+pprint(res)
     
