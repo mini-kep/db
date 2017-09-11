@@ -69,6 +69,53 @@ with orm.db_session:
 # 1. Import data from parser
 # --------------------------
 
+class ParserCaller:    
+    """Parent class to get parsing result from individual parser."""
+    
+    supported_frequencies = 'aqmd' #must overload this 
+    supported_variables = ['BRENT'] #must overload this 
+    
+    # may be properties
+    # must overload this 
+    @property
+    def varnames(self):
+        return ['BRENT']      
+    
+    @property 
+    def frequencies(self):
+        return ['d']
+    
+    @property
+    def start_date(self):
+        return '1999-01-01'
+
+    @property
+    def end_date(self):
+        return 'today'
+    
+    def pure_get_data(self, freq, varnames, start, end):
+        """Yield ditionaries with datapoints"""
+        
+        brent = [("2017-03-16", 50.56),
+                 ("2017-03-17", 50.58),
+                 ("2017-03-20", 50.67)]   
+    
+        for date, value in brent:
+            yield {"date": date,
+                   "freq": "d",
+                   "name": "BRENT",
+                   "value": value}            
+    
+    def get_data(self, freq, varnames, start=None):
+        assert freq in self.frequencies
+        for vn in varnames:
+            assert varnames in self.varnames
+        if start is None:
+            start = self.start_date
+        end = 'it should be today'    
+        return self.pure_get_data(freq, varnames, start, end)
+      
+
 def mock_parser_output_2():   
 
     brent = [("2017-03-16", 50.56),
