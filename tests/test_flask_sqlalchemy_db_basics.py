@@ -15,6 +15,7 @@ class DbTest(TestCase):
         return app
 
     def setUp(self):
+        print("BASE SETUP")
         db.create_all()
 
     def tearDown(self):
@@ -22,9 +23,11 @@ class DbTest(TestCase):
         db.drop_all()
 
 
-class BasicDbOperationsTest(DbTest):
+class BasicFilledDbSetup(DbTest):
 
-    def __populate(self):
+    def setUp(self):
+        super(BasicFilledDbSetup, self).setUp()
+        print("CHILD SETUP")
         x1 = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
         x2 = Datapoint(date="2017-03-16", freq='d', name="BRENT", value=50.56)
         db.session.add(x1)
@@ -32,24 +35,17 @@ class BasicDbOperationsTest(DbTest):
         db.session.commit()
         db.session.close()
 
-    def test_insert(self):
-        datapoints = Datapoint.query.all()
-        assert len(datapoints) == 0
 
-        self.__populate()
-        datapoints = Datapoint.query.all()
-        assert len(datapoints) == 2
+class DbEmpty(DbTest):
 
-        x1 = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
-        x2 = Datapoint(date="2017-03-16", freq='d', name="BRENT", value=50.56)
+    def test_initial_table_is_empty(self):
+        count = Datapoint.query.count()
+        assert count == 0
 
-        for dp in datapoints:
-            assert (dp.date == x1.date and dp.freq == x1.freq and dp.name == x1.name and float(dp.value) == x1.value)\
-                or (dp.date == x2.date and dp.freq == x2.freq and dp.name == x2.name and float(dp.value) == x2.value)
+
+class BasicFilledDbUpdate(BasicFilledDbSetup):
 
     def test_update(self):
-        self.__populate()
-
         # no specified data in DB currently
         result = Datapoint.query\
             .filter_by(value=(50.56+10))\
@@ -70,12 +66,12 @@ class BasicDbOperationsTest(DbTest):
         assert datapoint.name == "BRENT"
         assert datapoint.value == '60.56'
 
-    def test_initial_table_is_empty(self):
-        count = Datapoint.query.count()
-        assert count == 0
+
+class BasicFilledDbDelete(BasicFilledDbSetup):
 
     def test_delete(self):
-        self.__populate()
+        count = Datapoint.query.count()
+        assert count == 2
 
         Datapoint.query\
             .filter(Datapoint.value == "102.3")\
@@ -84,8 +80,16 @@ class BasicDbOperationsTest(DbTest):
         count = Datapoint.query.count()
         assert count == 1
 
-        Datapoint.query \
-            .filter(Datapoint.value == "50.56") \
-            .delete()
-        count = Datapoint.query.count()
-        assert count == 0
+
+class BasicFilledDbRead(BasicFilledDbSetup):
+
+    def test_read(self):
+        datapoints = Datapoint.query.all()
+        assert len(datapoints) == 2
+
+        x1 = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
+        x2 = Datapoint(date="2017-03-16", freq='d', name="BRENT", value=50.56)
+
+        for dp in datapoints:
+            assert (dp.date == x1.date and dp.freq == x1.freq and dp.name == x1.name and float(dp.value) == x1.value) \
+                   or (dp.date == x2.date and dp.freq == x2.freq and dp.name == x2.name and float(dp.value) == x2.value)
