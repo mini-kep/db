@@ -8,7 +8,7 @@ from sqlalchemy_plain_models.datapoint import Datapoint, Base
 
 class DbTest(TestCase):
 
-    engine = create_engine('sqlite:///:memory:')
+    engine = create_engine('sqlite:///:memory:', echo=True)
     Session = sessionmaker(bind=engine)
     session = Session()
 
