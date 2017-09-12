@@ -49,7 +49,7 @@ class BasicFilledDbUpdate(BasicFilledDbSetup):
 
         # update 1 row with specified data
         self.session.query(Datapoint).filter(Datapoint.name == "BRENT")\
-            .update({"value": (50.56 + 10.0)})
+            .update({"value": (50.56 + 10)})
 
         # assert that there's 1 row having specified data after update
         result = self.session.query(Datapoint)\
