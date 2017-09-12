@@ -15,7 +15,6 @@ class DbTest(TestCase):
         return app
 
     def setUp(self):
-        print("BASE SETUP")
         db.create_all()
 
     def tearDown(self):
@@ -27,7 +26,6 @@ class BasicFilledDbSetup(DbTest):
 
     def setUp(self):
         super(BasicFilledDbSetup, self).setUp()
-        print("CHILD SETUP")
         x1 = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
         x2 = Datapoint(date="2017-03-16", freq='d', name="BRENT", value=50.56)
         db.session.add(x1)
