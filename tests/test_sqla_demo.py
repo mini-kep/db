@@ -67,35 +67,40 @@ class Test_Update(FilledDatabase):
     def setUp(self):
         super(Test_Update, self).setUp()
         self.datapoint_with_updated_values = {**self.datapoint1_values}
-        self.datapoint_with_updated_values["value"] = 15.6
+        self.datapoint_with_updated_values["value"] += 15.6
 
-    def test_before_update_database_has_no_specified_row(self):
+    def test_before_update_row_has_old_value(self):
 
-        # no specified data in DB currently
-        count = self.session.query(Datapoint)\
-            .filter_by(**self.datapoint_with_updated_values)\
-            .count()
-        assert count == 0
+        condition = self.get_datapoint_condition(self.datapoint_with_updated_values)
 
-    def test_update(self):
+        # tests that before update the specified row has "old" value
+        datapoint = self.session.query(Datapoint)\
+            .filter_by(**condition)\
+            .one()
+
+        assert datapoint.value != self.datapoint_with_updated_values["value"]
+
+    def test_after_update_row_has_new_value(self):
         # update 1 row with specified data
 
-        condition = self.get_datapoint_condition(self.datapoint1_values)
+        condition = self.get_datapoint_condition(self.datapoint_with_updated_values)
 
         self.session.query(Datapoint).filter_by(**condition) \
             .update({"value": self.datapoint_with_updated_values["value"]})
 
-        # assert that there's 1 row only having specified data after update
-        count = self.session.query(Datapoint) \
+        # tests that after update the specified row has "new" value
+        datapoint = self.session.query(Datapoint) \
             .filter_by(**condition) \
-            .count()
-        assert count == 1
+            .one()
+
+        assert datapoint.value == self.datapoint_with_updated_values["value"]
 
     def test_unique_constraint_acting_on_update(self):
 
         # test that there cannot be the two equal datasets described by Datapoint's UniqueConstraint
         with self.assertRaises(Exception):
-            self.session.query(Datapoint).filter_by(**self.get_datapoint_condition(self.datapoint1_values)) \
+            self.session.query(Datapoint) \
+                .filter_by(**self.get_datapoint_condition(self.datapoint1_values)) \
                 .update(**self.datapoint2_values)
             self.session.commit()
             self.session.close()
@@ -107,7 +112,7 @@ class Test_Delete(FilledDatabase):
         count = self.session.query(Datapoint).count()
         assert count == 2
 
-    def test_after_delete_database_has_one_row(self):
+    def test_after_delete_one_row_database_has_one_row(self):
 
         condition = self.get_datapoint_condition(self.datapoint2_values)
 
