@@ -52,6 +52,12 @@ class FilledDatabase(Test_DatabaseSchema):
 
         self.session.rollback()
 
+    def get_datapoint1_condition(self):
+        return {k: v for k, v in self.datapoint1_values.items() if k != "value"}
+
+    def get_datapoint2_condition(self):
+        return {k: v for k, v in self.datapoint2_values.items() if k != "value"}
+
 
 #filter by just one variable is not good
 #TODO - CRITICAL: update/delete must operate on full datapoint, not querying
@@ -63,7 +69,8 @@ class Test_Update(FilledDatabase):
 
     def setUp(self):
         super(Test_Update, self).setUp()
-        self.datapoint_with_updated_values = dict(date="2015-03-31", freq='q', name="BRENT", value=15.6)
+        self.datapoint_with_updated_values = {**self.datapoint1_values}
+        self.datapoint_with_updated_values["value"] = 15.6
 
     def test_before_update_database_has_no_specified_row(self):
 
@@ -75,12 +82,15 @@ class Test_Update(FilledDatabase):
 
     def test_update(self):
         # update 1 row with specified data
-        self.session.query(Datapoint).filter(Datapoint.name == self.datapoint_with_updated_values["name"]) \
+
+        condition = self.get_datapoint1_condition()
+
+        self.session.query(Datapoint).filter_by(**condition) \
             .update({"value": self.datapoint_with_updated_values["value"]})
 
         # assert that there's 1 row only having specified data after update
         count = self.session.query(Datapoint) \
-            .filter_by(name=self.datapoint_with_updated_values["name"], value=self.datapoint_with_updated_values["value"]) \
+            .filter_by(**condition) \
             .count()
         assert count == 1
 
@@ -101,8 +111,11 @@ class Test_Delete(FilledDatabase):
         assert count == 2
 
     def test_after_delete_database_has_one_row(self):
+
+        condition = self.get_datapoint2_condition()
+
         self.session.query(Datapoint)\
-            .filter(Datapoint.value == self.datapoint1_values["value"])\
+            .filter_by(**condition)\
             .delete()
 
         count = self.session.query(Datapoint).count()
@@ -117,14 +130,19 @@ class Test_Read(FilledDatabase):
 
     def test_filled_database_has_specified_datapoint1(self):
 
+        condition = self.get_datapoint1_condition()
+
         count = self.session.query(Datapoint) \
-            .filter_by(**self.datapoint1_values) \
+            .filter_by(**condition) \
             .count()
         assert count == 1
 
     def test_filled_database_has_specified_datapoint2(self):
+
+        condition = self.get_datapoint2_condition()
+
         count = self.session.query(Datapoint) \
-            .filter_by(**self.datapoint2_values) \
+            .filter_by(**condition) \
             .count()
         assert count == 1
 
