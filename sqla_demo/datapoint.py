@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, UniqueConstraint
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -24,7 +24,11 @@ class Datapoint(Base):
     # end
     
     value = Column(Float, nullable=False)
-    
+
+    __table_args__ = (
+        UniqueConstraint("freq", "name", "date"),
+    )
+
     def __repr__(self):        
         args = (('freq', self.freq), 
                 ('name', self.name),

@@ -18,25 +18,39 @@ class Test_DatabaseSchema(TestCase):
     def tearDown(self):
         Base.metadata.drop_all(self.engine)
 
-    def test_Datapoint_table_is_empty_after_init(self):
-        query = self.session.query(Datapoint)
-        assert query.count == 0
 
+class Test_DatabaseEmpty(Test_DatabaseSchema):
+
+    def test_datapoint_table_is_empty_after_init(self):
+        query = self.session.query(Datapoint)
+        assert query.count() == 0
 
 
 class FilledDatabase(Test_DatabaseSchema):
 
     def setUp(self):
         # call create_all
-        super(Test_DatabaseSchema, self).setUp()
-        # datpoints
-        self.x1 = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
-        self.x2 = Datapoint(date="2017-03-16", freq='d', name="BRENT", value=50.56)
-        # add and close session 
-        for x in self.x1, self.x2:
+        super(FilledDatabase, self).setUp()
+        # datapoints
+        self.datapoint1_values = dict(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
+        self.datapoint2_values = dict(date="2017-03-16", freq='d', name="BRENT", value=50.56)
+
+        x1 = Datapoint(**self.datapoint1_values)
+        x2 = Datapoint(**self.datapoint2_values)
+        # add and close session
+        for x in x1, x2:
             self.session.add(x)
         self.session.commit()
         self.session.close()
+
+    def test_unique_constraint_acting_on_insert(self):
+
+        with self.assertRaises(Exception):
+            self.session.add(Datapoint(**self.datapoint1_values))
+            self.session.commit()
+            self.session.close()
+
+        self.session.rollback()
 
 
 #filter by just one variable is not good
@@ -47,38 +61,37 @@ class FilledDatabase(Test_DatabaseSchema):
 
 class Test_Update(FilledDatabase):
 
-    # TODO: separate to several methods each testing one thing, 
-    #       one assert per test metod 
-    #       tests should have long naming with what-when-result
-    
     def setUp(self):
-        self.unseen_value = 50.56 + 10 
-    
-    def test_update(self):
-        
-        # this is one testing method
-        
+        super(Test_Update, self).setUp()
+        self.datapoint_with_updated_values = dict(date="2015-03-31", freq='q', name="BRENT", value=15.6)
+
+    def test_before_update_database_has_no_specified_row(self):
+
         # no specified data in DB currently
-        result = self.session.query(Datapoint)\
-            .filter_by(value=(self.unseen_value))\
-            .all()
-        assert len(result) == 0
+        count = self.session.query(Datapoint)\
+            .filter_by(**self.datapoint_with_updated_values)\
+            .count()
+        assert count == 0
 
-        # this is another testing method         
-
+    def test_update(self):
         # update 1 row with specified data
-        self.session.query(Datapoint).filter(Datapoint.name == "BRENT")\
-            .update({"value": (self.unseen_value )})
+        self.session.query(Datapoint).filter(Datapoint.name == self.datapoint_with_updated_values["name"]) \
+            .update({"value": self.datapoint_with_updated_values["value"]})
 
-        # assert that there's 1 row having specified data after update
-        result = self.session.query(Datapoint)\
-            .filter_by(value=(self.unseen_value))\
-            .all()
+        # assert that there's 1 row only having specified data after update
+        count = self.session.query(Datapoint) \
+            .filter_by(name=self.datapoint_with_updated_values["name"], value=self.datapoint_with_updated_values["value"]) \
+            .count()
+        assert count == 1
 
-        assert len(result) == 1
-        datapoint = result[0]
-        assert datapoint.name == "BRENT"
-        assert datapoint.value == '60.56'
+    def test_unique_constraint_acting_on_update(self):
+
+        # test that there cannot be the two equal datasets described by Datapoint's UniqueConstraint
+        with self.assertRaises(Exception):
+            self.session.query(Datapoint).filter_by(**self.datapoint1_values) \
+                .update(**self.datapoint2_values)
+            self.session.commit()
+            self.session.close()
 
 
 class Test_Delete(FilledDatabase):
@@ -87,9 +100,9 @@ class Test_Delete(FilledDatabase):
         count = self.session.query(Datapoint).count()
         assert count == 2
 
-    def test_aftere_delete_database_has_two_rows(self):
+    def test_after_delete_database_has_one_row(self):
         self.session.query(Datapoint)\
-            .filter(Datapoint.value == "102.3")\
+            .filter(Datapoint.value == self.datapoint1_values["value"])\
             .delete()
 
         count = self.session.query(Datapoint).count()
@@ -98,21 +111,23 @@ class Test_Delete(FilledDatabase):
 
 class Test_Read(FilledDatabase):
 
-    # FIXME CRITICAL: must assert on getting same values from database, not Datapoint-to_datapoint identity
-    # ERROR: float is eaten into a string, tests do not catch this.  
-    def test_read(self):
-        datapoints = self.session.query(Datapoint).all()
-        assert len(datapoints) == 2
+    def test_filled_database_has_two_rows_only(self):
+        count = self.session.query(Datapoint).count()
+        assert count == 2
 
-        x1 = Datapoint(date="2014-03-31", freq='q', name="CPI_rog", value=102.3)
-        x2 = Datapoint(date="2017-03-16", freq='d', name="BRENT", value=50.56)
+    def test_filled_database_has_specified_datapoint1(self):
 
-        for dp in datapoints:
-            # FIXME: no compined assert like this, too long, needs refactroing 
-            assert (dp.date == x1.date and dp.freq == x1.freq and dp.name == x1.name and float(dp.value) == x1.value) \
-                   or (dp.date == x2.date and dp.freq == x2.freq and dp.name == x2.name and float(dp.value) == x2.value)
+        count = self.session.query(Datapoint) \
+            .filter_by(**self.datapoint1_values) \
+            .count()
+        assert count == 1
+
+    def test_filled_database_has_specified_datapoint2(self):
+        count = self.session.query(Datapoint) \
+            .filter_by(**self.datapoint2_values) \
+            .count()
+        assert count == 1
 
 #TODO - CRITICAL: add combined primary key [freq-varname-date]
 
 # TODO: run tests from main
-
