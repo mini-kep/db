@@ -52,11 +52,8 @@ class FilledDatabase(Test_DatabaseSchema):
 
         self.session.rollback()
 
-    def get_datapoint1_condition(self):
-        return {k: v for k, v in self.datapoint1_values.items() if k != "value"}
-
-    def get_datapoint2_condition(self):
-        return {k: v for k, v in self.datapoint2_values.items() if k != "value"}
+    def get_datapoint_condition(self, datapoint):
+        return {k: v for k, v in datapoint.items() if k != "value"}
 
 
 #filter by just one variable is not good
@@ -83,7 +80,7 @@ class Test_Update(FilledDatabase):
     def test_update(self):
         # update 1 row with specified data
 
-        condition = self.get_datapoint1_condition()
+        condition = self.get_datapoint_condition(self.datapoint1_values)
 
         self.session.query(Datapoint).filter_by(**condition) \
             .update({"value": self.datapoint_with_updated_values["value"]})
@@ -98,7 +95,7 @@ class Test_Update(FilledDatabase):
 
         # test that there cannot be the two equal datasets described by Datapoint's UniqueConstraint
         with self.assertRaises(Exception):
-            self.session.query(Datapoint).filter_by(**self.datapoint1_values) \
+            self.session.query(Datapoint).filter_by(**self.get_datapoint_condition(self.datapoint1_values)) \
                 .update(**self.datapoint2_values)
             self.session.commit()
             self.session.close()
@@ -112,7 +109,7 @@ class Test_Delete(FilledDatabase):
 
     def test_after_delete_database_has_one_row(self):
 
-        condition = self.get_datapoint2_condition()
+        condition = self.get_datapoint_condition(self.datapoint2_values)
 
         self.session.query(Datapoint)\
             .filter_by(**condition)\
@@ -130,7 +127,7 @@ class Test_Read(FilledDatabase):
 
     def test_filled_database_has_specified_datapoint1(self):
 
-        condition = self.get_datapoint1_condition()
+        condition = self.get_datapoint_condition(self.datapoint1_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -139,7 +136,7 @@ class Test_Read(FilledDatabase):
 
     def test_filled_database_has_specified_datapoint2(self):
 
-        condition = self.get_datapoint2_condition()
+        condition = self.get_datapoint_condition(self.datapoint2_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -153,12 +150,9 @@ class Test_Insert(FilledDatabase):
         super(Test_Insert, self).setUp()
         self.non_existed_datapoint_values = dict(date="2017-07-10", freq='q', name="CPI_rog", value=77.7)
 
-    def get_non_existed_datapoint_condition(self):
-        return {k: v for k, v in self.non_existed_datapoint_values.items() if k != "value"}
-
     def test_database_has_no_new_datapoint_which_has_not_been_inserted_yet(self):
 
-        condition = self.get_non_existed_datapoint_condition()
+        condition = self.get_datapoint_condition(self.non_existed_datapoint_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -173,7 +167,7 @@ class Test_Insert(FilledDatabase):
         self.session.commit()
         self.session.close()
 
-        condition = self.get_non_existed_datapoint_condition()
+        condition = self.get_datapoint_condition(self.non_existed_datapoint_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -182,13 +176,13 @@ class Test_Insert(FilledDatabase):
 
     def test_database_has_new_datapoint_with_proper_value_after_it_has_been_inserted(self):
 
-        # tests trhat insert of new unique row actually works (value testing)
+        # tests that insert of new unique row actually works (value testing)
         new_datapoint = Datapoint(**self.non_existed_datapoint_values)
         self.session.add(new_datapoint)
         self.session.commit()
         self.session.close()
 
-        condition = self.get_non_existed_datapoint_condition()
+        condition = self.get_datapoint_condition(self.non_existed_datapoint_values)
 
         result = self.session.query(Datapoint) \
             .filter_by(**condition) \
