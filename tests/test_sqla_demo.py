@@ -6,6 +6,10 @@ from unittest import TestCase
 from sqla_demo.datapoint import Datapoint, Base
 
 
+def get_datapoint_condition(datapoint):
+    return {k: v for k, v in datapoint.items() if k != "value"}
+
+
 class Test_DatabaseSchema(TestCase):
 
     engine = create_engine('sqlite:///:memory:', echo=True)
@@ -52,9 +56,6 @@ class FilledDatabase(Test_DatabaseSchema):
 
         self.session.rollback()
 
-    def get_datapoint_condition(self, datapoint):
-        return {k: v for k, v in datapoint.items() if k != "value"}
-
 
 #filter by just one variable is not good
 #TODO - CRITICAL: update/delete must operate on full datapoint, not querying
@@ -71,7 +72,7 @@ class Test_Update(FilledDatabase):
 
     def test_before_update_row_has_old_value(self):
 
-        condition = self.get_datapoint_condition(self.datapoint_with_updated_values)
+        condition = get_datapoint_condition(self.datapoint_with_updated_values)
 
         # tests that before update the specified row has "old" value
         datapoint = self.session.query(Datapoint)\
@@ -83,7 +84,7 @@ class Test_Update(FilledDatabase):
     def test_after_update_row_has_new_value(self):
         # update 1 row with specified data
 
-        condition = self.get_datapoint_condition(self.datapoint_with_updated_values)
+        condition = get_datapoint_condition(self.datapoint_with_updated_values)
 
         self.session.query(Datapoint).filter_by(**condition) \
             .update({"value": self.datapoint_with_updated_values["value"]})
@@ -100,7 +101,7 @@ class Test_Update(FilledDatabase):
         # test that there cannot be the two equal datasets described by Datapoint's UniqueConstraint
         with self.assertRaises(Exception):
             self.session.query(Datapoint) \
-                .filter_by(**self.get_datapoint_condition(self.datapoint1_values)) \
+                .filter_by(**get_datapoint_condition(self.datapoint1_values)) \
                 .update(**self.datapoint2_values)
             self.session.commit()
             self.session.close()
@@ -114,7 +115,7 @@ class Test_Delete(FilledDatabase):
 
     def test_after_delete_one_row_database_has_one_row(self):
 
-        condition = self.get_datapoint_condition(self.datapoint2_values)
+        condition = get_datapoint_condition(self.datapoint2_values)
 
         self.session.query(Datapoint)\
             .filter_by(**condition)\
@@ -132,7 +133,7 @@ class Test_Read(FilledDatabase):
 
     def test_filled_database_has_specified_datapoint1(self):
 
-        condition = self.get_datapoint_condition(self.datapoint1_values)
+        condition = get_datapoint_condition(self.datapoint1_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -141,7 +142,7 @@ class Test_Read(FilledDatabase):
 
     def test_filled_database_has_specified_datapoint2(self):
 
-        condition = self.get_datapoint_condition(self.datapoint2_values)
+        condition = get_datapoint_condition(self.datapoint2_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -157,7 +158,7 @@ class Test_Insert(FilledDatabase):
 
     def test_database_has_no_new_datapoint_which_has_not_been_inserted_yet(self):
 
-        condition = self.get_datapoint_condition(self.non_existed_datapoint_values)
+        condition = get_datapoint_condition(self.non_existed_datapoint_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -172,7 +173,7 @@ class Test_Insert(FilledDatabase):
         self.session.commit()
         self.session.close()
 
-        condition = self.get_datapoint_condition(self.non_existed_datapoint_values)
+        condition = get_datapoint_condition(self.non_existed_datapoint_values)
 
         count = self.session.query(Datapoint) \
             .filter_by(**condition) \
@@ -187,7 +188,7 @@ class Test_Insert(FilledDatabase):
         self.session.commit()
         self.session.close()
 
-        condition = self.get_datapoint_condition(self.non_existed_datapoint_values)
+        condition = get_datapoint_condition(self.non_existed_datapoint_values)
 
         result = self.session.query(Datapoint) \
             .filter_by(**condition) \
