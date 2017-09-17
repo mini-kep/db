@@ -6,4 +6,4 @@ Aggregator database blueprint
 - next: interfaces to accept json / return json as in pipeline 
 - after: integrate with parsers / frontend app
 
-- rejected: wrap SQLA to <https://flask-restless.readthedocs.io/en/stable/> (need more specialised import)
+Rejected: wrap SQLA to <https://flask-restless.readthedocs.io/en/stable/> (need more specialised import)
