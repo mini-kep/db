@@ -33,7 +33,7 @@ Database blueprint to store macroeconomic datapoints
 - we rejected <https://flask-restless.readthedocs.io/en/stable/> blueprint
   as more specialised import is needed
   
-- PonyORM fast-illustarted the project pipeline in <https://github.com/mini-kep/db/blob/master/pony_demo/pony_demo.py>
+- PonyORM used to fast-illustarte project pipeline in <https://github.com/mini-kep/db/blob/master/pony_demo/pony_demo.py>
   
-- *pipeline.py* models whole dataflow across project, 
-  moved to [parent repo](https://github.com/mini-kep/intro/blob/master/pipeline_demo.py)
+- [pipeline.py](https://github.com/mini-kep/intro/blob/master/pipeline_demo.py)
+  models whole dataflow across project
