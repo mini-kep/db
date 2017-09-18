@@ -1,0 +1,7 @@
+{
+  "tests/test_clientdb_demo.py::TestDeleteClientDB::test_after_delete_one_row_database_has_one_row": true,
+  "tests/test_clientdb_demo.py::TestReadClientDB::test_filled_database_has_specified_datapoint1": true,
+  "tests/test_clientdb_demo.py::TestReadClientDB::test_filled_database_has_specified_datapoint2": true,
+  "tests/test_clientdb_demo.py::TestUpdateClientDB::test_after_update_row_has_new_value": true,
+  "tests/test_clientdb_demo.py::TestUpdateClientDB::test_before_update_row_has_old_value": true
+}

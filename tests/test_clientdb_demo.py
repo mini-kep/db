@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from unittest import TestCase
-import sqla_demo.clientdb as clientdb
+
+import clientdb as clientdb
 
 
 class TestClientDB(TestCase):

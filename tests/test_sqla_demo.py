@@ -3,7 +3,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unittest import TestCase
-from sqla_demo.datapoint import Datapoint, Base
+
+from datapoint import Datapoint, Base
 
 
 def get_datapoint_condition(datapoint):
