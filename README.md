@@ -19,15 +19,21 @@ Database blueprint to store macroeconomic datapoints
    
 ## Current focus:  
 
-- 
+<https://github.com/mini-kep/db/blob/master/clientdb.py> and its testing
 
 ## Changelog
 
+- <https://github.com/mini-kep/db/blob/master/tests/test_sqla_demo.py> tests
+  abandoned in favour of <https://github.com/mini-kep/db/blob/master/clientdb.py>
+  
+  > test_sqla_demo.py makes little distinction between test setup, method tested
+  > and result comparision - no suprise, we did not have access methods yet!
+  > test_sqla_demo.py will be replaced/archived. 
 
 - we rejected <https://flask-restless.readthedocs.io/en/stable/> blueprint
   as more specialised import is needed
   
-- PonyORM fast-illustarted the project pipeline in <...>
+- PonyORM fast-illustarted the project pipeline in <https://github.com/mini-kep/db/blob/master/pony_demo/pony_demo.py>
   
 - *pipeline.py* models whole dataflow across project, 
   moved to [parent repo](https://github.com/mini-kep/intro/blob/master/pipeline_demo.py)
