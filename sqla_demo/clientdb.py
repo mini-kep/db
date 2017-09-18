@@ -1,13 +1,19 @@
-# -*- coding: utf-8 -*-
+"""Access functions to start database in SQLa and read/insert/update/delete rows.
+
+SQLa = sqlalchemy
+"""
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
+#FIXME: do we need to import Base from Datapoint?
 from sqla_demo.datapoint import Datapoint, Base
 
 
-def create_engine():
-    return sqlalchemy.create_engine('sqlite://', echo=True)
+def create_engine(engine_url='sqlite://'):
+    """Defaults to in-memory sqlite engine."""
+    return sqlalchemy.create_engine(engine_url, echo=True)
 
+# create / drop tables
 
 def create_tables(engine):
     Base.metadata.create_all(engine)
@@ -16,9 +22,13 @@ def create_tables(engine):
 def drop_tables(engine):
     Base.metadata.drop_all(engine)
 
+# session handling
 
 def create_session_factory(engine):
+    """Return a function, which is used to start a session.""" 
     return sessionmaker(bind=engine)
+
+# session / row operations
 
 
 def insert_one(session_factory, datapoint):
@@ -82,7 +92,7 @@ def find_by(session_factory, condition=None):
     finally:
         session.close()
 
-
+# FIXME: this should be explicit dictionary, not reverse reading from datapoint
 def get_datapoint_condition(datapoint):
     return {k: v for k, v in datapoint.items() if k != "value"}
 
