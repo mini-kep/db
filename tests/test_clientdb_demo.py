@@ -34,14 +34,14 @@ class TestUpdateClientDB(TestFilledClientDB):
         self.dp1_raw_with_updated_value["value"] += 11.12
 
     def test_before_update_row_has_old_value(self):
-        condition = clientdb.get_datapoint_condition(self.dp1_raw_with_updated_value)
+        condition = clientdb.strip_value(self.dp1_raw_with_updated_value)
         # tests that the specified row has "old" value before update
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1 and result[0].value != self.dp1_raw_with_updated_value["value"]
 
     def test_after_update_row_has_new_value(self):
         # update 1 row with specified data
-        condition = clientdb.get_datapoint_condition(self.dp1_raw_with_updated_value)
+        condition = clientdb.strip_value(self.dp1_raw_with_updated_value)
         clientdb.update_one(self.session_factory, condition, self.dp1_raw_with_updated_value["value"])
         # tests that the specified row has "new" value after update
         result = clientdb.find_by(self.session_factory, condition)
@@ -77,7 +77,7 @@ class TestDeleteClientDB(TestFilledClientDB):
         assert len(result) == 2
 
     def test_after_delete_one_row_database_has_one_row(self):
-        condition = clientdb.get_datapoint_condition(self.dp2_raw)
+        condition = clientdb.strip_value(self.dp2_raw)
         clientdb.delete_one(self.session_factory, condition)
         result = clientdb.find_by(self.session_factory)
         assert len(result) == 1
@@ -90,11 +90,11 @@ class TestReadClientDB(TestFilledClientDB):
         assert len(result) == 2
 
     def test_filled_database_has_specified_datapoint1(self):
-        condition = clientdb.get_datapoint_condition(self.dp1_raw)
+        condition = clientdb.strip_value(self.dp1_raw)
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1
 
     def test_filled_database_has_specified_datapoint2(self):
-        condition = clientdb.get_datapoint_condition(self.dp2_raw)
+        condition = clientdb.strip_value(self.dp2_raw)
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1
