@@ -17,6 +17,7 @@ Intent: make test scenarios applicable to production implementation either
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 
 from datapoint import Datapoint, Base
 
@@ -34,91 +35,75 @@ def create_tables(engine):
 def drop_tables(engine):
     Base.metadata.drop_all(engine)
 
-# session handling
 
+# session handling
+    
 def create_session_factory(engine):
     """Return a function, which is used to start a session.""" 
     return sessionmaker(bind=engine)
 
-#TODO: enable session context manager
-#      see usage in PonyORM in this repo (see example in this repo)
-#      option 1: as in code below
-#      option 2: with explicit __enter__ and __exit__ methods
 
-#from contextlib import contextmanager
-#
-#@contextmanager
-#def session_scope():
-#    """Provide a transactional scope around a series of operations."""
-#    session = Session()
-#    try:
-#        yield session
-#        session.commit()
-#    except:
-#        session.rollback()
-#        raise
-#    finally:
-#        session.close()
-#
-#
-#def run_my_program():
-#    with session_scope() as session:
-#        ThingOne().go(session)
-#        ThingTwo().go(session)
+@contextmanager
+def scope(session_factory):
+    """Provide a transactional scope around a series of operations."""    
+    session = session_factory()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        return False         
+    finally:
+        session.close()
+
+# context with no rollback       
+class Session:
+    def __init__(self, session_factory):
+        self.session = session_factory()
         
+    def __enter__(self):
+        return self.session
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.session.commit()
+        self.session.close()       
 
 
 # session / row operations
-
-
 def insert_one(session_factory, datapoint):
-
-    session = session_factory()
-    try:
+    with Session(session_factory) as session:
         session.add(datapoint)
-        session.commit()
         return True
-    except:
-        session.rollback()
-        return False
-    finally:
-        session.close()
-
+        
 
 def update_one(session_factory, condition, value):
-
-    session = session_factory()
-    try:
+    with Session(session_factory) as session:
         result = session.query(Datapoint) \
             .filter_by(**condition) \
             .update({"value": value})
-        session.commit()
         return result
-    except:
-        session.rollback()
-        return False
-    finally:
-        session.close()
 
 
 def delete_one(session_factory, condition):
-
-    session = session_factory()
-    try:
+    with scope(session_factory) as session:
         result = session.query(Datapoint) \
             .filter_by(**condition) \
             .delete()
-        session.commit()
         return result
-    except:
-        session.rollback()
-        return False
-    finally:
-        session.close()
 
 
-def find_by(session_factory, condition=None):
+def _find_by(session_factory, condition=None):
+    # FIXME: why not working with context manager?
+    # DetachedInstanceError: Instance <Datapoint at 0x9074ef0> 
+    # is not bound to a Session; attribute refresh operation cannot proceed
+    with Session(session_factory) as session:
+        query = session.query(Datapoint)
+        if condition is not None:
+            return query.filter_by(**condition).all()
+        else:
+            return query.all()    
 
+def find_by(session_factory, condition=None):            
     session = session_factory()
     try:
         query = session.query(Datapoint)
@@ -131,13 +116,12 @@ def find_by(session_factory, condition=None):
         return False
     finally:
         session.close()
-
-# FIXME: may delete
+        
 def strip_value(datapoint):
     return {k: v for k, v in datapoint.items() if k != "value"}
 
-
 if __name__ == '__main__':
+
 
     engine = create_engine()
     create_tables(engine)
@@ -161,6 +145,10 @@ if __name__ == '__main__':
     found[0].id = None
     assert found[0] == Datapoint(freq='q', name='CPI_rog', 
                                  date='2014-03-31', value=102.3)
+    
+    # this fails
+    # _ = _find_by(session_factory, condition)
+    
     
     # update with value
     condition = dict(date="2014-03-31", freq='q', name="CPI_rog")
