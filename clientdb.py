@@ -147,7 +147,7 @@ if __name__ == '__main__':
                                  date='2014-03-31', value=102.3)
     
     # this fails
-    # _ = _find_by(session_factory, condition)
+    # _ = _find_by(session_factory, condition=dict(date="2014-03-31", freq='q', name="CPI_rog"))
     
     
     # update with value
