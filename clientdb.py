@@ -52,7 +52,7 @@ def scope(session_factory):
         session.commit()
     except:
         session.rollback()
-        return False         
+        raise
     finally:
         session.close()
 
@@ -66,18 +66,18 @@ class Session:
 
     def __exit__(self, exception_type, exception_value, traceback):
         self.session.commit()
-        self.session.close()       
+        self.session.close()
 
 
 # session / row operations
 def insert_one(session_factory, datapoint):
-    with Session(session_factory) as session:
+    with scope(session_factory) as session:
         session.add(datapoint)
         return True
         
 
 def update_one(session_factory, condition, value):
-    with Session(session_factory) as session:
+    with scope(session_factory) as session:
         result = session.query(Datapoint) \
             .filter_by(**condition) \
             .update({"value": value})
@@ -93,17 +93,16 @@ def delete_one(session_factory, condition):
 
 
 def _find_by(session_factory, condition=None):
-    # FIXME: why not working with context manager?
-    # DetachedInstanceError: Instance <Datapoint at 0x9074ef0> 
-    # is not bound to a Session; attribute refresh operation cannot proceed
-    with Session(session_factory) as session:
+    with scope(session_factory) as session:
+        session.expire_on_commit = False
         query = session.query(Datapoint)
         if condition is not None:
             return query.filter_by(**condition).all()
         else:
             return query.all()    
 
-def find_by(session_factory, condition=None):            
+# this version is obsolete now. use _find_by instead and change its name if needed (i.e. remove underscore).
+def find_by(session_factory, condition=None):
     session = session_factory()
     try:
         query = session.query(Datapoint)
@@ -145,9 +144,8 @@ if __name__ == '__main__':
     found[0].id = None
     assert found[0] == Datapoint(freq='q', name='CPI_rog', 
                                  date='2014-03-31', value=102.3)
-    
-    # this fails
-    # _ = _find_by(session_factory, condition=dict(date="2014-03-31", freq='q', name="CPI_rog"))
+
+    _ = _find_by(session_factory, condition=dict(date="2014-03-31", freq='q', name="CPI_rog"))
     
     
     # update with value
