@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import exc
 import clientdb as clientdb
 
 
@@ -36,7 +36,7 @@ class TestUpdateClientDB(TestFilledClientDB):
     def test_before_update_row_has_old_value(self):
         condition = clientdb.strip_value(self.dp1_raw_with_updated_value)
         # tests that the specified row has "old" value before update
-        result = clientdb._find_by(self.session_factory, condition)
+        result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1 and result[0].value != self.dp1_raw_with_updated_value["value"]
 
     def test_after_update_row_has_new_value(self):
@@ -44,7 +44,7 @@ class TestUpdateClientDB(TestFilledClientDB):
         condition = clientdb.strip_value(self.dp1_raw_with_updated_value)
         clientdb.update_one(self.session_factory, condition, self.dp1_raw_with_updated_value["value"])
         # tests that the specified row has "new" value after update
-        result = clientdb._find_by(self.session_factory, condition)
+        result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1 and result[0].value == self.dp1_raw_with_updated_value["value"]
 
 
@@ -56,45 +56,45 @@ class TestInsertClientDB(TestFilledClientDB):
         self.dp_new = clientdb.Datapoint(**self.dp_new_raw)
 
     def test_database_has_no_new_datapoint_which_has_not_been_inserted_yet(self):
-        result = clientdb._find_by(self.session_factory, self.dp_new_raw)
+        result = clientdb.find_by(self.session_factory, self.dp_new_raw)
         assert len(result) == 0
 
     def test_insert_duplicate_datapoints_fails(self):
         for dpx in self.dp1_raw, self.dp2_raw:
             dp_copy = clientdb.Datapoint(**dpx)
-            self.assertRaises(IntegrityError, clientdb.insert_one, self.session_factory, dp_copy)
+            self.assertRaises(exc.IntegrityError, clientdb.insert_one, self.session_factory, dp_copy)
 
     def test_database_has_new_datapoint_after_it_has_been_inserted(self):
         clientdb.insert_one(self.session_factory, self.dp_new)
-        result = clientdb._find_by(self.session_factory, self.dp_new_raw)
+        result = clientdb.find_by(self.session_factory, self.dp_new_raw)
         assert len(result) == 1 and result[0].value == self.dp_new_raw["value"]
 
 
 class TestDeleteClientDB(TestFilledClientDB):
 
     def test_before_delete_database_has_two_rows(self):
-        result = clientdb._find_by(self.session_factory)
+        result = clientdb.find_by(self.session_factory)
         assert len(result) == 2
 
     def test_after_delete_one_row_database_has_one_row(self):
         condition = clientdb.strip_value(self.dp2_raw)
         clientdb.delete_one(self.session_factory, condition)
-        result = clientdb._find_by(self.session_factory)
+        result = clientdb.find_by(self.session_factory)
         assert len(result) == 1
 
 
 class TestReadClientDB(TestFilledClientDB):
 
     def test_filled_database_has_two_rows_only(self):
-        result = clientdb._find_by(self.session_factory)
+        result = clientdb.find_by(self.session_factory)
         assert len(result) == 2
 
     def test_filled_database_has_specified_datapoint1(self):
         condition = clientdb.strip_value(self.dp1_raw)
-        result = clientdb._find_by(self.session_factory, condition)
+        result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1
 
     def test_filled_database_has_specified_datapoint2(self):
         condition = clientdb.strip_value(self.dp2_raw)
-        result = clientdb._find_by(self.session_factory, condition)
+        result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1

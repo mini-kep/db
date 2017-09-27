@@ -92,7 +92,7 @@ def delete_one(session_factory, condition):
         return result
 
 
-def _find_by(session_factory, condition=None):
+def find_by(session_factory, condition=None):
     with scope(session_factory) as session:
         session.expire_on_commit = False
         query = session.query(Datapoint)
@@ -101,20 +101,22 @@ def _find_by(session_factory, condition=None):
         else:
             return query.all()    
 
-# this version is obsolete now. use _find_by instead and change its name if needed (i.e. remove underscore).
-def find_by(session_factory, condition=None):
-    session = session_factory()
-    try:
-        query = session.query(Datapoint)
-        if condition is not None:
-            return query.filter_by(**condition).all()
-        else:
-            return query.all()
-    except:
-        session.rollback()
-        return False
-    finally:
-        session.close()
+# this version is obsolete now. use find_by instead.
+#def find_by_(session_factory, condition=None):
+#    session = session_factory()
+#    try:
+#        query = session.query(Datapoint)
+#        if condition is not None:
+#            return query.filter_by(**condition).all()
+#        else:
+#            return query.all()
+#    except:
+#        session.rollback()
+#        return False
+#    finally:
+#        session.close()
+
+
         
 def strip_value(datapoint):
     return {k: v for k, v in datapoint.items() if k != "value"}
@@ -145,7 +147,7 @@ if __name__ == '__main__':
     assert found[0] == Datapoint(freq='q', name='CPI_rog', 
                                  date='2014-03-31', value=102.3)
 
-    _ = _find_by(session_factory, condition=dict(date="2014-03-31", freq='q', name="CPI_rog"))
+    _ = find_by(session_factory, condition=dict(date="2014-03-31", freq='q', name="CPI_rog"))
     
     
     # update with value
@@ -159,5 +161,7 @@ if __name__ == '__main__':
     assert is_deleted
     found2 = find_by(session_factory)
     assert isinstance(found2[0], Datapoint)
+
+
 
     drop_tables(engine)   
