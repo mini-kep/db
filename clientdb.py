@@ -76,9 +76,12 @@ def upsert_one(session_factory, condition, new_value):
         result = session.query(Datapoint).filter_by(**condition).first()
         if result is None:
             session.add(Datapoint(**condition, value=new_value))
+            return True
         else:
             if result.value != new_value:
                 result.value = new_value
+                return True
+        return False
 
 
 def insert_one(session_factory, datapoint):
@@ -176,9 +179,9 @@ if __name__ == '__main__':
     # upsert operation
     condition = dict(date="2014-03-31", freq='q', name="CPI_rog")
     upsert_one(session_factory, condition, 132.56)
-    found3 = find_by(session_factory, condition)
-    assert isinstance(found3, list)
-    assert len(found3) == 1
-    assert found3[0].value == 132.56
+    found_after_upsert = find_by(session_factory, condition)
+    assert isinstance(found_after_upsert, list)
+    assert len(found_after_upsert) == 1
+    assert found_after_upsert[0].value == 132.56
 
     drop_tables(engine)   
