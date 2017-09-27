@@ -70,6 +70,17 @@ class Session:
 
 
 # session / row operations
+def upsert_one(session_factory, condition, new_value):
+    with scope(session_factory) as session:
+        session.expire_on_commit = False
+        result = session.query(Datapoint).filter_by(**condition).first()
+        if result is None:
+            session.add(Datapoint(**condition, value=new_value))
+        else:
+            if result.value != new_value:
+                result.value = new_value
+
+
 def insert_one(session_factory, datapoint):
     with scope(session_factory) as session:
         session.add(datapoint)
@@ -162,6 +173,12 @@ if __name__ == '__main__':
     found2 = find_by(session_factory)
     assert isinstance(found2[0], Datapoint)
 
-
+    # upsert operation
+    condition = dict(date="2014-03-31", freq='q', name="CPI_rog")
+    upsert_one(session_factory, condition, 132.56)
+    found3 = find_by(session_factory, condition)
+    assert isinstance(found3, list)
+    assert len(found3) == 1
+    assert found3[0].value == 132.56
 
     drop_tables(engine)   

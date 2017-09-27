@@ -98,3 +98,33 @@ class TestReadClientDB(TestFilledClientDB):
         condition = clientdb.strip_value(self.dp2_raw)
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1
+
+
+class TestUpsertClientDB(TestFilledClientDB):
+
+    def setUp(self):
+        super(TestUpsertClientDB, self).setUp()
+        self.dp1_updated_value = self.dp1_raw["value"] + 12.31
+        self.dp_new_raw = dict(date="2015-03-31", freq='q', name="some_new_name", value=2.49)
+
+    def test_before_upsert_the_old_row_has_old_value(self):
+        condition = clientdb.strip_value(self.dp1_raw)
+        result = clientdb.find_by(self.session_factory, condition)
+        assert len(result) == 1 and result[0].value != self.dp1_updated_value
+
+    def test_after_upsert_the_old_row_has_new_value(self):
+        condition = clientdb.strip_value(self.dp1_raw)
+        clientdb.upsert_one(self.session_factory, condition, self.dp1_updated_value)
+        result = clientdb.find_by(self.session_factory, condition)
+        assert len(result) == 1 and result[0].value == self.dp1_updated_value
+
+    def test_before_upsert_database_has_no_new_datapoint_which_has_not_been_inserted_yet(self):
+        condition = clientdb.strip_value(self.dp_new_raw)
+        result = clientdb.find_by(self.session_factory, condition)
+        assert len(result) == 0
+
+    def test_after_upsert_database_has_new_datapoint_after_it_has_been_inserted(self):
+        condition = clientdb.strip_value(self.dp_new_raw)
+        clientdb.upsert_one(self.session_factory, condition, self.dp_new_raw["value"])
+        result = clientdb.find_by(self.session_factory, condition)
+        assert len(result) == 1 and result[0].value == self.dp_new_raw["value"]
