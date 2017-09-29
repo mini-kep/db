@@ -1,12 +1,55 @@
-1)	Database schema:
-Id – UID, autoincrement
-Date – type DateTime
-Freq – type String
-Name – type String
-Value – Float
-[Example](https://github.com/mini-kep/db/blob/master/demo/sqlalchemy/datapoint.py)
+
+Introduction 
+============
+
+```mini-kep``` is a small ETL (extract, transform, load) framework for macroeconomic data with public API for the database.
+```mini-kep``` code enables a pipeline for data sources (static files in internet and public APIs) to own database to user API to 
+get pandas dataframes. We want a user to be able to run:
+```
+pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
+```
+to get mothly consumer inflation time series for Russia in 2017 or 
+```
+pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005") 
+```
+to get daily oil prices for Brent between 2000 and 2005.
+
+
+Scope of this document
+======================
+
+This document descibes database layer, in the dta pipelineit is preceded by parsers and followed to end-user API:
+```
+parsers -> database -> user API
+```
+
+Some requirements:
+- parser can deliver a list of dicts, each dict is a datapoint
+- database should have a POST method to api\incoming to write incoming json to db
+- POST operation shoudl have some authentication
+- for simplicity all data is upserted - newer data overwrites older data
+- database has GET method is styled around the datapoint key (variable name, frequency) and filtered by start date and end date
+- GET operation is public API
+
+Database schema
+===============
+
+Table **Datpoint**
+
+Id – UID, autoincrement  
+Name – type String \*  
+Freq – type String \*  
+Date – type DateTime \*  
+Value – Float  
+
+See example at <https://github.com/mini-kep/db/blob/master/demo/sqlalchemy/datapoint.py>
+
+Methods
+=======
 
 2)	Available methods and descritpion of incoming/outgoing data
+
+
 2.1)	GET / API/values with following URL parameters:
 fromDate – should return results with date greater than this parameter.
 toDate – should return results with date less than this parameter
