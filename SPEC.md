@@ -4,13 +4,15 @@ Introduction
 
 ```mini-kep``` is a small ETL (extract, transform, load) framework for macroeconomic data with public API for the database.
 ```mini-kep``` code enables a pipeline for data sources (static files in internet and public APIs) to own database to user API to 
-get pandas dataframes. We want a user to be able to run:
-```
-pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
+get pandas dataframes. 
+
+We want a end user to be able to run:
+```python 
+df = pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
 ```
 to get mothly consumer inflation time series for Russia in 2017 or 
-```
-pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005") 
+```python
+df = pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005") 
 ```
 to get daily oil prices for Brent between 2000 and 2005.
 
@@ -42,13 +44,40 @@ Freq – type String \*
 Date – type DateTime \*  
 Value – Float  
 
+\* - composite key
+
 See example at <https://github.com/mini-kep/db/blob/master/demo/sqlalchemy/datapoint.py>
 
-Methods
-=======
+Database methods
+================
 
-2)	Available methods and descritpion of incoming/outgoing data
+POST
+----
 
+```POST api/incoming``` writes incoming json to database.
+
+Incoming json should have a structure like
+    [{
+        "date": "1999-01-31",
+        "freq": "m",
+        "name": "INVESTMENT_rog",
+        "value": 12345.6
+    },
+    {...} 
+    ]
+Action: 
+
+Validates incoming data in request body and upsert values to database.
+
+All fields should be filled.
+
+Returns:
+- empty JSON on success
+- error 400 if there’s an error in incoming json (eg invalid date string or empty parameter or missing field)
+
+GET (REST)
+----------
+```GET api/datapoint```
 
 2.1)	GET / API/values with following URL parameters:
 fromDate – should return results with date greater than this parameter.
@@ -59,20 +88,9 @@ fromValue - should return results with value greater than this parameter
 toValue - should return results with value less than this parameter. <br>
 Method returns JSON with data sorted by date or empty JSON if there’s no data with such query.
 Method validates parameters and returns error 400 if there’s an error in parameters (like string in data parameter or empty parameter) <br>
-2.2)	POST /API/incoming
-Body should have a structure like
-    [{
-        "date": "1999-01-31",
-        "freq": "m",
-        "name": "INVESTMENT_rog",
-        "value": 12345.6
-    },
-    {...} 
-    ]
-<br>Insert new data with values in request body.
-All fields should be filled.
-Method validates values, return error 400 if there’s an error in parameters (like string in data parameter or empty parameter or missing field)
-Method returns empty JSON on success.<br>
+
+
+
 3)	Tech stack:
 Web-frameworks: Flask, Django + SQLAlchemy (deployed to Heroku)
 Database: Postgres (Heroku or AWS)
