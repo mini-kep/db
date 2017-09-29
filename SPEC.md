@@ -9,14 +9,14 @@ user's pandas dataframes.
 
 An end user may run: 
 ```python 
-df = pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
-``` 
-to get monthly consumer inflation time series for Russia in 2017 or 
 
-```python
+# get monthly consumer inflation time series for Russia in 2017
+df = pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
+
+# get daily oil prices for Brent between 2000 and 2005
 df = pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005") 
+
 ```
-to get daily oil prices for Brent between 2000 and 2005.
 
 
 Scope of this document
