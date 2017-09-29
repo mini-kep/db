@@ -3,14 +3,16 @@ Introduction
 ============
 
 ```mini-kep``` is a small ETL (extract, transform, load) framework for macroeconomic data with public API for the database.
-```mini-kep``` code enables a pipeline for data sources (static files in internet and public APIs) to own database to user API to 
-get pandas dataframes. 
 
-We want a end user to be able to run:
+```mini-kep``` makes a pipeline from data sources (static files in internet and public APIs) to own database to user API to 
+user's pandas dataframes. 
+
+An end user may run: 
 ```python 
 df = pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
-```
-to get mothly consumer inflation time series for Russia in 2017 or 
+``` 
+to get monthly consumer inflation time series for Russia in 2017 or 
+
 ```python
 df = pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005") 
 ```
