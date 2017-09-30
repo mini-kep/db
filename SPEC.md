@@ -1,5 +1,8 @@
 To discuss here: <https://github.com/mini-kep/db/issues/5>
 
+---------------------
+
+
 Introduction 
 ============
 
@@ -7,17 +10,6 @@ Introduction
 
 ```mini-kep``` makes a pipeline from data sources (static files in internet and public APIs) to own database to user API to 
 user's pandas dataframes. 
-
-An end user may run: 
-```python 
-
-# get monthly consumer inflation time series for Russia in 2017
-df = pd.read_json("http://ourapp.com/ru/series/CPI/m/rog/2017")
-
-# get daily oil prices for Brent between 2000 and 2005
-df = pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005") 
-
-```
 
 Scope of this document
 ======================
@@ -36,8 +28,6 @@ Some requirements
 - POST operation shoudl have some authentication
 - for simplicity all data is upserted - newer data overwrites older data
 - database has GET method is styled around the datapoint key (variable name, frequency), filtered by start date and end date, ordered by date 
-- GET operation is public API
-- there is another GET the is reponsible for calls like ```http://mini-db.herokuapp.com/oil/series/BRENT/d/2000/2005```
 
 Database schema
 ===============
@@ -109,13 +99,6 @@ Returns:
 
 Method validates parameters and returns error 400 if there’s an error in parameters (like string in data parameter or empty parameter) 
 
-GET (Custom API) 
-----------------
-
-Custom API allows call like mentioned in intro. See <https://github.com/mini-kep/frontend-app/issues/8>
-
-Custom API will be implemented outside of db layer. 
-
 Security
 ========
 
@@ -148,8 +131,43 @@ Database: Postgres (default on Heroku) or other on AWS
 
 Additions
 =========
-Outisde of scope of current implementation:
-- GET (Custom API) 
-- scheduler (for periodic database updates): [Heroku APS](https://devcenter.heroku.com/articles/clock-processes-python)
+
+Out of scope this document but important:
+
+####  Custom end user API
+
+We expect end user will call like below run: 
+```python 
+
+# get monthly consumer inflation time series for Russia in 2017
+df = pd.read_json("http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2017")
+
+# get daily oil prices for Brent between 2000 and 2005
+df = pd.read_json("http://mini-kep.herokuapp.com/oil/series/BRENT/d/2000/2005") 
+
+```
+
+Custom API is discussed here: <https://github.com/mini-kep/frontend-app/issues/8>
+
+Initial version of custom API is here: <https://github.com/mini-kep/frontend-app/blob/master/apps/views/time_series.py>
+
+The calls to custom URLs now return parameter dictionaries, try and click: 
+ - <http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2017>
+ - <http://mini-kep.herokuapp.com/oil/series/BRENT/d/2000/2005>
+
+Also for reference/editing: <https://github.com/mini-kep/intro/blob/master/pipeline/older_versions/datamodel_and_api.md>
+
+#### Scheduler 
+
+For periodic database updates consider:
+ - [Heroku APS](https://devcenter.heroku.com/articles/clock-processes-python)
+ - celery?
+ - APScheduler?
+ - something else?
+
+
+https://github.com/mini-kep/frontend-app/blob/master/apps/views/time_series.py
+
+---------------------
 
 To discuss here: <https://github.com/mini-kep/db/issues/5>
