@@ -20,7 +20,7 @@ df = pd.read_json("http://ourapp.com/oil/series/BRENT/d/2000/2005")
 Scope of this document
 ======================
 
-This document descibes database layer in between parsers and end-user API:
+This document describes database layer in between parsers and end-user API:
 
 ```
 parsers -> database -> user API
@@ -64,6 +64,8 @@ POST
 
 Validates incoming json and upsert values to database. All fields should be filled.
 
+For insert_ьфтн щзукфешщт see sheep/flock example at <https://stackoverflow.com/a/33768160/1758363>
+
 Returns:
 - empty JSON on success
 - error 400 if there’s an error in incoming json (eg invalid date string or empty parameter or missing field)
@@ -90,32 +92,32 @@ Other examples of incoming json:
 GET (REST)
 ----------
 
-```GET api/datapoints```
+```GET api/datapoints?name=<name>&freq=<freq>```
+```GET api/datapoints?name=<name>&freq=<freq>&start_date=<start_date>&end_date=<end_date>```
 
-2.1)	GET / API/values with following URL parameters:
-fromDate – should return results with date greater than this parameter.
-toDate – should return results with date less than this parameter
-Freq – freq value to search like freq=m
-Name – name value to search like name=BRENT
-fromValue - should return results with value greater than this parameter
-toValue - should return results with value less than this parameter. <br>
-Method returns JSON with data sorted by date or empty JSON if there’s no data with such query.
+Parameters:
+name – name value to search like name=BRENT
+freq – freq value to search like freq=m
+start_date(optional) – should return results with date greater than this parameter
+end_date(optional) – should return results with date less than this parameter
+
+Returns:
+- JSON in format similar to incoming json with data sorted by date
+- empty JSON if there’s no data with such query.
+
 Method validates parameters and returns error 400 if there’s an error in parameters (like string in data parameter or empty parameter) 
 
-GET (Custom API)
+GET (Custom API) 
 ----------------
 
-Custom API allows call like mentioned in intro:
+Custom API allows call like mentioned in intro. See <https://github.com/mini-kep/frontend-app/issues/8>
 
-See <https://github.com/mini-kep/frontend-app/issues/8>
-
-Interpretation 
-
+Custom API will be implemented outside of db layer. 
 
 Security
 ========
 
-POST methods should require API_TOKEN as URL parameter or header, validate it with environment variable (Heroku config vars)
+POST methods should require API_TOKEN as URL parameter or header, validate it with environment variable (possibly Heroku config vars)
 
 Tests
 =====
@@ -125,9 +127,25 @@ Use combinations GET – POST – GET to validate data inserts and updates.
 [Example1](https://github.com/mini-kep/db/blob/master/demo/sqlalchemy/tests/test_clientdb_demo.py)
 [Example2](https://github.com/mini-kep/full-app/blob/master/datapoint/tests.py)
 
+Should we write some tests in curl/httpie? 
+
 Tech stack
 ==========
+To discuss:
 
-Web-frameworks: Flask, Django + SQLAlchemy (deployed to Heroku)
-Database: Postgres (Heroku or AWS)
-Scheduler (for periodic database updates): [Heroku APS](https://devcenter.heroku.com/articles/clock-processes-python)
+Web-frameworks: Flask + SQLAlchemy or Django, may consider Falcon
+
+Rest frameworks: 
+- flask: <https://github.com/flask-restful/flask-restfuls>
+- django: <http://www.django-rest-framework.org/>
+
+Container: prototype can be deployed to Heroku, for production it is rather expensive, may need to use  AWS
+
+Database: Postgres (default on Heroku) or other on AWS
+
+
+Additions
+=========
+Outisde of scope of current implementation:
+- GET (Custom API) 
+- scheduler (for periodic database updates): [Heroku APS](https://devcenter.heroku.com/articles/clock-processes-python)
