@@ -1,3 +1,5 @@
+To discuss here: <https://github.com/mini-kep/db/issues/5>
+
 Introduction 
 ============
 
@@ -149,3 +151,5 @@ Additions
 Outisde of scope of current implementation:
 - GET (Custom API) 
 - scheduler (for periodic database updates): [Heroku APS](https://devcenter.heroku.com/articles/clock-processes-python)
+
+To discuss here: <https://github.com/mini-kep/db/issues/5>
