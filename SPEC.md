@@ -114,6 +114,7 @@ Use combinations GET – POST – GET to validate data inserts and updates.
 
 Should we write some tests in curl/httpie? 
 
+
 Tech stack
 ==========
 To discuss:
@@ -128,13 +129,22 @@ Container: prototype can be deployed to Heroku, for production it is rather expe
 
 Database: Postgres (default on Heroku) or other on AWS
 
+Repositories
+============
+
+- the database layer is to be developed here, at ```db``` repo: <https://github.com/mini-kep/db>
+- custom API (see below) is implemented at frontend app:  https://github.com/mini-kep/frontend-app> and <http://mini-kep.herokuapp.com/>
+- django app already has parts of functionality described in this document: <https://github.com/mini-kep/full-app>. the problem with it is that django @epogrebnyak is not well versed with django, so development there takes long time. 
+
+It is a bit complicated project structure, but it allows to experiment with different features at different time by talking to different people. All of this could be a signle flask or django app. Please comment if you have ideas/suggestions. 
+
 
 Additions
 =========
 
 Out of scope this document but important:
 
-####  Custom end user API
+##  Custom end user API
 
 We expect end user will call like below run: 
 ```python 
@@ -157,7 +167,9 @@ The calls to custom URLs now return parameter dictionaries, try and click:
 
 Also for reference/editing: <https://github.com/mini-kep/intro/blob/master/pipeline/older_versions/datamodel_and_api.md>
 
-#### Scheduler 
+TODO (EP): change fronend markdown at mini-kep.herokuapp.com to reflect custom API calls.
+
+## Scheduler 
 
 For periodic database updates consider:
  - [Heroku APS](https://devcenter.heroku.com/articles/clock-processes-python)
