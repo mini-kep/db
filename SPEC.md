@@ -56,7 +56,7 @@ POST
 
 Validates incoming json and upsert values to database. All fields should be filled.
 
-For insert_ьфтн щзукфешщт see sheep/flock example at <https://stackoverflow.com/a/33768160/1758363>
+For insert_many() operation see *sheep/flock* example at <https://stackoverflow.com/a/33768160/1758363>
 
 Returns:
 - empty JSON on success
@@ -122,7 +122,9 @@ To discuss:
 Web-frameworks: Flask + SQLAlchemy or Django, may consider Falcon
 
 Rest frameworks: 
-- flask: <https://github.com/flask-restful/flask-restfuls>
+- flask: 
+  - <https://github.com/flask-restful/flask-restful>
+  - <https://flask-restless.readthedocs.io/en/stable/quickstart.html>
 - django: <http://www.django-rest-framework.org/>
 
 Container: prototype can be deployed to Heroku, for production it is rather expensive, may need to use  AWS
