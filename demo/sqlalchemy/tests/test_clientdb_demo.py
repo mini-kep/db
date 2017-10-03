@@ -32,7 +32,7 @@ class TestUpdateClientDB(TestFilledClientDB):
         super(TestUpdateClientDB, self).setUp()
         self.dp1_raw_with_updated_value = {**self.dp1_raw}
         self.dp1_raw_with_updated_value["value"] += 11.12
-        self.non_existed_dp_raw = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
+        self.non_existing_dp_raw = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
 
     def test_before_update_row_has_old_value(self):
         condition = clientdb.strip_value(self.dp1_raw_with_updated_value)
@@ -48,9 +48,9 @@ class TestUpdateClientDB(TestFilledClientDB):
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1 and result[0].value == self.dp1_raw_with_updated_value["value"]
 
-    def test_update_nonexisted_row_has_no_effect(self):
-        condition = clientdb.strip_value(self.non_existed_dp_raw)
-        clientdb.update_one(self.session_factory, condition, self.non_existed_dp_raw["value"])
+    def test_update_non_existing_row_has_no_effect(self):
+        condition = clientdb.strip_value(self.non_existing_dp_raw)
+        clientdb.update_one(self.session_factory, condition, self.non_existing_dp_raw["value"])
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 0
 
@@ -81,7 +81,7 @@ class TestDeleteClientDB(TestFilledClientDB):
 
     def setUp(self):
         super(TestDeleteClientDB, self).setUp()
-        self.non_existed_dp_raw = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
+        self.non_existing_dp_raw = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
 
     def test_before_delete_database_has_two_rows(self):
         result = clientdb.find_by(self.session_factory)
@@ -93,8 +93,8 @@ class TestDeleteClientDB(TestFilledClientDB):
         result = clientdb.find_by(self.session_factory)
         assert len(result) == 1
 
-    def test_delete_nonexisted_row_has_no_effect(self):
-        condition = clientdb.strip_value(self.non_existed_dp_raw)
+    def test_delete_non_existing_row_has_no_effect(self):
+        condition = clientdb.strip_value(self.non_existing_dp_raw)
         clientdb.delete_one(self.session_factory, condition)
         result = clientdb.find_by(self.session_factory)
         assert len(result) == 2
