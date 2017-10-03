@@ -72,7 +72,6 @@ class Session:
 # session / row operations
 def upsert_one(session_factory, condition, new_value):
     with scope(session_factory) as session:
-        session.expire_on_commit = False
         result = session.query(Datapoint).filter_by(**condition).first()
         if result is None:
             session.add(Datapoint(**condition, value=new_value))
