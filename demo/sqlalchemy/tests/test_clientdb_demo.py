@@ -32,6 +32,7 @@ class TestUpdateClientDB(TestFilledClientDB):
         super(TestUpdateClientDB, self).setUp()
         self.dp1_raw_with_updated_value = {**self.dp1_raw}
         self.dp1_raw_with_updated_value["value"] += 11.12
+        self.non_existed_dp_raw = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
 
     def test_before_update_row_has_old_value(self):
         condition = clientdb.strip_value(self.dp1_raw_with_updated_value)
@@ -48,9 +49,8 @@ class TestUpdateClientDB(TestFilledClientDB):
         assert len(result) == 1 and result[0].value == self.dp1_raw_with_updated_value["value"]
 
     def test_update_nonexisted_row_has_no_effect(self):
-        non_existed_dp = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
-        condition = clientdb.strip_value(non_existed_dp)
-        clientdb.update_one(self.session_factory, condition, non_existed_dp["value"])
+        condition = clientdb.strip_value(self.non_existed_dp_raw)
+        clientdb.update_one(self.session_factory, condition, self.non_existed_dp_raw["value"])
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 0
 
