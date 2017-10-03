@@ -79,6 +79,10 @@ class TestInsertClientDB(TestFilledClientDB):
 
 class TestDeleteClientDB(TestFilledClientDB):
 
+    def setUp(self):
+        super(TestDeleteClientDB, self).setUp()
+        self.non_existed_dp_raw = dict(date="2000-03-31", freq='q', name="CPII_rog", value=32.0)
+
     def test_before_delete_database_has_two_rows(self):
         result = clientdb.find_by(self.session_factory)
         assert len(result) == 2
@@ -89,6 +93,11 @@ class TestDeleteClientDB(TestFilledClientDB):
         result = clientdb.find_by(self.session_factory)
         assert len(result) == 1
 
+    def test_delete_nonexisted_row_has_no_effect(self):
+        condition = clientdb.strip_value(self.non_existed_dp_raw)
+        clientdb.delete_one(self.session_factory, condition)
+        result = clientdb.find_by(self.session_factory)
+        assert len(result) == 2
 
 class TestReadClientDB(TestFilledClientDB):
 
