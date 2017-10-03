@@ -99,6 +99,7 @@ class TestDeleteClientDB(TestFilledClientDB):
         result = clientdb.find_by(self.session_factory)
         assert len(result) == 2
 
+
 class TestReadClientDB(TestFilledClientDB):
 
     def test_filled_database_has_two_rows_only(self):
