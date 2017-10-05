@@ -145,3 +145,9 @@ class TestUpsertClientDB(TestFilledClientDB):
         clientdb.upsert_one(self.session_factory, condition, self.dp_new_raw["value"])
         result = clientdb.find_by(self.session_factory, condition)
         assert len(result) == 1 and result[0].value == self.dp_new_raw["value"]
+
+    def test_upserting_with_the_same_value_has_no_effect(self):
+        condition = clientdb.strip_value(self.dp1_raw)
+        clientdb.upsert_one(self.session_factory, condition, self.dp1_raw["value"])
+        result = clientdb.find_by(self.session_factory, condition)
+        self.assertTrue(len(result) == 1 and result[0].value == self.dp1_raw["value"])
