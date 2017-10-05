@@ -4,7 +4,7 @@ from db import db
 
 class Datapoint(db.Model):
     id = db.Column(db.Integer,primary_key=True)
-    # COMMENT (EP): for id we had a lot of properties, not sure abnout all, but we are liekly to need 'autoincrement=True'  
+    # COMMENT (EP): for id we had a lot of properties, not sure about all, but we are liekly to need 'autoincrement=True'  
     
     #    id = Column(Integer, nullable=False, 
     #                     unique=True, 
