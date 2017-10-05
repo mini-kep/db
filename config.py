@@ -8,7 +8,7 @@ class ProductionConfig(object):
     API_TOKEN = os.getenv('API_TOKEN')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    PORT=os.getenv('PORT')
+    PORT=int(os.getenv('PORT'))
 
 
 class DevelopmentConfig(object):
