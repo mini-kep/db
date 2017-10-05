@@ -10,4 +10,4 @@ TODO:
 - ```api/datapoints/varnames/{freq}``` lists all variable names available as that frequency ```{freq}``` (assumed to be in ```aqmwd```)
 - variable descriptions ```GDP``` -> ```Gross domestic product```
 - [varname splitter](https://github.com/mini-kep/parser-rosstat-kep/blob/master/src/csv2df/util_label.py) goes to helper function, will need to use it locally 
-- unti descriptions
+- use [unit descriptions](https://github.com/mini-kep/parser-rosstat-kep/blob/master/src/csv2df/specification.py#L74-L84)
