@@ -7,7 +7,7 @@ class Datapoint(db.Model):
         db.UniqueConstraint("name", "freq", "date"),
     )
 
-    id = db.Column(db.Integer,primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     freq = db.Column(db.String, nullable=False)    
     date = db.Column(db.Date, nullable=False)
