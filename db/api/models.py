@@ -11,8 +11,6 @@ class Datapoint(db.Model):
     #                     autoincrement=True, 
     #                      primary_key=True) 
     
-    
-    
     freq = db.Column(db.String, nullable=False)
     name = db.Column(db.String, nullable=False)
     date = db.Column(db.Date, nullable=False)
