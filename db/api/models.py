@@ -9,6 +9,8 @@ class Datapoint(db.Model):
     date = db.Column(db.Date, nullable=False)
     value =db.Column(db.Float, nullable=False)
 
+    # COMMENT (EP): I think we will need a <freq-name-date> composite key in order to work with existing vs new values in the database 
+    
     @property
     def serialize(self): # Add serialize method for jsonify
        return {
@@ -16,4 +18,5 @@ class Datapoint(db.Model):
            'name': self.name,
            'date': datetime.strftime(self.date, "%Y-%m-%d"),
            'value':self.value
-       }
+       }   
+    
