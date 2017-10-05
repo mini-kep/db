@@ -22,7 +22,7 @@ def get_datapoints():
     if start_date:
         data = data.filter(Datapoint.date >= datetime.strptime(start_date, "%Y-%M-%d").date())
     if end_date:
-        data = data.filter(Datapoint.date <= datetime.strptime(start_date, "%Y-%M-%d").date())
+        data = data.filter(Datapoint.date <= datetime.strptime(end_date, "%Y-%M-%d").date())
     return jsonify([row.serialize for row in data.all()])
 
 
