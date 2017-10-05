@@ -42,3 +42,9 @@ def upload_data():
         return abort(400)
     db.session.commit()
     return jsonify({})
+
+
+# EP: not sure helper functions are gоod in views.py but my suggestion is this:
+def to_date(date_str: str):
+   """Convert YYYY-MM-DD string to datetime.date object."""
+   return datetime.strptime(datapoint['date'], "%Y-%m-%d").date() 

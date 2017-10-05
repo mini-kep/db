@@ -21,3 +21,4 @@ db.create_all()
 
 
 # EP (question): the  prescription is to run db_init.py before the first run of each configuration (Development, Production)? 
+# EK (answer): yes, that's right

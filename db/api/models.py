@@ -4,14 +4,14 @@ from db import db
 
 class Datapoint(db.Model):
     __table_args__ = (
-        db.UniqueConstraint("freq", "name", "date"),
+        db.UniqueConstraint("name", "freq", "date"),
     )
 
-    id = db.Column(db.Integer,primary_key=True)
-    freq = db.Column(db.String, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
+    freq = db.Column(db.String, nullable=False)    
     date = db.Column(db.Date, nullable=False)
-    value =db.Column(db.Float, nullable=False)
+    value = db.Column(db.Float, nullable=False)
     
     @property
     def serialize(self): # Add serialize method for jsonify
