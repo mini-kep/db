@@ -2,6 +2,6 @@
 
 Can try GET method as:
 - <https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m>
-- <https://minikep-db.herokuapp.com/api/datapoints?name=GDP_rog&freq=q>
+- <https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q>
 - <https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01>
 - <https://minikep-db.herokuapp.com/api/datapoints?name=USDRUR_CD&freq=d&start_date=2017-08-01&end_date=2017-10-01>
