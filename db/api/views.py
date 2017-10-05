@@ -20,9 +20,9 @@ def get_datapoints():
     # Filter by optional parameters
     start_date, end_date = request.args.get('start_date'), request.args.get('end_date')
     if start_date:
-        data = data.filter(Datapoint.date >= datetime.strptime(start_date, "%Y-%M-%d").date())
+        data = data.filter(Datapoint.date >= to_date(start_date))
     if end_date:
-        data = data.filter(Datapoint.date <= datetime.strptime(end_date, "%Y-%M-%d").date())
+        data = data.filter(Datapoint.date <= to_date(end_date))
     return jsonify([row.serialize for row in data.all()])
 
 
@@ -36,7 +36,7 @@ def upload_data():
     try:
         data = json.loads(request.data)
         for datapoint in data:
-            datapoint['date'] = datetime.strptime(datapoint['date'], "%Y-%m-%d").date()
+            datapoint['date'] = to_date(datapoint['date'])
         db.session.bulk_insert_mappings(Datapoint, data)
     except:
         return abort(400)
@@ -47,4 +47,4 @@ def upload_data():
 # EP: not sure helper functions are gоod in views.py but my suggestion is this:
 def to_date(date_str: str):
    """Convert YYYY-MM-DD string to datetime.date object."""
-   return datetime.strptime(datapoint['date'], "%Y-%m-%d").date() 
+   return datetime.strptime(date_str, "%Y-%m-%d").date()
