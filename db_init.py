@@ -11,13 +11,13 @@
 
 # EP: once we are importing db from db.__init__ we have a SQLAlchemy(app) instance in this module
 from db import db
-
+from db import create_app
 # EP: we need to import models here explicitly, otherwise the tables created will be empty
 from db.api import models
 
 # EP: this creates tables speciified in db.api.models
-# EP: the tables will be created in config.DevelopmentConfig.SQLALCHEMY_DATABASE_URI
-db.create_all()
+# EP: the tables will be created in config.DevelopmentConfig.SQLALCHEMY_DATABASE_URI)
+db.create_all(app=create_app('config.ProductionConfig'))
 
 
 # EP (question): the  prescription is to run db_init.py before the first run of each configuration (Development, Production)? 

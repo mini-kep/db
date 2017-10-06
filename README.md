@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mini-kep/db.svg?branch=flask_sqlalchemy)](https://travis-ci.org/mini-kep/db)
+[![Build Status](https://travis-ci.org/mini-kep/db.svg?branch=master)](https://travis-ci.org/mini-kep/db)
 
 Can try GET method as:
 - <https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m>

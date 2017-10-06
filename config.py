@@ -13,7 +13,15 @@ class ProductionConfig(object):
 
 class DevelopmentConfig(object):
     DEBUG = True
-    API_TOKEN = '123'
+    API_TOKEN = 'developer'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PORT=5000
+
+
+class TestingConfig(object):
+    DEBUG = True
+    API_TOKEN = 'test'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PORT=5000
