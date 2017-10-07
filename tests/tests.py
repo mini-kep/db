@@ -1,10 +1,10 @@
+import unittest
+import json
 import os
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir)
-import unittest
-import json
 from db import create_app, db
-from db.api.views import api as api_module
+from db.api.views import api as api_module, to_date
 
 
 app = create_app('config.TestingConfig')
@@ -21,7 +21,6 @@ class TestCase(unittest.TestCase):
         db.session.remove()
         db.drop_all(app=app)
 
-    # FIXME: I suggest the test name to be extended to reflect if it a good or bad result
     def test_auth_forbidden(self):
         response = self.app.post('/api/incoming')
         assert response.status_code == 403
@@ -35,7 +34,6 @@ class TestCase(unittest.TestCase):
                                  headers=dict(API_TOKEN=app.config['API_TOKEN']))
         assert response.status_code == 200
 
-    # FIXME: maybe also check for some values, not jeust response code?    
     def test_get_request(self):
         # Upload data
         tests_folder = os.path.abspath(os.path.dirname(__file__))
@@ -47,8 +45,11 @@ class TestCase(unittest.TestCase):
         # Check response
         params = dict(name='INVESTMENT_rog', freq='m')
         response = self.app.get('/api/datapoints', query_string=params)
-        expected_response = [row for row in json.loads(data) if row['name']=='INVESTMENT_rog' and row['freq']=='m']
         response_body = json.loads(response.get_data().decode('utf-8'))
+        # Select data from test json file by same parameters
+        expected_response = [row for row in json.loads(data) if row['name']=='INVESTMENT_rog' and row['freq']=='m']
+        # Sort by date
+        expected_response = sorted(expected_response, key=lambda item: to_date(item['date']))
         assert response.status_code == 200
         assert response_body == expected_response
 
