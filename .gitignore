@@ -2,3 +2,5 @@ venv
 *.pyc
 staticfiles
 .env
+run.py
+db_init.py

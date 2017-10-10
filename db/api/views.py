@@ -1,11 +1,19 @@
 import json
-from datetime import datetime
 from flask import Blueprint, request, abort, jsonify, current_app
-from db.api.models import Datapoint
+from utils import to_date, to_csv
 from db import db
+from db.api.models import Datapoint
+from db.api.errors import Custom_error_code_400
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
+
+
+@api.errorhandler(Custom_error_code_400)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 
 @api.route('/datapoints', methods=['GET'])
@@ -14,7 +22,7 @@ def get_datapoints():
         name = request.args['name']
         freq = request.args['freq']
     except:
-        return abort(400)
+        raise Custom_error_code_400("Following parameters are required: name, freq")
     # Filter by necessary parameters
     data = Datapoint.query.filter(Datapoint.name == name).filter(Datapoint.freq == freq).order_by(Datapoint.date)
     # Filter by optional parameters
@@ -23,7 +31,16 @@ def get_datapoints():
         data = data.filter(Datapoint.date >= to_date(start_date))
     if end_date:
         data = data.filter(Datapoint.date <= to_date(end_date))
-    return jsonify([row.serialize for row in data.all()])
+    # Format result to CSV or JSON
+    output_format = request.args.get('format')
+    # By default return json
+    if output_format == 'json' or not output_format:
+        return jsonify([row.serialize for row in data.all()])
+    elif output_format == 'csv':
+        return to_csv([row.serialize for row in data.all()])
+    # IF parameter format is different from 'json' or 'csv' - return error
+    else:
+        raise Custom_error_code_400(f"Wrong value for parameter 'format': {output_format}")
 
 
 @api.route('/incoming', methods=['POST'])
@@ -42,9 +59,3 @@ def upload_data():
         return abort(400)
     db.session.commit()
     return jsonify({})
-
-
-# EP: not sure helper functions are gоod in views.py but my suggestion is this:
-def to_date(date_str: str):
-   """Convert YYYY-MM-DD string to datetime.date object."""
-   return datetime.strptime(date_str, "%Y-%m-%d").date()
