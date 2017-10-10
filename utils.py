@@ -1,9 +1,13 @@
 from datetime import datetime
+from db.api.errors import Custom_error_code_400
 
 
 # Convert YYYY-MM-DD string to datetime.date object.
 def to_date(date_str: str):
-    return datetime.strptime(date_str, "%Y-%m-%d").date()
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except:
+        raise Custom_error_code_400(f'Invalid date parameter {date_str}')
 
 
 # serialiser fucntion
