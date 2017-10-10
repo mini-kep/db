@@ -6,7 +6,7 @@ from db.api.errors import Custom_error_code_400
 def to_date(date_str: str):
     try:
         return datetime.strptime(date_str, "%Y-%m-%d").date()
-    except:
+    except ValueError:
         raise Custom_error_code_400(f'Invalid date parameter {date_str}')
 
 
