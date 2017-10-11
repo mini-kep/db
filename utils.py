@@ -1,4 +1,5 @@
 from datetime import datetime
+from db.api.models import Datapoint
 from db.api.errors import Custom_error_code_400
 
 
@@ -35,3 +36,31 @@ def to_csv(dicts):
         return '\n'.join(rows)
     else:
         return ''
+
+
+def validate_freq_exist(freq):
+    possible_freq_values = Datapoint.query.group_by(Datapoint.freq).all()
+    possible_freq_values = [row.freq for row in possible_freq_values]
+    if freq not in possible_freq_values:
+        raise Custom_error_code_400(f'Invalid value for parameter \'freq\', possible values are {possible_freq_values}')
+
+
+def validate_name_exist_for_given_freq(freq, name):
+    possible_names_values = Datapoint.query.filter(Datapoint.freq==freq).group_by(Datapoint.name).all()
+    possible_names_values = [row.name for row in possible_names_values]
+    if name not in possible_names_values:
+        raise Custom_error_code_400(f'Invalid value for parameter \'name\', '
+                                    f'possible name values for freq \'{freq}\' are {possible_names_values}')
+
+
+def validate_and_convert_dates(start_date, end_date):
+    if start_date:
+        start_date = to_date(start_date)
+        current_time = datetime.date(datetime.utcnow())
+        if start_date >= current_time:
+            raise Custom_error_code_400('Start date can\'t be more than current date')
+    if end_date:
+        end_date = to_date(end_date)
+        if start_date and end_date < start_date:
+            raise Custom_error_code_400('End date can\'t be more than start date')
+    return start_date, end_date
