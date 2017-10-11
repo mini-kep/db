@@ -92,11 +92,11 @@ Parameters:
 - freq (required) – freq value to search like freq=m
 - start_date (optional) – should return results with date greater than this parameter
 - end_date (optional) – should return results with date less than this parameter
-- format (optional, possible values ```json, csv```, default ```json```) – returns data in chosen format. CSV data can be read by pandas with ```pd.read_csv(io.StringIO(response_body))```
+- format (optional, possible values ```json, csv```, default ```csv```) – returns data in chosen format. CSV data can be read by pandas with ```pd.read_csv(url_to_api_request)```
 
 Returns:
-- JSON or CSV in format similar to incoming json with data sorted by date
-- empty JSON or CSV if there’s no data with such query.
+- CSV or JSON in format similar to incoming json with data sorted by date
+- empty CSV or JSON if there’s no data with such query.
 
 Method validates parameters and returns error 400 if there’s an error in parameters (like string in data parameter or empty parameter)
 

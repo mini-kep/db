@@ -34,10 +34,10 @@ def get_datapoints():
     # Format result to CSV or JSON
     output_format = request.args.get('format')
     # By default return json
-    if output_format == 'json' or not output_format:
-        return jsonify([row.serialize for row in data.all()])
-    elif output_format == 'csv':
-        return to_csv([row.serialize for row in data.all()])
+    if output_format == 'csv' or not output_format:
+        return to_csv([row.serialized for row in data.all()])
+    elif output_format == 'json':
+        return jsonify([row.serialized for row in data.all()])
     # IF parameter format is different from 'json' or 'csv' - return error
     else:
         raise Custom_error_code_400(f"Wrong value for parameter 'format': {output_format}")

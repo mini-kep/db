@@ -1,7 +1,7 @@
 import unittest
 import json
 import os
-import pandas as pd
+from random import randint
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir)
 from db import create_app, db
@@ -45,7 +45,7 @@ class TestCase(unittest.TestCase):
                       data=data,
                       headers=dict(API_TOKEN=app.config['API_TOKEN']))
         # Check response
-        params = dict(name='INVESTMENT_rog', freq='m')
+        params = dict(name='INVESTMENT_rog', freq='m', format='json')
         response = self.app.get('/api/datapoints', query_string=params)
         response_body = json.loads(response.get_data().decode('utf-8'))
         # Select data from test json file by same parameters
@@ -67,15 +67,13 @@ class TestCase(unittest.TestCase):
         params = dict(name='INVESTMENT_rog', freq='m', format='csv')
         response = self.app.get('/api/datapoints', query_string=params)
         response_body = response.get_data().decode('utf-8')
-        # Build DataFrame from raw json and export to csv
+        # Get random data from raw JSON with same parameters as in request
         raw_data = [row for row in json.loads(data) if row['name'] == 'INVESTMENT_rog' and row['freq'] == 'm']
-        df = pd.DataFrame(raw_data)
-        df.date = df.date.apply(pd.to_datetime)
-        df = df.pivot(index='date', values='value', columns='name')
-        df.index.name = None
-        df = df.to_csv()
-        # Check if response body equal to DataFrame built from raw JSON
-        assert response_body == df
+        random_data_point = raw_data[randint(0, len(raw_data))]
+        # Format random data to like we have in response csv
+        random_data_to_check = f'{random_data_point["date"]},{random_data_point["value"]}'
+        # Check if random datapoint exists in csv
+        assert random_data_to_check in response_body.split('<br>')
 
 
 if __name__ == '__main__':

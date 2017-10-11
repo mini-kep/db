@@ -14,7 +14,7 @@ class Datapoint(db.Model):
     value = db.Column(db.Float, nullable=False)
     
     @property
-    def serialize(self): # Add serialize method for jsonify
+    def serialized(self): # Add serialize method for jsonify
        return {
            'freq': self.freq,
            'name': self.name,
