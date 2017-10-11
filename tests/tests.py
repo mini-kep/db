@@ -73,7 +73,7 @@ class TestCase(unittest.TestCase):
         # Format random data to like we have in response csv
         random_data_to_check = f'{random_data_point["date"]},{random_data_point["value"]}'
         # Check if random datapoint exists in csv
-        assert random_data_to_check in response_body.split('<br>')
+        assert random_data_to_check in response_body.split('\n')
 
 
 if __name__ == '__main__':

@@ -32,6 +32,6 @@ def yield_csv_row(dicts):
 def to_csv(dicts):
     if dicts:
         rows = list(yield_csv_row(dicts))
-        return '<br>'.join(rows)
+        return '\n'.join(rows)
     else:
         return ''
