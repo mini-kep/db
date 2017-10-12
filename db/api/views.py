@@ -108,4 +108,4 @@ def get_date_range():
     utils.validate_name_exist_for_given_freq(freq, name)
     # Extract dates from table
     start_date, end_date = utils.get_first_and_last_date(freq, name)
-    return jsonify({'start_date':start_date}, {'end_date':end_date})
+    return jsonify({'start_date':start_date, 'end_date':end_date})
