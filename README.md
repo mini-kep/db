@@ -26,3 +26,5 @@
 - [api/info?name=BRENT&freq=d](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d)
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
+More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
+
