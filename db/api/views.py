@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, request, abort, jsonify, current_app
+from flask import Blueprint, request, abort, jsonify, current_app, Response
 from utils import to_date, to_csv, validate_freq_exist, validate_name_exist_for_given_freq, validate_and_convert_dates
 from db import db
 from db.api.models import Datapoint
@@ -41,7 +41,8 @@ def get_datapoints():
     output_format = request.args.get('format')
     # By default return csv
     if output_format == 'csv' or not output_format:
-        return to_csv([row.serialized for row in data.all()])
+        return Response(response=to_csv([row.serialized for row in data.all()]),
+                        mimetype='text/plain')
     elif output_format == 'json':
         return jsonify([row.serialized for row in data.all()])
     # IF parameter format is different from 'json' or 'csv' - return error
