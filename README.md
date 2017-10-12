@@ -23,6 +23,6 @@
 #### ```info```:
 - [api/info?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/info?name=CPI_rog&freq=m)
 - [api/info?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/info?name=GDP_yoy&freq=q)
-- [api/info?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d&start_date=2017-01-01)
-- [api/info?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
+- [api/info?name=BRENT&freq=d](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d)
+- [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
