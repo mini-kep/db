@@ -98,41 +98,25 @@ def get_first_and_last_date(freq, name):
     return start_date, end_date
 
 
-# EP: BIG, BIG QUESTION and A ROADBLOCK IN FLASK FOR ME:
-
-# outside flask I normally I would have written some code under
-#  if __name__ == '__main__':   to be able to see how it works and how to deal
-# with it next:
-
-# if lask I get error like
-# RuntimeError: No application found. Either work inside a view function or push an application context.
-
-# so I come with a design like below
-# <https://stackoverflow.com/questions/24060553/creating-a-database-outside-the-application-context>
+# QUESTION: standalone flask usage
 
 if __name__ == '__main__':
-    from db import create_app
-
+    from db import create_app, db
     from db.api.views import api as api_module
 
     # create test app
     app = create_app('config.TestingConfig')
     app.register_blueprint(api_module)
-    ctx = app.app_context()
-    ctx.push()
+    db.create_all(app=create_app('config.TestingConfig'))
+
+    #ctx = app.app_context()
+    #ctx.push()
+    
+    #TODO: populate database with data
 
     possible_names_values = Datapoint.query.filter(Datapoint.freq == 'd') \
         .group_by(Datapoint.name) \
         .values(Datapoint.name)
+    assert list(possible_names_values) == []    
 
-    ctx.pop()
-
-# but after that I still cannot access a test database:
-
-# OperationalError: (sqlite3.OperationalError) no such table: datapoint [SQL: 'SELECT datapoint.name AS datapoint_name \nFROM datapoint \nWHERE datapoint.freq = ? GROUP BY datapoint.name'] [parameters: ('d',)]
-
-# Maybe we shoudl have a database already in place in test configuration?
-# We seem to populate it each time for the test in tests/test.py
-
-# My question is really silly, but how do developpers write code in flask
-# and go through - try-this - see what happened cycle?
+    #ctx.pop()
