@@ -3,6 +3,10 @@
    <https://github.com/mini-kep/intro/wiki/Testing-guidelines#checklist>      
 """
 
+# I suggest that we rename this file to something more meaningful, like test_apis.py for instance.
+# At this moment it is not clear what "parts" of the project this test.py covers, because its name is generic.
+# Moreover, maybe there will be more specific tests later, which will be put in a separate tests file.
+
 import json
 import os
 from random import randint
