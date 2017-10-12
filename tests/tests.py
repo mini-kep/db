@@ -1,3 +1,8 @@
+"""For testing guidelines see:
+    
+   <https://github.com/mini-kep/intro/wiki/Testing-guidelines#checklist>      
+"""
+
 import json
 import os
 from random import randint
@@ -6,6 +11,8 @@ import unittest
 from db import create_app, db
 from db.api.views import api as api_module
 from utils import to_date
+
+
 
 # EP: must have repo root on path, but why exactly are we doing this? 
 #     I ran the tests without path tweaking and they worked locally
@@ -44,27 +51,50 @@ class TestAPI_Incoming(TestCase):
                                  headers=dict(API_TOKEN=app.config['API_TOKEN']))
         assert response.status_code == 200
 
-    # methods below may not pass  <https://github.com/mini-kep/intro/wiki/Testing-guidelines#checklist>  
+class TestAPI_Datapoints(TestCase):
     
-    # FIXME: this should be two tests with one assert per test, may not pass  <https://github.com/mini-kep/intro/wiki/Testing-guidelines#checklist>     
-    def test_json_output_format(self):
-        # Upload data
+    def _prepare_database(self):
+        # FIXME: maybe this should not be done by posting to database, 
+        #        but rather connecting an existing databse
         data = self._read_test_data()
         self.app.post('/api/incoming',
                       data=data,
                       headers=dict(API_TOKEN=app.config['API_TOKEN']))
-        # Check response
+    def setUp(self):
+        # this is from parent class
+        db.create_all(app=app)
+        self.app = app.test_client()  
+        self._prepare_database()
+    
+    # FIXME: test name not inofrmative with respect what the test
+    def test_json_output_format(self):
+        # ERROR: must check contents of test_data.json and regenerate it as 
+        #        this variable is invalid in actual dataset since 2016?
+        #        need to use more generic example
+        #        name='INVESTMENT_rog', freq='m'           
         params = dict(name='INVESTMENT_rog', freq='m', format='json')
-        response = self.app.get('/api/datapoints', query_string=params)
+        response = self.app.get('/api/datapoints', query_string=params)        
+        assert response.status_code == 200
+     
+    # FIXME: very convoluted test, need simplfy, rename with respect to what is tested and result expected
+    def test_json_output_format_part2(self):  
+        params = dict(name='INVESTMENT_rog', freq='m', format='json')
+        response = self.app.get('/api/datapoints', query_string=params)           
+        # FIXME: why not use response.json()?
         response_body = json.loads(response.get_data().decode('utf-8'))
+        
+        # FIXME: this test has the benefit of fuller coverage of dataset, 
+        #        but htis is more of a integration test as opposed to unit test
+        #        we need fail-quick unit tests before integration tests
         # Select data from test json file by same parameters
+        data = self._read_test_data()
         expected_response = [row for row in json.loads(data) if row['name']=='INVESTMENT_rog' and row['freq']=='m']
         # Sort by date
         expected_response = sorted(expected_response, key=lambda item: to_date(item['date']))
-        assert response.status_code == 200
+        # --------------------------------------------------------------------
         assert response_body == expected_response
 
-    # FIXME: this is such a nested test, need refactor 
+    # FIXME: very nested test, need refactor     
     def test_csv_output_format(self):
         # Upload data
         data = self._read_test_data()
