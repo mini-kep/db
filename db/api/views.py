@@ -1,5 +1,11 @@
 import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
+# EP - TO DISCUSS: a) there are several validate functions, rather long import, maybe collect them in some class
+#                     for shorter import? eg from utils import Input; Input.validate_freq_exist(freq), etc. 
+#                     Input class can be just a collection of classmethods, like in https://github.com/mini-kep/parser-rosstat-kep/blob/master/src/csv2df/runner.py#L82-L112
+#                     Another name suggestion for such class is Helper.
+# EP - TO DISCUSS: b) validate_and_convert_dates() - maybe split into two, these are different responsibilities
+#                     to convert and to check
 from utils import to_date, to_csv, validate_freq_exist, validate_name_exist_for_given_freq, validate_and_convert_dates
 from db import db
 from db.api.models import Datapoint
@@ -22,7 +28,7 @@ def get_datapoints():
         name = request.args['name']
         freq = request.args['freq']
     except:
-        raise Custom_error_code_400("Following parameters are required: name, freq")
+        raise Custom_error_code_400("Following parameters are required: name, freq")        
     # Validate freq
     validate_freq_exist(freq)
     # Validate name exist for given freq
@@ -45,14 +51,14 @@ def get_datapoints():
                         mimetype='text/plain')
     elif output_format == 'json':
         return jsonify([row.serialized for row in data.all()])
-    # IF parameter format is different from 'json' or 'csv' - return error
+    # return error if parameter format is different from 'json' or 'csv'
     else:
         raise Custom_error_code_400(f"Wrong value for parameter 'format': {output_format}")
 
 
 @api.route('/incoming', methods=['POST'])
 def upload_data():
-    #Auth
+    # Authorisation
     token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
     if token_to_check != current_app.config['API_TOKEN']:
         return abort(403)
