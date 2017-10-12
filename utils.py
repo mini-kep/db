@@ -43,7 +43,7 @@ def validate_freq_exist(freq):
     possible_freq_values = [row.freq for row in possible_freq_values]
     if freq not in possible_freq_values:
         raise Custom_error_code_400(message=f'Invalid value for parameter \'freq\', check possible values list in \'allowed\'',
-                                    payload={'allowed':f'{possible_freq_values}'})
+                                    payload={'allowed':possible_freq_values})
 
 
 def validate_name_exist_for_given_freq(freq, name):
@@ -52,7 +52,7 @@ def validate_name_exist_for_given_freq(freq, name):
     if name not in possible_names_values:
         raise Custom_error_code_400(message=f'Invalid value for parameter \'name\', '
                                     f'check possible values list for freq \'{freq}\' in \'allowed\'',
-                                    payload={"allowed":f'{possible_names_values}'})
+                                    payload={"allowed":possible_names_values})
 
 
 def validate_and_convert_dates(start_date, end_date):
