@@ -8,16 +8,15 @@ import os
 from random import randint
 import unittest
 
+# tests fail unless repo root is on path 
+# COMMENT: suspicious, usually tests do not need this
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.sys.path.insert(0,parentdir)
+
 from db import create_app, db
 from db.api.views import api as api_module
 from utils import to_date
 
-
-
-# EP: must have repo root on path, but why exactly are we doing this? 
-#     I ran the tests without path tweaking and they worked locally
-parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.sys.path.insert(0,parentdir)
 
 # create test app
 app = create_app('config.TestingConfig')
