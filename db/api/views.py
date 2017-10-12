@@ -81,11 +81,18 @@ def upload_data():
 def get_possible_names(freq):
     # Get all names
     if freq == 'all':
-        possible_names_values = Datapoint.query.group_by(Datapoint.name).values(Datapoint.name)
+        possible_names_values = Datapoint.query.\
+            group_by(Datapoint.name).\
+            order_by(Datapoint.name).\
+            values(Datapoint.name)
     # Get names by freq
     else:
         utils.validate_freq_exist(freq)
-        possible_names_values = Datapoint.query.filter(Datapoint.freq==freq).group_by(Datapoint.name).values(Datapoint.name)
+        possible_names_values = Datapoint.query.\
+            filter(Datapoint.freq==freq).\
+            group_by(Datapoint.name). \
+            order_by(Datapoint.name). \
+            values(Datapoint.name)
     return jsonify([row.name for row in possible_names_values])
 
 
