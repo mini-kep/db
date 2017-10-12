@@ -11,7 +11,7 @@
 - [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
 - [api/names/q](https://minikep-db.herokuapp.com/api/names/q)
 - [api/names/m](https://minikep-db.herokuapp.com/api/names/m)
-
+- [api/names/d](https://minikep-db.herokuapp.com/api/names/d)
 
 #### ```datapoints```:
 - [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
