@@ -20,11 +20,10 @@ def handle_invalid_usage(error):
 
 @api.route('/datapoints', methods=['GET'])
 def get_datapoints():
-    try:
-        name = request.args['name']
-        freq = request.args['freq']
-    except:
-        raise Custom_error_code_400("Following parameters are required: name, freq")        
+    name = request.args.get('name')
+    freq = request.args.get('freq')
+    if not name or not freq:
+        raise Custom_error_code_400("Following parameters are required: name, freq")
     # Validate freq
     utils.validate_freq_exist(freq)
     # Validate name exist for given freq
@@ -33,11 +32,11 @@ def get_datapoints():
     data = Datapoint.query.filter(Datapoint.name == name).filter(Datapoint.freq == freq).order_by(Datapoint.date)
     # init start and end_dates
     start_date, end_date = None, None
-    # get optional parameters as strings 
-    start_date_str = request.args.get('start_date')  
-    end_date_str = request.args.get('end_date')  
+    # get optional parameters as strings
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
     # process start date
-    if start_date_str:        
+    if start_date_str:
         start_date = to_date(start_date_str)
         utils.validate_start_is_not_in_future(start_date)
         data = data.filter(Datapoint.date >= start_date)
@@ -77,3 +76,29 @@ def upload_data():
     db.session.commit()
     return jsonify({})
 
+
+@api.route('/names/<freq>', methods=['GET'])
+def get_possible_names(freq):
+    # Get all names
+    if freq == 'all':
+        possible_names_values = Datapoint.query.group_by(Datapoint.name).values(Datapoint.name)
+    # Get names by freq
+    else:
+        utils.validate_freq_exist(freq)
+        possible_names_values = Datapoint.query.filter(Datapoint.freq==freq).group_by(Datapoint.name).values(Datapoint.name)
+    return jsonify([row.name for row in possible_names_values])
+
+
+@api.route('/info', methods=['GET'])
+def get_date_range():
+    name = request.args.get('name')
+    freq = request.args.get('freq')
+    if not name or not freq:
+        raise Custom_error_code_400("Following parameters are required: name, freq")
+    # Validate freq
+    utils.validate_freq_exist(freq)
+    # Validate name exist for given freq
+    utils.validate_name_exist_for_given_freq(freq, name)
+    # Extract dates from table
+    start_date, end_date = utils.get_first_and_last_date(freq, name)
+    return jsonify({'start_date':start_date}, {'end_date':end_date})
