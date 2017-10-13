@@ -1,7 +1,29 @@
 [![Build Status](https://travis-ci.org/mini-kep/db.svg?branch=master)](https://travis-ci.org/mini-kep/db)
 [![Assertible status](https://assertible.com/apis/56e34b07-ae3a-4248-937e-fef69d8ec2f2/status?api_token=VkiQoHOdjWU3vGv2)](https://assertible.com/dashboard#/services/56e34b07-ae3a-4248-937e-fef69d8ec2f2/results)
 
-## Specification
+## Quickstart
+
+This repo contains a flask project, deployed at *minikep-db.herokuapp.com*. On ```api/datapoints```
+endpoint you can query macroeconomic database by indicator name, frequency and date range. 
+
+For example, link below will provide quarterly year-on-year GDP growth rates as csv file, readable by R/pandas.
+
+<https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01>
+
+Output:
+
+```
+,GDP_yoy
+2016-03-31,99.6
+2016-06-30,99.5
+2016-09-30,99.6
+2016-12-31,100.3
+2017-03-31,100.5
+2017-06-30,102.5
+```
+
+
+## Specification document
 
 - <https://github.com/mini-kep/intro/blob/master/specification/database.md>
 
@@ -33,4 +55,3 @@
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
 More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
-
