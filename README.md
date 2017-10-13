@@ -3,8 +3,7 @@
 
 ## Quickstart
 
-This repo contains a flask project, deployed at *minikep-db.herokuapp.com*. On ```api/datapoints```
-endpoint you can query macroeconomic database by indicator name, frequency and date range. 
+At ```api/datapoints``` you can query macroeconomic database by indicator name, frequency and date range. 
 
 For example, link below will provide quarterly year-on-year GDP growth rates as csv file, readable by R/pandas.
 
