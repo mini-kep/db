@@ -3,13 +3,7 @@ python:
   - "3.6"
 install:
   - pip install -r requirements.txt
-berofe_script:
-  - export PYTHONPATH=$PYTHONPATH:$(pwd);
 script:
-  - coverage run tests/testAPI_Incoming.py
-  - coverage run tests/testAPI_Datapoints.py
-  - coverage run tests/testAPI_Names.py
-  - coverage run tests/testAPI_Info.py
-  - coverage run tests/testAPI_Errors.py
+  - pytest
 after_success:
   - codecov
