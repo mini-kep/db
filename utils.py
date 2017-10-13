@@ -99,21 +99,28 @@ def get_first_and_last_date(freq, name):
 
 
 if __name__ == '__main__':
-    from db import create_app, db
+    from db import create_app
     from db.api.views import api as api_module
 
     # create test app
     app = create_app('config.DevelopmentConfig') 
     app.register_blueprint(api_module)
-    db.create_all(app=create_app('config.DevelopmentConfig'))
-
-
-    possible_names_values = Datapoint.query.filter(Datapoint.freq == 'd') \
-        .group_by(Datapoint.name) \
-        .values(Datapoint.name)
-    assert list(possible_names_values) == []    
     
+    # EP: works without db creation after done once
+    # from db import db
+    # db.create_all(app=create_app('config.DevelopmentConfig'))
+    # db.init_app(app)
+    #
     
-    # ERROR: how should I fix this?
+    with app.app_context():
+        possible_names_values = Datapoint.query.filter(Datapoint.freq == 'd') \
+            .group_by(Datapoint.name) \
+            .values(Datapoint.name)
+        assert list(possible_names_values) == []
+
+    
+    # EP: without  with app.app_context() will prodcue error
+    #
     # RuntimeError: No application found. Either work inside a view function or
     #               push an application context.>
+    #
