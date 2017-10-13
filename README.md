@@ -9,8 +9,6 @@ For example, link below will provide quarterly year-on-year GDP growth rates as 
 
 <https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01>
 
-Output:
-
 ```
 ,GDP_yoy
 2016-03-31,99.6
