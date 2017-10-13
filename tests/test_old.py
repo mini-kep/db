@@ -17,8 +17,8 @@ import unittest
 
 # tests fail unless repo root is on path 
 # COMMENT: suspicious, usually tests do not need this
-parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.sys.path.insert(0,parentdir)
+#parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#os.sys.path.insert(0,parentdir)
 
 from db import create_app, db
 from db.api.views import api as api_module
