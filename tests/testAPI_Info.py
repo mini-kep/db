@@ -1,5 +1,6 @@
 import json
 import unittest
+import tests
 from tests import app, db, TestCase
 
 

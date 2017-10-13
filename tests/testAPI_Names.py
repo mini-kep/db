@@ -1,6 +1,7 @@
 import json
 import unittest
 from random import randint
+import tests
 from tests import app, db, TestCase
 
 

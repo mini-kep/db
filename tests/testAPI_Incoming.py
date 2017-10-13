@@ -1,4 +1,5 @@
 import unittest
+import tests
 from tests import app, TestCase
 
 class TestAPI_Incoming(TestCase):
