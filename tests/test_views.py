@@ -1,7 +1,7 @@
 import json
 import os
-from random import randint
 import unittest
+from random import randint
 from db import create_app, db
 from db.api.views import api as api_module
 from utils import to_date
