@@ -7,6 +7,9 @@
 # At this moment it is not clear what "parts" of the project this test.py covers, because its name is generic.
 # Moreover, maybe there will be more specific tests later, which will be put in a separate tests file.
 
+
+
+
 import json
 import os
 from random import randint
@@ -41,7 +44,7 @@ class TestCase(unittest.TestCase):
         db.session.remove()
         db.drop_all(app=app)
 
-class TestAPI_Incoming(TestCase):
+class Test_API_Incoming(TestCase):
 
     def test_auth_forbidden(self):
         response = self.app.post('/api/incoming')
@@ -54,7 +57,7 @@ class TestAPI_Incoming(TestCase):
                                  headers=dict(API_TOKEN=app.config['API_TOKEN']))
         assert response.status_code == 200
 
-class TestAPI_Datapoints(TestCase):
+class Test_API_Datapoints(TestCase):
     
     def _prepare_database(self):
         # FIXME: maybe this should not be done by posting to database, 
@@ -117,7 +120,7 @@ class TestAPI_Datapoints(TestCase):
     # TODO: we do not have tests for getting datapoints yet
 
 # Test /api/names/<freq>
-class TestAPI_Names(TestCase):
+class Test_API_Names(TestCase):
     def _prepare_database(self):
         # FIXME: maybe this should not be done by posting to database,
         #        but rather connecting an existing databse
@@ -169,7 +172,7 @@ class TestAPI_Names(TestCase):
         assert response_body == expected_response_body
 
 
-class TestAPI_Info(TestCase):
+class Test_API_Info(TestCase):
     def _prepare_database(self):
         # FIXME: maybe this should not be done by posting to database,
         #        but rather connecting an existing databse
@@ -201,7 +204,7 @@ class TestAPI_Info(TestCase):
         assert {'start_date':expected_start_date, 'end_date':expected_end_date} == response_body
 
 
-class TestAPI_Errors(TestCase):
+class Test_API_Errors(TestCase):
     def _prepare_database(self):
         # FIXME: maybe this should not be done by posting to database,
         #        but rather connecting an existing databse
