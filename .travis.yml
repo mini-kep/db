@@ -4,7 +4,7 @@ python:
 install:
   - pip install -r requirements.txt
 berofe_script:
-  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+  - export PYTHONPATH=$PYTHONPATH:$(pwd);
 script:
   - coverage run tests/testAPI_Incoming.py
   - coverage run tests/testAPI_Datapoints.py
