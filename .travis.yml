@@ -4,6 +4,10 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - coverage run tests/tests.py
+  - coverage run tests/testAPI_Incoming.py
+  - coverage run tests/testAPI_Datapoints.py
+  - coverage run tests/testAPI_Names.py
+  - coverage run tests/testAPI_Info.py
+  - coverage run tests/testAPI_Errors.py
 after_success:
   - codecov
