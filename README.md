@@ -22,9 +22,9 @@ For example, link below will provide quarterly year-on-year GDP growth rates as 
 
 ## Specification document
 
-- <https://github.com/mini-kep/intro/blob/master/specification/database.md>
+- <https://mini-kep.github.io/documentation/database/>
 
-## Sample GET calls 
+## GET calls 
 
 #### ```names```:
 - [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
