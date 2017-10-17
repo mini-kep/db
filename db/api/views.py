@@ -37,7 +37,7 @@ def validate_and_transform_datapoints_params(freq, name, start_date_str, end_dat
     return freq, name, start_date, end_date
 
 
-def perform_datapoints_query(freq, name, start_date, end_date):
+def select_datapoints(freq, name, start_date, end_date):
     # Filter by necessary parameters
     data = Datapoint.query.filter_by(name=name, freq=freq).order_by(Datapoint.date)
     if start_date:
@@ -49,7 +49,7 @@ def perform_datapoints_query(freq, name, start_date, end_date):
 
 def _get_datapoints(freq, name, start_date_str, end_date_str, output_format):
     transformed_params = validate_and_transform_datapoints_params(freq, name, start_date_str, end_date_str)
-    data = perform_datapoints_query(*transformed_params)
+    data = select_datapoints(*transformed_params)
 
     # By default return csv
     if output_format == 'csv' or not output_format:
