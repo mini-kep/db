@@ -47,19 +47,10 @@ def perform_datapoints_query(freq, name, start_date, end_date):
     return data
 
 
-@api.route('/datapoints', methods=['GET'])
-def get_datapoints():
-    name = request.args.get('name')
-    freq = request.args.get('freq')
-    if not name or not freq:
-        raise Custom_error_code_400("Following parameters are required: name, freq")
-    start_date_str = request.args.get('start_date')
-    end_date_str = request.args.get('end_date')
-
+def _get_datapoints(freq, name, start_date_str, end_date_str, output_format):
     transformed_params = validate_and_transform_datapoints_params(freq, name, start_date_str, end_date_str)
     data = perform_datapoints_query(*transformed_params)
 
-    output_format = request.args.get('format')
     # By default return csv
     if output_format == 'csv' or not output_format:
         csv_str = to_csv([row.serialized for row in data.all()])
@@ -69,6 +60,19 @@ def get_datapoints():
     # return error if parameter format is different from 'json' or 'csv'
     else:
         raise Custom_error_code_400(f"Wrong value for parameter 'format': {output_format}")
+
+
+
+@api.route('/datapoints', methods=['GET'])
+def get_datapoints():
+    name = request.args.get('name')
+    freq = request.args.get('freq')
+    if not name or not freq:
+        raise Custom_error_code_400("Following parameters are required: name, freq")
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+    output_format = request.args.get('format')
+    return _get_datapoints(freq, name, start_date_str, end_date_str, output_format)
 
 
 @api.route('/incoming', methods=['POST'])
