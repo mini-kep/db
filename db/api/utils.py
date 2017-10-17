@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import desc
 from db.api.models import Datapoint
-from db.api.errors import Custom_error_code_400
+from db.api.errors import CustomError400
 
 
 def to_date(date_str: str):
@@ -11,7 +11,7 @@ def to_date(date_str: str):
     try:
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
-        raise Custom_error_code_400(f'Invalid date parameter {date_str}')
+        raise CustomError400(f'Invalid date parameter {date_str}')
 
 
 def yield_csv_row(dicts):
@@ -51,7 +51,7 @@ def validate_freq_exist(freq):
     possible_freq_values = [row.freq for row in possible_freq_values]
     if freq not in possible_freq_values:
         msg = f'Invalid frequency <{freq}>'
-        raise Custom_error_code_400(
+        raise CustomError400(
             message=msg,
             payload={'allowed': possible_freq_values})
 
@@ -64,7 +64,7 @@ def validate_name_exist_for_given_freq(freq, name):
     possible_names_values = [row.name for row in possible_names_values]
     if name not in possible_names_values:
         msg = f'No such name <{name}> for <{freq}> frequency.'
-        raise Custom_error_code_400(message=msg,
+        raise CustomError400(message=msg,
                                     payload={"allowed": possible_names_values})
 
 
@@ -73,12 +73,12 @@ def validate_name_exist_for_given_freq(freq, name):
 def validate_start_is_not_in_future(start_date):
     current_time = datetime.date(datetime.utcnow())
     if start_date >= current_time:
-        raise Custom_error_code_400('Start date cannot be in the future')
+        raise CustomError400('Start date cannot be in the future')
 
 
 def validate_end_date_after_start_date(start_date, end_date):
     if end_date < start_date:
-        raise Custom_error_code_400('End date must be after start date')
+        raise CustomError400('End date must be after start date')
 
 
 def get_first_and_last_date(freq, name):

@@ -4,7 +4,7 @@ import unittest
 from random import randint
 from db import create_app, db
 from db.api.views import api as api_module
-from utils import to_date
+from db.api.utils import to_date
 
 
 # create test app

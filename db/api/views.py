@@ -1,17 +1,16 @@
 import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 
-import utils
-from utils import to_date, to_csv
+import db.api.utils as utils
 from db import db
 from db.api.models import Datapoint
-from db.api.errors import Custom_error_code_400
+from db.api.errors import CustomError400
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@api.errorhandler(Custom_error_code_400)
+@api.errorhandler(CustomError400)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
@@ -27,11 +26,11 @@ def validate_and_transform_datapoints_params(freq, name, start_date_str, end_dat
     start_date, end_date = None, None
     # process start date
     if start_date_str:
-        start_date = to_date(start_date_str)
+        start_date = utils.to_date(start_date_str)
         utils.validate_start_is_not_in_future(start_date)
     # process end date
     if end_date_str:
-        end_date = to_date(end_date_str)
+        end_date = utils.to_date(end_date_str)
         if start_date:
             utils.validate_end_date_after_start_date(start_date, end_date)
     return freq, name, start_date, end_date
@@ -53,13 +52,13 @@ def _get_datapoints(freq, name, start_date_str, end_date_str, output_format):
 
     # By default return csv
     if output_format == 'csv' or not output_format:
-        csv_str = to_csv([row.serialized for row in data.all()])
+        csv_str = utils.to_csv([row.serialized for row in data.all()])
         return Response(response=csv_str, mimetype='text/plain')
     elif output_format == 'json':
         return jsonify([row.serialized for row in data.all()])
     # return error if parameter format is different from 'json' or 'csv'
     else:
-        raise Custom_error_code_400(f"Wrong value for parameter 'format': {output_format}")
+        raise CustomError400(f"Wrong value for parameter 'format': {output_format}")
 
 
 
@@ -68,7 +67,7 @@ def get_datapoints():
     name = request.args.get('name')
     freq = request.args.get('freq')
     if not name or not freq:
-        raise Custom_error_code_400("Following parameters are required: name, freq")
+        raise CustomError400("Following parameters are required: name, freq")
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
     output_format = request.args.get('format')
@@ -85,7 +84,7 @@ def upload_data():
     try:
         data = json.loads(request.data)
         for datapoint in data:
-            datapoint['date'] = to_date(datapoint['date'])
+            datapoint['date'] = utils.to_date(datapoint['date'])
         db.session.bulk_insert_mappings(Datapoint, data)
     except:
         return abort(400)
@@ -117,7 +116,7 @@ def get_date_range():
     name = request.args.get('name')
     freq = request.args.get('freq')
     if not name or not freq:
-        raise Custom_error_code_400("Following parameters are required: name, freq")
+        raise CustomError400("Following parameters are required: name, freq")
     # Validate freq
     utils.validate_freq_exist(freq)
     # Validate name exist for given freq

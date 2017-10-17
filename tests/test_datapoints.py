@@ -1,5 +1,5 @@
 import unittest
-from db.api.errors import Custom_error_code_400
+from db.api.errors import CustomError400
 from db.api.views import validate_and_transform_datapoints_params, select_datapoints, _get_datapoints
 from datetime import date
 from db import create_app, db
@@ -37,7 +37,7 @@ class TestCase(unittest.TestCase):
 
 class TestValidateAndTransform(TestCase):
     def test_none_params_should_fail(self):
-        with self.assertRaises(Custom_error_code_400):
+        with self.assertRaises(CustomError400):
             validate_and_transform_datapoints_params(None, None, None, None)
 
     def test_date_is_transformed_correctly(self):
@@ -46,15 +46,15 @@ class TestValidateAndTransform(TestCase):
         assert end_date == date(year=2016, month=4, day=1)
 
     def test_start_date_greater_than_end_date_should_fail(self):
-        with self.assertRaises(Custom_error_code_400):
+        with self.assertRaises(CustomError400):
             validate_and_transform_datapoints_params('m', 'RETAIL_SALES_FOOD_rog', '2015-10-25', '2015-04-01')
 
     def test_invalid_freq_should_fail(self):
-        with self.assertRaises(Custom_error_code_400):
+        with self.assertRaises(CustomError400):
             validate_and_transform_datapoints_params('o', 'INVESTMENT_rog', None, None)
 
     def test_invalid_name_should_fail(self):
-        with self.assertRaises(Custom_error_code_400):
+        with self.assertRaises(CustomError400):
             validate_and_transform_datapoints_params('m', 'BIBA_boba', None, None)
 
 
@@ -100,7 +100,7 @@ class TestGetDatapoints(TestCase):
         self.assertIn(',CPI_ALCOHOL_rog\\n1999-01-31,109.7', str(csv_bytes))
 
     def test_invalid_output_format_should_fail(self):
-        with self.assertRaises(Custom_error_code_400):
+        with self.assertRaises(CustomError400):
             _get_datapoints('m', 'CPI_ALCOHOL_rog', '1999-01-31', '2000-01-31', 'html')
 
 
