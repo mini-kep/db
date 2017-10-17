@@ -18,6 +18,35 @@ def handle_invalid_usage(error):
     return response
 
 
+def validate_and_transform_datapoints_params(freq, name, start_date_str, end_date_str):
+    # Validate freq
+    utils.validate_freq_exist(freq)
+    # Validate name exist for given freq
+    utils.validate_name_exist_for_given_freq(freq, name)
+    # init start and end_dates
+    start_date, end_date = None, None
+    # process start date
+    if start_date_str:
+        start_date = to_date(start_date_str)
+        utils.validate_start_is_not_in_future(start_date)
+    # process end date
+    if end_date_str:
+        end_date = to_date(end_date_str)
+        if start_date:
+            utils.validate_end_date_after_start_date(start_date, end_date)
+    return freq, name, start_date, end_date
+
+
+def perform_datapoints_query(freq, name, start_date, end_date):
+    # Filter by necessary parameters
+    data = Datapoint.query.filter_by(name=name, freq=freq).order_by(Datapoint.date)
+    if start_date:
+        data = data.filter(Datapoint.date >= start_date)
+    if end_date:
+        data = data.filter(Datapoint.date <= end_date)
+    return data
+
+
 @api.route('/datapoints', methods=['GET'])
 def get_datapoints():
     name = request.args.get('name')
@@ -27,7 +56,8 @@ def get_datapoints():
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
-    data = Datapoint.process_query(freq, name, start_date_str, end_date_str)
+    transformed_params = validate_and_transform_datapoints_params(freq, name, start_date_str, end_date_str)
+    data = perform_datapoints_query(*transformed_params)
 
     output_format = request.args.get('format')
     # By default return csv
