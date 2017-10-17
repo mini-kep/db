@@ -24,29 +24,11 @@ def get_datapoints():
     freq = request.args.get('freq')
     if not name or not freq:
         raise Custom_error_code_400("Following parameters are required: name, freq")
-    # Validate freq
-    utils.validate_freq_exist(freq)
-    # Validate name exist for given freq
-    utils.validate_name_exist_for_given_freq(freq, name)
-    # Filter by necessary parameters
-    data = Datapoint.query.filter(Datapoint.name == name).filter(Datapoint.freq == freq).order_by(Datapoint.date)
-    # init start and end_dates
-    start_date, end_date = None, None
-    # get optional parameters as strings
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
-    # process start date
-    if start_date_str:
-        start_date = to_date(start_date_str)
-        utils.validate_start_is_not_in_future(start_date)
-        data = data.filter(Datapoint.date >= start_date)
-    # process end date
-    if end_date_str:
-        end_date = to_date(end_date_str)
-        if start_date:
-             utils.validate_end_date_after_start_date(start_date, end_date)
-        data = data.filter(Datapoint.date <= end_date)
-    # Format result to CSV or JSON
+
+    data = Datapoint.process_query(freq, name, start_date_str, end_date_str)
+
     output_format = request.args.get('format')
     # By default return csv
     if output_format == 'csv' or not output_format:
