@@ -90,11 +90,18 @@ class TestDatapointParameters(TestCase):
 
 class TestSelectDataPoints(TestCase):
     def test_data_is_fetching(self):
-        datapoint = select_datapoints(
-            'm', 'CPI_ALCOHOL_rog', date(year=1999, month=1, day=1), date(year=1999, month=2, day=1)
-        ).first().serialized
+        # EP: please pay attention to separation of responsibilities inside test
+        #     it is #7 in https://github.com/mini-kep/intro/blob/master/testing_guidelines/README.md#checklist
+        # created parameters
+        params = dict(freq='m', 
+                      name='CPI_ALCOHOL_rog', 
+                      start_date=date(year=1999, month=1, day=1), 
+                      end_date =date(year=1999, month=2, day=1))
+        # calling function under test
+        datapoint = select_datapoints(**params).first()        
+        # checking result
         self.assertEqual(
-            datapoint,
+            datapoint.serialized,
             {"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7}
         )
 
@@ -144,6 +151,10 @@ class TestSelectDataPoints(TestCase):
 #        with self.assertRaises(CustomError400):
 #            _get_datapoints('m', 'CPI_ALCOHOL_rog', '1999-01-31', '2000-01-31', 'html')
 
+
+# NOT TODO:
+# serialise_datapoints may be renamed get_reponse_datapoints, to avoid duplicating 'serialiasation' term
+
 class TestSerialiseDatapoints(TestCase):
     data_dicts = [{"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7},
                   {"date": "1999-01-31", "freq": "m", "name": "CPI_FOOD_rog", "value": 110.4},
@@ -153,11 +164,15 @@ class TestSerialiseDatapoints(TestCase):
         return [Datapoint(**params) for params in self.data_dicts]
 
     def test_json_serialising_is_valid(self):
-        serialised = serialise_datapoints(self._make_sample_datapoints_list(), 'json').data
-        parsed_json = json.loads(serialised)
+        # EP: here too must observe setup-call-check rule as mentioned above
+        # call
+        response = serialise_datapoints(self._make_sample_datapoints_list(), 'json')
+        # check
+        parsed_json = json.loads(response.data)
         self.assertEqual(self.data_dicts, parsed_json)
 
     def test_csv_serialising_is_valid(self):
+        # FIXME, as commented above:
         serialised = str(serialise_datapoints(self._make_sample_datapoints_list(), 'csv').data, 'utf-8')
         self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', serialised)
 
