@@ -25,6 +25,7 @@ def select_datapoints(freq: str, name: str, start_date, end_date):
         data = data.filter(Datapoint.date <= end_date)
     return data
 
+
 def serialise_datapoints(data, output_format: str):
     if output_format == 'csv' or not output_format:
         csv_str = utils.to_csv([row.serialized for row in data])

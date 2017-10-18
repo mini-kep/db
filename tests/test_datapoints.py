@@ -6,10 +6,11 @@ import json
 import unittest
 
 from db.api.errors import CustomError400
-from db.api.views import select_datapoints
+from db.api.views import select_datapoints, serialise_datapoints
 from db import create_app, db
 from db.api.views import api as api_module
-from db.api.utils import DatapointParameters
+from db.api.utils import DatapointParameters, to_date
+from db.api.models import Datapoint
 
 app = create_app('config.TestingConfig')
 app.register_blueprint(api_module)
@@ -143,6 +144,30 @@ class TestSelectDataPoints(TestCase):
 #    def test_invalid_output_format_should_fail(self):
 #        with self.assertRaises(CustomError400):
 #            _get_datapoints('m', 'CPI_ALCOHOL_rog', '1999-01-31', '2000-01-31', 'html')
+
+class TestSerialiseDatapoints(TestCase):
+    data_dicts = [{"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7},
+                  {"date": "1999-01-31", "freq": "m", "name": "CPI_FOOD_rog", "value": 110.4},
+                  {"date": "1999-01-31", "freq": "m", "name": "CPI_NONFOOD_rog", "value": 106.2}]
+
+    @property
+    def datapoints(self):
+        datapoints = []
+        for params in self.data_dicts:
+            datapoints.append(Datapoint(
+                name=params.get('name'),
+                freq=params.get('freq'),
+                date=to_date(params.get('date')),
+                value=params.get('value')
+            ))
+        return datapoints
+
+    def test_json_serialising_is_valid(self):
+        serialised = serialise_datapoints(self.datapoints, 'json').data
+        parsed_json = json.loads(serialised)
+        self.assertEqual(self.data_dicts, parsed_json)
+
+
 
 
 if __name__ == '__main__':
