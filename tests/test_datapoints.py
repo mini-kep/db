@@ -149,25 +149,16 @@ class TestSerialiseDatapoints(TestCase):
                   {"date": "1999-01-31", "freq": "m", "name": "CPI_FOOD_rog", "value": 110.4},
                   {"date": "1999-01-31", "freq": "m", "name": "CPI_NONFOOD_rog", "value": 106.2}]
 
-    @property
-    def datapoints(self):
-        datapoints = []
-        for params in self.data_dicts:
-            datapoints.append(Datapoint(
-                name=params.get('name'),
-                freq=params.get('freq'),
-                date=to_date(params.get('date')),
-                value=params.get('value')
-            ))
-        return datapoints
+    def _make_sample_datapoints_list(self):
+        return [Datapoint(**params) for params in self.data_dicts]
 
     def test_json_serialising_is_valid(self):
-        serialised = serialise_datapoints(self.datapoints, 'json').data
+        serialised = serialise_datapoints(self._make_sample_datapoints_list(), 'json').data
         parsed_json = json.loads(serialised)
         self.assertEqual(self.data_dicts, parsed_json)
 
     def test_csv_serialising_is_valid(self):
-        serialised = str(serialise_datapoints(self.datapoints, 'csv').data, 'utf-8')
+        serialised = str(serialise_datapoints(self._make_sample_datapoints_list(), 'csv').data, 'utf-8')
         self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', serialised)
 
 if __name__ == '__main__':
