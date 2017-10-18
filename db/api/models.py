@@ -12,7 +12,13 @@ class Datapoint(db.Model):
     freq = db.Column(db.String, nullable=False)    
     date = db.Column(db.Date, nullable=False)
     value = db.Column(db.Float, nullable=False)
-    
+
+    def __init__(self, name, freq, date, value):
+        self.name = name
+        self.freq = freq
+        self.date = date
+        self.value = value
+
     @property
     def serialized(self): # Add serialize method for jsonify
        return {
