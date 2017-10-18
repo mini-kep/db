@@ -1,8 +1,8 @@
 import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 
-import db.api.utils as utils
 from db import db
+import db.api.utils as utils
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
 
@@ -17,27 +17,7 @@ def handle_invalid_usage(error):
     return response
 
 
-def validate_and_transform_datapoints_params(freq, name, start_date_str, end_date_str):
-    # Validate freq
-    utils.validate_freq_exist(freq)
-    # Validate name exist for given freq
-    utils.validate_name_exist_for_given_freq(freq, name)
-    # init start and end_dates
-    start_date, end_date = None, None
-    # process start date
-    if start_date_str:
-        start_date = utils.to_date(start_date_str)
-        utils.validate_start_is_not_in_future(start_date)
-    # process end date
-    if end_date_str:
-        end_date = utils.to_date(end_date_str)
-        if start_date:
-            utils.validate_end_date_after_start_date(start_date, end_date)
-    return freq, name, start_date, end_date
-
-
-def select_datapoints(freq, name, start_date, end_date):
-    # Filter by necessary parameters
+def select_datapoints(freq: str, name: str, start_date, end_date):
     data = Datapoint.query.filter_by(name=name, freq=freq).order_by(Datapoint.date)
     if start_date:
         data = data.filter(Datapoint.date >= start_date)
@@ -45,42 +25,31 @@ def select_datapoints(freq, name, start_date, end_date):
         data = data.filter(Datapoint.date <= end_date)
     return data
 
-
-def _get_datapoints(freq, name, start_date_str, end_date_str, output_format):
-    transformed_params = validate_and_transform_datapoints_params(freq, name, start_date_str, end_date_str)
-    data = select_datapoints(*transformed_params)
-
-    # By default return csv
+def serialise_datapoints(data, output_format: str):
     if output_format == 'csv' or not output_format:
         csv_str = utils.to_csv([row.serialized for row in data.all()])
         return Response(response=csv_str, mimetype='text/plain')
     elif output_format == 'json':
         return jsonify([row.serialized for row in data.all()])
-    # return error if parameter format is different from 'json' or 'csv'
     else:
         raise CustomError400(f"Wrong value for parameter 'format': {output_format}")
 
 
-
 @api.route('/datapoints', methods=['GET'])
-def get_datapoints():
-    name = request.args.get('name')
-    freq = request.args.get('freq')
-    if not name or not freq:
-        raise CustomError400("Following parameters are required: name, freq")
-    start_date_str = request.args.get('start_date')
-    end_date_str = request.args.get('end_date')
-    output_format = request.args.get('format')
-    return _get_datapoints(freq, name, start_date_str, end_date_str, output_format)
+def get_datapoints():    
+    params = utils.DatapointParameters(request.args).get()
+    data = select_datapoints(**params)
+    fmt = request.args.get('format')
+    return serialise_datapoints(data, fmt)
 
 
 @api.route('/incoming', methods=['POST'])
 def upload_data():
-    # Authorisation
+    # authorisation
     token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
     if token_to_check != current_app.config['API_TOKEN']:
         return abort(403)
-    # Upload data
+    # upload data
     try:
         data = json.loads(request.data)
         for datapoint in data:
@@ -102,7 +71,7 @@ def get_possible_names(freq):
             values(Datapoint.name)
     # Get names by freq
     else:
-        utils.validate_freq_exist(freq)
+        utils.DatapointParameters.validate_freq_exist(freq)
         possible_names_values = Datapoint.query.\
             filter(Datapoint.freq==freq).\
             group_by(Datapoint.name). \
@@ -118,9 +87,9 @@ def get_date_range():
     if not name or not freq:
         raise CustomError400("Following parameters are required: name, freq")
     # Validate freq
-    utils.validate_freq_exist(freq)
+    utils.DatapointParameters.validate_freq_exist(freq)
     # Validate name exist for given freq
-    utils.validate_name_exist_for_given_freq(freq, name)
+    utils.DatapointParameters.validate_name_exist_for_given_freq(freq, name)
     # Extract dates from table
     start_date, end_date = utils.get_first_and_last_date(freq, name)
     return jsonify({'start_date':start_date, 'end_date':end_date})
