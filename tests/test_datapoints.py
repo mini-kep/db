@@ -2,7 +2,6 @@ from datetime import date
 import datetime
 import os
 import json
-
 import unittest
 
 from db.api.errors import CustomError400
@@ -167,8 +166,9 @@ class TestSerialiseDatapoints(TestCase):
         parsed_json = json.loads(serialised)
         self.assertEqual(self.data_dicts, parsed_json)
 
-
-
+    def test_csv_serialising_is_valid(self):
+        serialised = str(serialise_datapoints(self.datapoints, 'csv').data, 'utf-8')
+        self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', serialised)
 
 if __name__ == '__main__':
     unittest.main()
