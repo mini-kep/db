@@ -1,7 +1,4 @@
-"""For testing guidelines see:
-    
-   <https://github.com/mini-kep/intro/wiki/Testing-guidelines#checklist>      
-"""
+"""FOR SCRAPPING - TO BE DELETED."""
 
 
 import json
@@ -11,7 +8,9 @@ import unittest
 
 import flask
 
-from db import create_app #, db
+import pytest
+import datetime
+from db import db
 from db.api.views import api as api_module
 from db.api.utils import to_date
 import flask_sqlalchemy as fsa
@@ -29,7 +28,7 @@ def app():
     app.register_blueprint(api_module)
     return app
 
-def db(app):
+def make_db(app):
     return fsa.SQLAlchemy(app)
 
 
@@ -50,7 +49,7 @@ def Todo(db):
             self.pub_date = datetime.utcnow()
     db.create_all()
     yield Todo
-db.drop_all()
+    db.drop_all()
 
 
 

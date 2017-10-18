@@ -4,8 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def create_app(config):
+def _app():
+    return Flask(__name__)
+
+def create_app(config=None):
     app = Flask(__name__)
-    app.config.from_object(config)
+    # make config optioal - easier for debugging.
+    if config:
+        app.config.from_object(config)
     db.init_app(app)
     return app
