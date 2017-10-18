@@ -5,7 +5,8 @@ import json
 import unittest
 
 from db.api.errors import CustomError400
-from db.api.views import select_datapoints, serialise_datapoints
+from db.api.views import serialise_datapoints
+from db.api.queries import select_datapoints
 from db import create_app, db
 from db.api.views import api as api_module
 from db.api.utils import DatapointParameters

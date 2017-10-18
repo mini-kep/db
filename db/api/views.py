@@ -5,6 +5,7 @@ from db import db
 import db.api.utils as utils
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
+import db.api.queries as queries
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
@@ -15,15 +16,6 @@ def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
-
-
-def select_datapoints(freq: str, name: str, start_date, end_date):
-    data = Datapoint.query.filter_by(name=name, freq=freq).order_by(Datapoint.date)
-    if start_date:
-        data = data.filter(Datapoint.date >= start_date)
-    if end_date:
-        data = data.filter(Datapoint.date <= end_date)
-    return data
 
 
 def serialise_datapoints(data, output_format: str):
@@ -39,7 +31,7 @@ def serialise_datapoints(data, output_format: str):
 @api.route('/datapoints', methods=['GET'])
 def get_datapoints():    
     params = utils.DatapointParameters(request.args).get()
-    data = select_datapoints(**params)
+    data = queries.select_datapoints(**params)
     fmt = request.args.get('format')
     return serialise_datapoints(data, fmt)
 
@@ -62,23 +54,20 @@ def upload_data():
     return jsonify({})
 
 
+# TODO: move to queries.py
+def possible_names_values(freq):
+    query = Datapoint.query
+    if freq != 'all':
+        query = query.filter_by(freq=freq)
+    return query.group_by(Datapoint.name).\
+                 order_by(Datapoint.name).\
+                 values(Datapoint.name)
+
+
 @api.route('/names/<freq>', methods=['GET'])
 def get_possible_names(freq):
-    # Get all names
-    if freq == 'all':
-        possible_names_values = Datapoint.query.\
-            group_by(Datapoint.name).\
-            order_by(Datapoint.name).\
-            values(Datapoint.name)
-    # Get names by freq
-    else:
-        utils.DatapointParameters.validate_freq_exist(freq)
-        possible_names_values = Datapoint.query.\
-            filter(Datapoint.freq==freq).\
-            group_by(Datapoint.name). \
-            order_by(Datapoint.name). \
-            values(Datapoint.name)
-    return jsonify([row.name for row in possible_names_values])
+    possible_names = possible_names_values(freq)
+    return jsonify([row.name for row in possible_names])
 
 
 @api.route('/info', methods=['GET'])
