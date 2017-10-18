@@ -8,7 +8,7 @@ from db.api.errors import CustomError400
 from db.api.views import select_datapoints, serialise_datapoints
 from db import create_app, db
 from db.api.views import api as api_module
-from db.api.utils import DatapointParameters, to_date
+from db.api.utils import DatapointParameters
 from db.api.models import Datapoint
 
 app = create_app('config.TestingConfig')
@@ -164,17 +164,14 @@ class TestSerialiseDatapoints(TestCase):
         return [Datapoint(**params) for params in self.data_dicts]
 
     def test_json_serialising_is_valid(self):
-        # EP: here too must observe setup-call-check rule as mentioned above
-        # call
         response = serialise_datapoints(self._make_sample_datapoints_list(), 'json')
-        # check
         parsed_json = json.loads(response.data)
         self.assertEqual(self.data_dicts, parsed_json)
 
     def test_csv_serialising_is_valid(self):
-        # FIXME, as commented above:
-        serialised = str(serialise_datapoints(self._make_sample_datapoints_list(), 'csv').data, 'utf-8')
-        self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', serialised)
+        response = serialise_datapoints(self._make_sample_datapoints_list(), 'csv')
+        csv_string = str(response.data, 'utf-8')
+        self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', csv_string)
 
 if __name__ == '__main__':
     unittest.main()
