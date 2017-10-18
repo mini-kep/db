@@ -106,15 +106,15 @@ class TestSelectDataPoints(TestCase):
         )
 
     def test_wrong_params_fetch_zero_results(self):
-        empty_query = select_datapoints(
-            'biba', 'boba',
-            date(year=2005, month=1, day=1),
-            date(year=2006, month=1, day=1)
+        params = dict(
+            freq='biba',
+            name='boba',
+            start_date=date(year=2005, month=1, day=1),
+            end_date=date(year=2006, month=1, day=1)
         )
-        self.assertEqual(
-            empty_query.count(),
-            0
-        )
+        number_of_results = select_datapoints(**params).count()
+        self.assertEqual(number_of_results, 0)
+
 
 # CODE UNDER TEST: ------------------------------------------------------------------------
 #def serialise_datapoints(data, output_format: str):
