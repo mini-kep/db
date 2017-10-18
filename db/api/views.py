@@ -27,10 +27,10 @@ def select_datapoints(freq: str, name: str, start_date, end_date):
 
 def serialise_datapoints(data, output_format: str):
     if output_format == 'csv' or not output_format:
-        csv_str = utils.to_csv([row.serialized for row in data.all()])
+        csv_str = utils.to_csv([row.serialized for row in data])
         return Response(response=csv_str, mimetype='text/plain')
     elif output_format == 'json':
-        return jsonify([row.serialized for row in data.all()])
+        return jsonify([row.serialized for row in data])
     else:
         raise CustomError400(f"Wrong value for parameter 'format': {output_format}")
 
