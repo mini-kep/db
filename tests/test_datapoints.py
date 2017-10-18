@@ -1,12 +1,15 @@
-import unittest
-from db.api.errors import CustomError400
-from db.api.views import select_datapoints
 from datetime import date
-from db import create_app, db
-from db.api.views import api as api_module
+import datetime
 import os
 import json
 
+import unittest
+
+from db.api.errors import CustomError400
+from db.api.views import select_datapoints
+from db import create_app, db
+from db.api.views import api as api_module
+from db.api.utils import DatapointParameters
 
 app = create_app('config.TestingConfig')
 app.register_blueprint(api_module)
@@ -16,7 +19,9 @@ class TestCase(unittest.TestCase):
         tests_folder = os.path.abspath(os.path.dirname(__file__))
         with open(os.path.join(tests_folder, 'test_data.json')) as data_file:
             return data_file.read()
-
+        
+    # NOT TODO: must populate test database without API
+    # NOT TODO: must have two test classes - with empty and with full database
     def _prepare_database(self):
         data = self._read_test_data()
         self.app.post('/api/incoming',
@@ -34,28 +39,53 @@ class TestCase(unittest.TestCase):
         db.drop_all(app=app)
 
 
+def days_ahead(k):
+    dt = datetime.date.today() + datetime.timedelta(days=k)
+    return dt.strftime('%Y-%m-%d')
 
-#class TestValidateAndTransform(TestCase):
-#    def test_none_params_should_fail(self):
-#        with self.assertRaises(CustomError400):
-#            validate_and_transform_datapoints_params(None, None, None, None)
-#
-#    def test_date_is_transformed_correctly(self):
-#        _, _, start_date, end_date = validate_and_transform_datapoints_params('m', 'RETAIL_SALES_FOOD_rog', '2015-03-25', '2016-04-01')
-#        assert start_date == date(year=2015, month=3, day=25)
-#        assert end_date == date(year=2016, month=4, day=1)
-#
-#    def test_start_date_greater_than_end_date_should_fail(self):
-#        with self.assertRaises(CustomError400):
-#            validate_and_transform_datapoints_params('m', 'RETAIL_SALES_FOOD_rog', '2015-10-25', '2015-04-01')
-#
-#    def test_invalid_freq_should_fail(self):
-#        with self.assertRaises(CustomError400):
-#            validate_and_transform_datapoints_params('o', 'INVESTMENT_rog', None, None)
-#
-#    def test_invalid_name_should_fail(self):
-#        with self.assertRaises(CustomError400):
-#            validate_and_transform_datapoints_params('m', 'BIBA_boba', None, None)
+#Code under test:
+#    class DatapointParameters:
+
+class TestDatapointParameters(TestCase):
+    
+    @staticmethod
+    def _make_args(freq, name, start, end):
+        return dict(name=name,
+                    freq=freq,
+                    start_date=start,
+                    end_date=end)
+    
+    def test_none_params_should_fail(self):
+        args = self._make_args(None, None, None, None)
+        with self.assertRaises(CustomError400):
+            DatapointParameters(args)
+
+    def test_date_is_transformed_correctly(self):
+        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', '2015-03-25', '2016-04-01')
+        dp = DatapointParameters(args) 
+        assert dp.get_start() == date(year=2015, month=3, day=25)
+        assert dp.get_end() == date(year=2016, month=4, day=1)
+
+    def test_on_wrong_sequence_of_dates_fails(self):
+        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', '2015-10-30', '1999-10-01')
+        with self.assertRaises(CustomError400):
+             DatapointParameters(args).get_end()
+
+    def test_on_start_in_future_fails(self):
+        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', days_ahead(1), days_ahead(2))
+        with self.assertRaises(CustomError400):
+             DatapointParameters(args).get_start()
+
+    def test_on_invalid_freq_should_fail(self):
+        args = self._make_args('z', 'RETAIL_SALES_FOOD_rog', None, None)
+        with self.assertRaises(CustomError400):
+             DatapointParameters(args)
+
+    def test_on_invalid_name_should_fail(self):
+        args = self._make_args('m', 'BIBA_boba', None, None)
+        with self.assertRaises(CustomError400):
+             DatapointParameters(args)
+
 
 
 class TestSelectDataPoints(TestCase):
@@ -79,6 +109,17 @@ class TestSelectDataPoints(TestCase):
             0
         )
 
+# CODE UNDER TEST: ------------------------------------------------------------------------
+#def serialise_datapoints(data, output_format: str):
+#    if output_format == 'csv' or not output_format:
+#        csv_str = utils.to_csv([row.serialized for row in data.all()])
+#        return Response(response=csv_str, mimetype='text/plain')
+#    elif output_format == 'json':
+#        return jsonify([row.serialized for row in data.all()])
+#    else:
+#        raise CustomError400(f"Wrong value for parameter 'format': {output_format}")
+# TODO: must generate a small (2-3 elements) *data* of proper type to test csv, json outputs 
+# ------------------------------------------------------------------------------------------
 
 #class TestGetDatapoints(TestCase):
 #    # actually, _get_datapoints function is tested
@@ -105,5 +146,4 @@ class TestSelectDataPoints(TestCase):
 
 
 if __name__ == '__main__':
-    TestCase._prepare_database()
     unittest.main()
