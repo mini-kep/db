@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import desc
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
+import db.api.queries as queries
 
 
 def to_date(date_str: str):
@@ -43,6 +44,12 @@ def to_csv(dicts):
     else:
         return ''
 
+
+def datapoint_possible_names(freq):
+    return Datapoint.query.\
+        filter_by(freq=freq).\
+        group_by(Datapoint.name).\
+        values(Datapoint.name)
 
 class DatapointParameters:
     
@@ -95,16 +102,14 @@ class DatapointParameters:
 
     @staticmethod
     def validate_freq_exist(freq):
-        allowed = list(select_unique_frequencies()) 
+        allowed = list(queries.select_unique_frequencies())
         if freq not in allowed:
             raise CustomError400(message='Invalid frequency <{freq}>',
                                  payload={'allowed': allowed})
     
     @staticmethod
     def validate_name_exist_for_given_freq(freq, name):
-        possible_names_values = Datapoint.query.filter(Datapoint.freq == freq) \
-            .group_by(Datapoint.name) \
-            .values(Datapoint.name)
+        possible_names_values = datapoint_possible_names(freq)
         # EP: redefining same variable is a bit questionable
         possible_names_values = [row.name for row in possible_names_values]
         if name not in possible_names_values:
@@ -122,28 +127,23 @@ class DatapointParameters:
     def validate_end_date_after_start_date(start_date, end_date):
         if end_date < start_date:
             raise CustomError400('End date must be after start date')          
-            
 
-def select_unique_frequencies():
-    query = Datapoint.query.group_by(Datapoint.freq) \
-                           .values(Datapoint.freq)
-    return [row.freq for row in query]
+
+# TODO: change name
+# TODO: move to queries.py
+def _get_first_and_last_date(freq, name):
+    dates = Datapoint.query.filter_by(freq=freq, name=name)
+    first_date = dates.order_by(Datapoint.date).first()
+    last_date = dates.order_by(desc(Datapoint.date)).first()
+    return first_date, last_date
+
 
 def get_first_and_last_date(freq, name):
     # Extract first and last dates from datapoints with given freq, names
-    start_date = Datapoint.query. \
-        filter(Datapoint.name == name). \
-        filter(Datapoint.freq == freq). \
-        order_by(Datapoint.date). \
-        first()
-    start_date = datetime.strftime(start_date.date, "%Y-%m-%d")
-    end_date = Datapoint.query. \
-        filter(Datapoint.name == name). \
-        filter(Datapoint.freq == freq). \
-        order_by(desc(Datapoint.date)). \
-        first()
-    end_date = datetime.strftime(end_date.date, "%Y-%m-%d")
-    return start_date, end_date
+    start_date, end_date = _get_first_and_last_date(freq, name)
+    start_date_str = datetime.strftime(start_date.date, "%Y-%m-%d")
+    end_date_str = datetime.strftime(end_date.date, "%Y-%m-%d")
+    return start_date_str, end_date_str
 
 
 if __name__ == '__main__':
@@ -167,5 +167,5 @@ if __name__ == '__main__':
                                .values(Datapoint.name)
         k = [x.name for x in query]    
         assert k == ['BRENT', 'USDRUR_CB']
-        assert set(['a', 'd', 'm', 'q']) == set(select_unique_frequencies())
+        assert set(['a', 'd', 'm', 'q']) == set(queries.select_unique_frequencies())
         
