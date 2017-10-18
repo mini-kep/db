@@ -3,31 +3,69 @@
    <https://github.com/mini-kep/intro/wiki/Testing-guidelines#checklist>      
 """
 
-# I suggest that we rename this file to something more meaningful, like test_apis.py for instance.
-# At this moment it is not clear what "parts" of the project this test.py covers, because its name is generic.
-# Moreover, maybe there will be more specific tests later, which will be put in a separate tests file.
-
-
-
 
 import json
 import os
 from random import randint
 import unittest
 
-# tests fail unless repo root is on path 
-# COMMENT: suspicious, usually tests do not need this
-#parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#os.sys.path.insert(0,parentdir)
+import flask
 
-from db import create_app, db
+from db import create_app #, db
 from db.api.views import api as api_module
 from db.api.utils import to_date
-
+import flask_sqlalchemy as fsa
 
 # create test app
-app = create_app('config.TestingConfig')
-app.register_blueprint(api_module)
+# app = create_app('config.TestingConfig')
+# app.register_blueprint(api_module)
+
+
+def app():
+    app = flask.Flask(__name__)
+    app.testing = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.register_blueprint(api_module)
+    return app
+
+def db(app):
+    return fsa.SQLAlchemy(app)
+
+
+@pytest.fixture
+def Todo(db):
+    class Todo(db.Model):
+        __tablename__ = 'todos'
+        id = db.Column('todo_id', db.Integer, primary_key=True)
+        title = db.Column(db.String(60))
+        text = db.Column(db.String)
+        done = db.Column(db.Boolean)
+        pub_date = db.Column(db.DateTime)
+
+        def __init__(self, title, text):
+            self.title = title
+            self.text = text
+            self.done = False
+            self.pub_date = datetime.utcnow()
+    db.create_all()
+    yield Todo
+db.drop_all()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class TestCase(unittest.TestCase):
 
