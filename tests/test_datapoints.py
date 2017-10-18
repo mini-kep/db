@@ -90,11 +90,18 @@ class TestDatapointParameters(TestCase):
 
 class TestSelectDataPoints(TestCase):
     def test_data_is_fetching(self):
-        datapoint = select_datapoints(
-            'm', 'CPI_ALCOHOL_rog', date(year=1999, month=1, day=1), date(year=1999, month=2, day=1)
-        ).first().serialized
+        # EP: please pay attention to separation of responsibilities inside test
+        #     it is #7 in https://github.com/mini-kep/intro/blob/master/testing_guidelines/README.md#checklist
+        # created parameters
+        params = dict(freq='m', 
+                      name='CPI_ALCOHOL_rog', 
+                      start_date=date(year=1999, month=1, day=1), 
+                      end_date =date(year=1999, month=2, day=1))
+        # calling function under test
+        datapoint = select_datapoints(**params).first()        
+        # checking result
         self.assertEqual(
-            datapoint,
+            datapoint.serialized,
             {"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7}
         )
 
