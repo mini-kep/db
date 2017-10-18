@@ -151,11 +151,16 @@ class TestSelectDataPoints(TestCase):
 #        with self.assertRaises(CustomError400):
 #            _get_datapoints('m', 'CPI_ALCOHOL_rog', '1999-01-31', '2000-01-31', 'html')
 
+
+# NOT TODO:
+# serialise_datapoints may be renamed get_reponse_datapoints, to avoid duplicating 'serialiasation' term
+
 class TestSerialiseDatapoints(TestCase):
     data_dicts = [{"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7},
                   {"date": "1999-01-31", "freq": "m", "name": "CPI_FOOD_rog", "value": 110.4},
                   {"date": "1999-01-31", "freq": "m", "name": "CPI_NONFOOD_rog", "value": 106.2}]
-
+    
+    # FIXME: rename as in comment  
     @property
     def datapoints(self):
         datapoints = []
@@ -163,17 +168,25 @@ class TestSerialiseDatapoints(TestCase):
             datapoints.append(Datapoint(
                 name=params.get('name'),
                 freq=params.get('freq'),
+                # FIXME: to_date should go to models.py, where maked by comment
+                #        better 'copy-paste' code there, otherwise may get a circular refeference between modules                
+                #        after above is done all this function likely will be one line:                 
+                #            return [Datapoint(params) for params in self.data_dicts]          
                 date=to_date(params.get('date')),
                 value=params.get('value')
             ))
         return datapoints
 
     def test_json_serialising_is_valid(self):
-        serialised = serialise_datapoints(self.datapoints, 'json').data
-        parsed_json = json.loads(serialised)
+        # EP: here too must observe setup-call-check rule as mentioned above
+        # call
+        response = serialise_datapoints(self.datapoints, 'json')
+        # check
+        parsed_json = json.loads(response.data)
         self.assertEqual(self.data_dicts, parsed_json)
 
     def test_csv_serialising_is_valid(self):
+        # FIXME, as commented above:
         serialised = str(serialise_datapoints(self.datapoints, 'csv').data, 'utf-8')
         self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', serialised)
 
