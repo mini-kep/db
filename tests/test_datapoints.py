@@ -165,12 +165,14 @@ class TestSerialiseDatapoints(TestCase):
         return [Datapoint(**params) for params in self.data_dicts]
 
     def test_json_serialising_is_valid(self):
-        response = serialise_datapoints(self._make_sample_datapoints_list(), 'json')
+        data = self._make_sample_datapoints_list()
+        response = serialise_datapoints(data, 'json')
         parsed_json = json.loads(response.data)
         self.assertEqual(self.data_dicts, parsed_json)
 
     def test_csv_serialising_is_valid(self):
-        response = serialise_datapoints(self._make_sample_datapoints_list(), 'csv')
+        data = self._make_sample_datapoints_list()
+        response = serialise_datapoints(data, 'csv')
         csv_string = str(response.data, 'utf-8')
         self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', csv_string)
 
