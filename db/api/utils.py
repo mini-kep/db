@@ -13,6 +13,8 @@ def to_date(date_str: str):
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
 
+def date_as_str(dt):
+    return datetime.strftime(dt.date, "%Y-%m-%d")
 
 def yield_csv_row(dicts):
     """Serialiser function to create CSV rows as strings.
@@ -84,19 +86,30 @@ class DatapointParameters:
         date_str = self.args.get(key)  
         if date_str:
             dt = to_date(date_str)
-        return dt     
+        return dt
+    
+    def get_min_date(self):
+        query = queries.get_boundary_date(self.freq, self.name, 
+                                          direction='start')
+        return date_as_str(query) 
+
+    def get_max_date(self):
+        query = queries.get_boundary_date(self.freq, self.name, 
+                                          direction='end')
+        return date_as_str(query) 
 
     def get(self):
         return dict(name=self.name,
                     freq=self.freq,
                     start_date=self.get_start(),
-                    end_date=self.get_end()
-                    )
+                    end_date=self.get_end())
 
     @staticmethod
     def validate_freq_exist(freq):
         allowed = list(queries.select_unique_frequencies())
-        if freq not in allowed:
+        if freq in allowed:
+            return True
+        else:     
             raise CustomError400(message='Invalid frequency <{freq}>',
                                  payload={'allowed': allowed})
     
@@ -104,31 +117,30 @@ class DatapointParameters:
     def validate_name_exist_for_given_freq(freq, name):
         possible_names_values = queries.datapoint_possible_names(freq)
         # EP: redefining same variable is a bit questionable
-        possible_names_values = [row.name for row in possible_names_values]
-        if name not in possible_names_values:
+        # FIXME: mayb eworks without this line
+        # possible_names_values = [row.name for row in possible_names_values]
+        if name in possible_names_values:
+            return True
+        else:
             msg = f'No such name <{name}> for <{freq}> frequency.'
             raise CustomError400(message=msg,
                                  payload={"allowed": possible_names_values})
     
     @staticmethod
     def validate_start_is_not_in_future(start_date):
-        current_time = datetime.date(datetime.utcnow())
-        if start_date >= current_time:
-            raise CustomError400('Start date cannot be in the future')
+        current_date = datetime.date(datetime.utcnow())
+        #TODO: test on date = today must pass
+        if start_date > current_date:
+            raise CustomError400('Start date cannot be in future')
+        else:
+            return True            
     
     @staticmethod
     def validate_end_date_after_start_date(start_date, end_date):
         if end_date < start_date:
             raise CustomError400('End date must be after start date')          
-
-
-def get_first_and_last_date(freq, name):
-    # TODO: refactor this
-    # Extract first and last dates from datapoints with given freq, names
-    start_date, end_date = queries.get_first_and_last_datapoint_date(freq, name)
-    start_date_str = datetime.strftime(start_date.date, "%Y-%m-%d")
-    end_date_str = datetime.strftime(end_date.date, "%Y-%m-%d")
-    return start_date_str, end_date_str
+        else:
+            return True
 
 
 if __name__ == '__main__':
@@ -143,14 +155,13 @@ if __name__ == '__main__':
     #from db import db
     #db.create_all(app=create_app('config.DevelopmentConfig'))
 
-    with app.app_context():
-       
+    with app.app_context():       
         z = [d.value for d in Datapoint.query.filter(Datapoint.freq == 'd').all()]
-
         query = Datapoint.query.filter(Datapoint.freq == 'd') \
                                .group_by(Datapoint.name) \
                                .values(Datapoint.name)
         k = [x.name for x in query]    
         assert k == ['BRENT', 'USDRUR_CB']
-        assert set(['a', 'd', 'm', 'q']) == set(queries.select_unique_frequencies())
+        assert set(['a', 'd', 'm', 'q']) == \
+               set(queries.select_unique_frequencies())
         
