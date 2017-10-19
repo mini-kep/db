@@ -51,11 +51,8 @@ def make_app():
 
 
 class TestCaseBase(unittest.TestCase):
-    def prepare_db(self, filename=None):
-        if filename is None:
-            data = read_test_data() # use default parameter in function
-        else:
-            data = read_test_data(filename)
+    def prepare_db(self):
+        data = read_test_data()
         for datapoint in data:
             datapoint['date'] = utils.to_date(datapoint['date'])
         fsa_db.session.bulk_insert_mappings(Datapoint, data)

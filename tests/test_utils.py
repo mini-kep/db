@@ -13,7 +13,7 @@ def days_ahead(k):
 class TestDatapointParameters(TestCaseBase):
     def setUp(self):
         self.prepare_app()
-        self.prepare_db('test_data.json')
+        self.prepare_db()
         self.mount_blueprint()
 
     @staticmethod
