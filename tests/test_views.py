@@ -20,6 +20,8 @@ from db import db as fsa_db
 from db.api import utils  
 from db.api.models import Datapoint
 from db.api.views import api as api_module
+from db.api.errors import CustomError400
+from db.api.views import get_response_datapoints
 
 def read_test_data(filename = 'test_data_2016H2.json'):
     tests_folder = os.path.abspath(os.path.dirname(__file__))
@@ -41,6 +43,7 @@ def make_app():
     app.testing = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
     app.config['API_TOKEN'] = 'token'
     return app 
 
@@ -243,6 +246,37 @@ class Test_API_Errors(TestCaseBase):
         response = self.client.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
 
+
+class TestGetResponseDatapoints(TestCaseBase):
+    def setUp(self):
+        self._prepare_app()
+        self._mount_blueprint()
+        self._prepare_db()
+        self._start_client()
+
+    data_dicts = [{"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7},
+                  {"date": "1999-01-31", "freq": "m", "name": "CPI_FOOD_rog", "value": 110.4},
+                  {"date": "1999-01-31", "freq": "m", "name": "CPI_NONFOOD_rog", "value": 106.2}]
+
+    def _make_sample_datapoints_list(self):
+        return [Datapoint(**params) for params in self.data_dicts]
+
+    def test_json_serialising_is_valid(self):
+        data = self._make_sample_datapoints_list()
+        response = get_response_datapoints(data, 'json')
+        parsed_json = json.loads(response.data)
+        self.assertEqual(self.data_dicts, parsed_json)
+
+    def test_csv_serialising_is_valid(self):
+        data = self._make_sample_datapoints_list()
+        response = get_response_datapoints(data, 'csv')
+        csv_string = str(response.data, 'utf-8')
+        self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', csv_string)
+
+    def test_invalid_output_format_should_fail(self):
+        data = self._make_sample_datapoints_list()
+        with self.assertRaises(CustomError400):
+            get_response_datapoints(data, 'html')
 
 if __name__ == '__main__':
     unittest.main(module='test_views')

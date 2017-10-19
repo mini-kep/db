@@ -18,7 +18,7 @@ def handle_invalid_usage(error):
     return response
 
 
-def serialise_datapoints(data, output_format: str):
+def get_response_datapoints(data, output_format: str):
     if output_format == 'csv' or not output_format:
         csv_str = utils.to_csv([row.serialized for row in data])
         return Response(response=csv_str, mimetype='text/plain')
@@ -33,7 +33,7 @@ def get_datapoints():
     params = utils.DatapointParameters(request.args).get()
     data = queries.select_datapoints(**params)
     fmt = request.args.get('format')
-    return serialise_datapoints(data, fmt)
+    return get_response_datapoints(data, fmt)
 
 
 @api.route('/incoming', methods=['POST'])
