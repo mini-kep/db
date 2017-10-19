@@ -1,103 +1,37 @@
-"""FOR SCRAPPING - TO BE DELETED."""
-
-
 import json
 import os
-from random import randint
 import unittest
-
-import flask
-
-import pytest
-import datetime
-from db import db
+from random import randint
+from db import create_app, db
 from db.api.views import api as api_module
 from db.api.utils import to_date
-import flask_sqlalchemy as fsa
+
 
 # create test app
-# app = create_app('config.TestingConfig')
-# app.register_blueprint(api_module)
-
-
-def app():
-    app = flask.Flask(__name__)
-    app.testing = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.register_blueprint(api_module)
-    return app
-
-def make_db(app):
-    return fsa.SQLAlchemy(app)
-
-
-@pytest.fixture
-def Todo(db):
-    class Todo(db.Model):
-        __tablename__ = 'todos'
-        id = db.Column('todo_id', db.Integer, primary_key=True)
-        title = db.Column(db.String(60))
-        text = db.Column(db.String)
-        done = db.Column(db.Boolean)
-        pub_date = db.Column(db.DateTime)
-
-        def __init__(self, title, text):
-            self.title = title
-            self.text = text
-            self.done = False
-            self.pub_date = datetime.utcnow()
-    db.create_all()
-    yield Todo
-    db.drop_all()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+app = create_app('config.TestingConfig')
+app.register_blueprint(api_module)
 
 
 class TestCase(unittest.TestCase):
-
     def _read_test_data(self):
         tests_folder = os.path.abspath(os.path.dirname(__file__))
-        with open(os.path.join(tests_folder,'test_data.json')) as data_file:
-            return data_file.read()    
-    
+        with open(os.path.join(tests_folder, 'test_data.json')) as data_file:
+            return data_file.read()
+
     def setUp(self):
         db.create_all(app=app)
-        self.app = app.test_client()        
+        self.app = app.test_client()
 
     def tearDown(self):
         db.session.remove()
         db.drop_all(app=app)
 
-class Test_API_Incoming(TestCase):
 
-    def test_auth_forbidden(self):
-        response = self.app.post('/api/incoming')
-        assert response.status_code == 403
-
-    def test_upload_data(self):
-        data = self._read_test_data()
-        response = self.app.post('/api/incoming',
-                                 data=data,
-                                 headers=dict(API_TOKEN=app.config['API_TOKEN']))
-        assert response.status_code == 200
+#TODO: name='INVESTMENT_rog', freq='m'  change to 'CPI_NONFOOD_rog'
 
 class Test_API_Datapoints(TestCase):
-    
     def _prepare_database(self):
-        # FIXME: maybe this should not be done by posting to database, 
+        # FIXME: maybe this should not be done by posting to database,
         #        but rather connecting an existing databse
         data = self._read_test_data()
         self.app.post('/api/incoming',
@@ -107,38 +41,10 @@ class Test_API_Datapoints(TestCase):
     def setUp(self):
         # this is from parent class
         db.create_all(app=app)
-        self.app = app.test_client()  
+        self.app = app.test_client()
         self._prepare_database()
-    
-    # FIXME: test name not inofrmative with respect what the test
-    def test_json_output_format(self):
-        # ERROR: must check contents of test_data.json and regenerate it as 
-        #        this variable is invalid in actual dataset since 2016?
-        #        need to use more generic example
-        #        name='INVESTMENT_rog', freq='m'           
-        params = dict(name='INVESTMENT_rog', freq='m', format='json')
-        response = self.app.get('/api/datapoints', query_string=params)        
-        assert response.status_code == 200
-     
-    # FIXME: very convoluted test, need simplfy, rename with respect to what is tested and result expected
-    def test_json_output_format_part2(self):  
-        params = dict(name='INVESTMENT_rog', freq='m', format='json')
-        response = self.app.get('/api/datapoints', query_string=params)           
-        # FIXME: why not use response.json()?
-        response_body = json.loads(response.get_data().decode('utf-8'))
-        
-        # FIXME: this test has the benefit of fuller coverage of dataset, 
-        #        but htis is more of a integration test as opposed to unit test
-        #        we need fail-quick unit tests before integration tests
-        # Select data from test json file by same parameters
-        data = self._read_test_data()
-        expected_response = [row for row in json.loads(data) if row['name']=='INVESTMENT_rog' and row['freq']=='m']
-        # Sort by date
-        expected_response = sorted(expected_response, key=lambda item: to_date(item['date']))
-        # --------------------------------------------------------------------
-        assert response_body == expected_response
 
-    # FIXME: very nested test, need refactor     
+    # FIXME: very nested test, need refactor
     def test_csv_output_format(self):
         # Read test data
         data = self._read_test_data()
@@ -153,8 +59,22 @@ class Test_API_Datapoints(TestCase):
         random_data_to_check = f'{random_data_point["date"]},{random_data_point["value"]}'
         # Check if random datapoint exists in csv
         assert random_data_to_check in response_body.split('\n')
-        
-    # TODO: we do not have tests for getting datapoints yet
+
+        # TODO: we do not have tests for getting datapoints yet
+
+
+class Test_API_Incoming(TestCase):
+    def test_auth_forbidden(self):
+        response = self.app.post('/api/incoming')
+        assert response.status_code == 403
+
+    def test_upload_data(self):
+        data = self._read_test_data()
+        response = self.app.post('/api/incoming',
+                                 data=data,
+                                 headers=dict(API_TOKEN=app.config['API_TOKEN']))
+        assert response.status_code == 200
+
 
 # Test /api/names/<freq>
 class Test_API_Names(TestCase):
@@ -209,6 +129,7 @@ class Test_API_Names(TestCase):
         assert response_body == expected_response_body
 
 
+# Test /api/info?name=<name>&freq=<freq>
 class Test_API_Info(TestCase):
     def _prepare_database(self):
         # FIXME: maybe this should not be done by posting to database,
@@ -256,7 +177,11 @@ class Test_API_Errors(TestCase):
         self.app = app.test_client()
         self._prepare_database()
 
-    def test_freq_doesnt_exist_error(self):
+    def empty_params(self):
+        response = self.app.get('/api/datapoints')
+        assert response.status_code == 400
+
+    def test_freq_doesnt_exist(self):
         params = dict(name='INVESTMENT_rog', freq='z')
         response = self.app.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
@@ -266,12 +191,12 @@ class Test_API_Errors(TestCase):
         response = self.app.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
 
-    def test_start_date_in_future_error(self):
+    def test_start_date_in_future(self):
         params = dict(name='INVESTMENT_rog', freq='q', start_date='2099-01-01')
         response = self.app.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
 
-    def test_start_date_more_than_end_date_error(self):
+    def test_start_date_more_than_end_date(self):
         params = dict(name='INVESTMENT_rog', freq='q', start_date='2010-01-01', end_date='2000-01-01')
         response = self.app.get('/api/datapoints', query_string=params)
         assert response.status_code == 400

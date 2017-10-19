@@ -26,11 +26,6 @@ def read_test_data(filename = 'test_data_2016H2.json'):
     with open(path) as file:
         return json.load(file)
 
-def subset_test_data_(name, freq):
-    data = read_test_data()
-    return [d for d in data if d['name'] == name and d['freq'] == freq]  
-    
-
 # db/__init__.py --------------------------------------------------------------
 #
 # db = SQLAlchemy()
@@ -56,27 +51,25 @@ def make_app():
 
 
 class TestCaseBase(unittest.TestCase):
-    def _prepare_db(self):
+    def prepare_db(self):
         data = read_test_data()
         for datapoint in data:
             datapoint['date'] = utils.to_date(datapoint['date'])
         fsa_db.session.bulk_insert_mappings(Datapoint, data)
         
-    def _prepare_app(self):    
+    def prepare_app(self):    
         self.app = make_app()               
         self.app_context = self.app.app_context()
         self.app_context.push()
+        self.client = self.app.test_client()
         fsa_db.init_app(app=self.app)
         fsa_db.create_all()   
         
-    def _mount_blueprint(self):
+    def mount_blueprint(self):
         self.app.register_blueprint(api_module)
-
-    def _start_client(self):
-        self.client = self.app.test_client()
         
     def setUp(self):   
-        self._prepare_app()
+        self.prepare_app()
         
     def tearDown(self):
         fsa_db.session.remove()
@@ -89,10 +82,9 @@ class TestCaseBase(unittest.TestCase):
 class TestViewsDatapoints(TestCaseBase): 
     
     def setUp(self):   
-        self._prepare_app()
-        self._mount_blueprint()
-        self._prepare_db()
-        self._start_client()
+        self.prepare_app()
+        self.prepare_db()
+        self.mount_blueprint()
         
     def query_on_name_and_freq(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m', format='json')
@@ -102,30 +94,18 @@ class TestViewsDatapoints(TestCaseBase):
         response = self.query_on_name_and_freq()
         assert response.status_code == 200
 
-    def test_get_on_name_and_freq_returns_list_of_dicts_CPI_rog(self):
+    def test_get_on_name_and_freq_returns_list_of_dicts(self):
         response = self.query_on_name_and_freq()
         data = json.loads(response.get_data().decode('utf-8'))
         assert data[0] == {'date': '2016-06-30',
                            'freq': 'm',
                            'name': 'CPI_NONFOOD_rog',
                            'value': 100.5}
-        
-    # NOT TODO: may be parametrised    
-    def test_test_get_on_name_and_freq_returns_list_of_dicts(self):
-        response= self.query_on_name_and_freq()
-        data = json.loads(response.get_data().decode('utf-8'))
-        expected_data = subset_test_data_('CPI_NONFOOD_rog', 'm')
-        # FIXME: order seems not guaranteed
-        assert data == expected_data
-
-# TODO: carefully bring tests from test_views_old.py
-
+ 
 
 if __name__ == '__main__':
-    unittest.main(module='test_views')
+    unittest.main(module='test_basic')
     z = read_test_data()
     t = TestViewsDatapoints()
     t.setUp()
     response = t.query_on_name_and_freq()
-    data = json.loads(response.get_data().decode('utf-8'))
-    a = subset_test_data_('CPI_NONFOOD_rog', 'm')
