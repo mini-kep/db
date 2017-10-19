@@ -123,6 +123,7 @@ class DatapointParameters:
 
 
 def get_first_and_last_date(freq, name):
+    # TODO: refactor this
     # Extract first and last dates from datapoints with given freq, names
     start_date, end_date = queries.get_first_and_last_datapoint_date(freq, name)
     start_date_str = datetime.strftime(start_date.date, "%Y-%m-%d")
