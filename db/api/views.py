@@ -54,19 +54,9 @@ def upload_data():
     return jsonify({})
 
 
-# TODO: move to queries.py
-def possible_names_values(freq):
-    query = Datapoint.query
-    if freq != 'all':
-        query = query.filter_by(freq=freq)
-    return query.group_by(Datapoint.name).\
-                 order_by(Datapoint.name).\
-                 values(Datapoint.name)
-
-
 @api.route('/names/<freq>', methods=['GET'])
 def get_possible_names(freq):
-    possible_names = possible_names_values(freq)
+    possible_names = queries.possible_names_values(freq)
     return jsonify([row.name for row in possible_names])
 
 
