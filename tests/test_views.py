@@ -145,49 +145,61 @@ class Test_API_Datapoints(TestCaseQuery):
 # как будет понятнее.
 # Test /api/names/<freq>
 class Test_API_Names(TestCaseQuery):
-    def test_on_all_reponse_code_ok(self):
-        response = self.client.get('/api/names/all')
+    def query_names_for_freq(self, freq):
+        return self.client.get(f'/api/names/{freq}')
+
+    def query_random_freq_from_test_data(self):
+        data = read_test_data()
+        return data[randint(0, len(data))].get('freq')
+
+    def test_get_all_names_response_code_200(self):
+        response = self.query_names_for_freq(freq='all')
         assert response.status_code == 200
-        
-    def test_on_all_returns_expected_sorted_list(self):    
-        # call 
-        response = self.client.get('/api/names/all')
+
+    def test_get_all_names_returns_sorted_list_of_all_names(self):
+        # call
+        response = self.query_names_for_freq(freq='all')
         result = json.loads(response.get_data().decode('utf-8'))
-        # expected result 
+        # expected result
         names = set([x['name'] for x in read_test_data()])
         expected_result = sorted(list(names))
-        # check 
+        # check
         assert result == expected_result
 
-    def test_getting_names_for_random_freq(self):
-        # Read test data
-        data = read_test_data()
-        # Get random freq from test data
-        random_freq = data[randint(0, len(data))].get('freq')
-        # Send request
-        response = self.client.get(f'/api/names/{random_freq}')
-        # Test response code is ok
+    def test_get_random_freq_response_code_200(self):
+        random_freq = self.query_random_freq_from_test_data()
+        response = self.query_names_for_freq(freq=random_freq)
         assert response.status_code == 200
-        # Starting to validate response body
-        expected_response_body = []
-        for row in data:
-            if row['freq'] == random_freq and row['name'] not in expected_response_body:
-                expected_response_body.append(row['name'])
-        # Sort expected response body
-        expected_response_body = sorted(expected_response_body)
-        # Compare response body and expected response body
-        response_body = json.loads(response.get_data().decode('utf-8'))
-        assert response_body == expected_response_body
+
+    def test_get_names_on_random_freq_returns_sorted_list_of_names_for_given_random_freq(self):
+        random_freq = self.query_random_freq_from_test_data()
+        response = self.query_names_for_freq(freq=random_freq)
+        result = json.loads(response.get_data().decode('utf-8'))
+        # expected result
+        expected_result = []
+        for row in read_test_data():
+            if row['freq'] == random_freq and row['name'] not in expected_result:
+                expected_result.append(row['name'])
+        expected_result = sorted(expected_result)
+        # check
+        assert result == expected_result
 
 
 # Test /api/info?name=<name>&freq=<freq>
 class Test_API_Info(TestCaseQuery):
 
-    def test_getting_info_start_date_end_date(self):
+    def query_get_start_and_end_date(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m')
-        response = self.client.get('/api/info', query_string=params)
-        # Test response code is ok
+        return self.client.get('/api/info', query_string=params)
+
+    def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_response_code_200(self):
+        response = self.query_get_start_and_end_date()
+        # check
         assert response.status_code == 200
+
+    def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_dict_with_such_dates(self):
+        response = self.query_get_start_and_end_date()
+        result = json.loads(response.get_data().decode('utf-8'))
         # Select all dates from test json file by same parameters
         data = read_test_data()
         dates_from_raw_json = [row['date'] for row in data if row['name'] == 'CPI_NONFOOD_rog' and row['freq'] == 'm']
@@ -195,9 +207,8 @@ class Test_API_Info(TestCaseQuery):
         sorted_dates_from_raw_json = sorted(dates_from_raw_json)
         expected_start_date = sorted_dates_from_raw_json[0]
         expected_end_date = sorted_dates_from_raw_json[-1]
-        # Compare response body and expected response body
-        response_body = json.loads(response.get_data().decode('utf-8'))
-        assert {'start_date':expected_start_date, 'end_date':expected_end_date} == response_body
+        # check
+        assert result == {'start_date':expected_start_date, 'end_date':expected_end_date}
 
 # NOT TODO: may be paarmetrised
 class Test_API_Errors(TestCaseBase):
@@ -207,26 +218,26 @@ class Test_API_Errors(TestCaseBase):
         self._prepare_db()
         self._start_client()
 
-    def test_empty_params(self):
+    def test_datapoints_empty_params_returns_400(self):
         response = self.client.get('/api/datapoints')
         assert response.status_code == 400
 
-    def test_freq_doesnt_exist(self):
-        params = dict(name='CPI_NONFOOD_rog', freq='z')
+    def test_datapoints_wrong_freq_returns_400(self):
+        params = dict(name='CPI_NONFOOD_rog', freq='wrong_freq')
         response = self.client.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
 
-    def test_name_doesnt_exist_for_given_freq(self):
+    def test_datapoints_wrong_name_returns_400(self):
         params = dict(name='wrong_name', freq='q')
         response = self.client.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
 
-    def test_start_date_in_future(self):
+    def test_datapoints_start_date_in_future_returns_400(self):
         params = dict(name='CPI_NONFOOD_rog', freq='q', start_date='2099-01-01')
         response = self.client.get('/api/datapoints', query_string=params)
         assert response.status_code == 400
 
-    def test_start_date_after_end_date(self):
+    def test_datapoints_end_date_after_start_date_returns_400(self):
         params = dict(name='CPI_NONFOOD_rog', freq='q', start_date='2010-01-01', 
                       end_date='2000-01-01')
         response = self.client.get('/api/datapoints', query_string=params)
