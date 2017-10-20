@@ -29,8 +29,15 @@ def upload_data():
     try:
         data = json.loads(request.data)
         for datapoint in data:
-            datapoint['date'] = utils.to_date(datapoint['date'])
-        db.session.bulk_insert_mappings(Datapoint, data)
+            existing_datapoint = Datapoint.query.\
+                filter(Datapoint.freq==datapoint['freq']).\
+                filter(Datapoint.name==datapoint['name']).\
+                filter(Datapoint.date==datapoint['date']).\
+                first()
+            if existing_datapoint:
+                existing_datapoint.value = datapoint['value']
+            else:
+                db.session.add(Datapoint(**datapoint))
     except:
         return abort(400)
     db.session.commit()
