@@ -16,7 +16,7 @@ class Datapoint(db.Model):
     def __init__(self, name, freq, date, value):
         self.name = name
         self.freq = freq
-        self.date = datetime.strptime(date, "%Y-%m-%d").date()
+        self.date = date
         # actually, utils.to_date should be called
         # but if we import utils, we get import recursion
         self.value = value
