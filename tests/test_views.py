@@ -106,7 +106,7 @@ class Test_API_Incoming(TestCaseBase):
                                     headers=_token_dict)
         assert response.status_code == 200
 
-    def test_upsert_data_successfull(self):
+    def test_update_data_successfull(self):
         self._prepare_db()
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
         _data = json.dumps([{"date": "2016-06-30", "freq": "m", "name": "CPI_FOOD_rog", "value": 999.9}])
