@@ -29,7 +29,7 @@ def read_test_data(filename = 'test_data_2016H2.json'):
     with open(path) as file:
         return json.load(file)
 
-def subset_test_data_(name, freq):
+def subset_test_data(name, freq):
     data = read_test_data()
     is_var = lambda d: d['name'] == name and d['freq'] == freq
     sorter_func = lambda item: utils.to_date(item['date'])
@@ -92,25 +92,24 @@ class Test_API_Incoming(TestCaseBase):
         self._mount_blueprint()
         self._start_client()
 
+    def get_response(self, data, headers):
+        return self.client.post('/api/incoming', data=data, headers=headers)        
+
     def test_on_no_auth_token_returns_forbidden_status_code_403(self):
         response = self.client.post('/api/incoming')
         assert response.status_code == 403
 
-    def test_upload_data_successful(self):
+    def test_on_new_data_upload_successfull_with_code_200(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
         _data = json.dumps(read_test_data())
-        response = self.client.post('/api/incoming',
-                                    data=_data,
-                                    headers=_token_dict)
+        response = self.get_response(data=_data, headers=_token_dict)
         assert response.status_code == 200
 
-    def test_update_data_successfull(self):
+    def test_on_existing_data_upload_successfull_with_code_200(self):
         self._prepare_db()
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        _data = json.dumps([{"date": "2016-06-30", "freq": "m", "name": "CPI_FOOD_rog", "value": 999.9}])
-        response = self.client.post('/api/incoming',
-                                    data=_data,
-                                    headers=_token_dict)
+        _data= json.dumps(read_test_data()[0:10])
+        response = self.get_response(data=_data, headers=_token_dict)
         assert response.status_code == 200
 
 
@@ -144,7 +143,7 @@ class Test_API_Datapoints(TestCaseQuery):
     def test_test_get_on_name_and_freq_returns_list_of_dicts(self):
         response= self.query_on_name_and_freq()
         data = json.loads(response.get_data().decode('utf-8'))
-        expected_data = subset_test_data_('CPI_NONFOOD_rog', 'm')
+        expected_data = subset_test_data('CPI_NONFOOD_rog', 'm')
         assert data == expected_data
 
 # COMMENT: -----------------------------------------------------------------
@@ -182,6 +181,7 @@ class Test_API_Names(TestCaseQuery):
         response = self.query_names_for_freq(freq=random_freq)
         assert response.status_code == 200
 
+    # FIXME: ------------------------------------------------------------------
     def test_get_names_on_random_freq_returns_sorted_list_of_names_for_given_random_freq(self):
         random_freq = self.query_random_freq_from_test_data()
         response = self.query_names_for_freq(freq=random_freq)
@@ -194,32 +194,34 @@ class Test_API_Names(TestCaseQuery):
         expected_result = sorted(expected_result)
         # check
         assert result == expected_result
-
+    # ------------------------------------------------------------------------
 
 class Test_API_Info(TestCaseQuery):
     """API under test: /api/info?name=<name>&freq=<freq>"""
 
-    def query_get_start_and_end_date(self):
-        params = dict(name='CPI_NONFOOD_rog', freq='m')
+    def query_get_start_and_end_date(self, _name='CPI_NONFOOD_rog', _freq='m'):
+        params = dict(name=_name, freq=_freq)
         return self.client.get('/api/info', query_string=params)
+    
+    def get_dates(self, _name='CPI_NONFOOD_rog', _freq='m'):
+        data = subset_test_data('CPI_NONFOOD_rog', 'm')        
+        return sorted([row['date'] for row in data])
 
     def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_response_code_200(self):
         response = self.query_get_start_and_end_date()
         # check
         assert response.status_code == 200
 
-    def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_dict_with_such_dates(self):
-        response = self.query_get_start_and_end_date()
+    # NOT TODO: may be parametrised
+    def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_proper_dates(self):
+        # call
+        response = self.query_get_start_and_end_date('CPI_NONFOOD_rog', 'm')
         result = json.loads(response.get_data().decode('utf-8'))
-        # Select all dates from test json file by same parameters
-        data = read_test_data()
-        dates_from_raw_json = [row['date'] for row in data if row['name'] == 'CPI_NONFOOD_rog' and row['freq'] == 'm']
-        # Sort these dates
-        sorted_dates_from_raw_json = sorted(dates_from_raw_json)
-        expected_start_date = sorted_dates_from_raw_json[0]
-        expected_end_date = sorted_dates_from_raw_json[-1]
+        # expected
+        dates = self.get_dates('CPI_NONFOOD_rog', 'm')        
         # check
-        assert result == {'start_date':expected_start_date, 'end_date':expected_end_date}
+        assert result['start_date'] == dates[0]
+        assert result['end_date'] == dates[-1]
 
 # NOT TODO: may be paarmetrised
 class Test_API_Errors(TestCaseBase):
@@ -293,4 +295,4 @@ if __name__ == '__main__':
     t.setUp()
     response = t.query_on_name_and_freq()
     data = json.loads(response.get_data().decode('utf-8'))
-    a = subset_test_data_('CPI_NONFOOD_rog', 'm')
+    a = subset_test_data('CPI_NONFOOD_rog', 'm')
