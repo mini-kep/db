@@ -143,7 +143,7 @@ class DatapointParameters:
             return True
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     from db import create_app
     from db.api.views import api 
 
