@@ -31,11 +31,9 @@ def read_test_data(filename = 'test_data_2016H2.json'):
 
 def subset_test_data_(name, freq):
     data = read_test_data()
-    # Добавил сортировку
-    filtered_data = [d for d in data if d['name'] == name and d['freq'] == freq]
+    is_var = lambda d: d['name'] == name and d['freq'] == freq
     sorter_func = lambda item: utils.to_date(item['date'])
-    sorted_data = sorted(filtered_data, key=sorter_func)
-    return sorted_data
+    return sorted(filter(is_var, data), key=sorter_func)
     
 def make_app():
     # _app() returns Flask(__name__) with __name__ as db/__init__.py'
@@ -149,13 +147,15 @@ class Test_API_Datapoints(TestCaseQuery):
         expected_data = subset_test_data_('CPI_NONFOOD_rog', 'm')
         assert data == expected_data
 
-
+# COMMENT: -----------------------------------------------------------------
 # возможно потребуются дополнительные функции для Test_API_Names для валидации
 # тела ответа,
 # сейчас манипуляции с данными идут в теле теста, тут уже лучше вам сделать, 
 # как будет понятнее.
-# Test /api/names/<freq>
+# -------------------------------------------------------------------------
+
 class Test_API_Names(TestCaseQuery):
+    """Endpoint under test: /api/names/<freq>"""
     def query_names_for_freq(self, freq):
         return self.client.get(f'/api/names/{freq}')
 
@@ -196,8 +196,8 @@ class Test_API_Names(TestCaseQuery):
         assert result == expected_result
 
 
-# Test /api/info?name=<name>&freq=<freq>
 class Test_API_Info(TestCaseQuery):
+    """API under test: /api/info?name=<name>&freq=<freq>"""
 
     def query_get_start_and_end_date(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m')
@@ -289,7 +289,7 @@ class TestGetResponseDatapoints(TestCaseBase):
 if __name__ == '__main__':
     unittest.main(module='test_views')
     z = read_test_data()
-    t = TestViewsDatapoints()
+    t = Test_API_Datapoints()
     t.setUp()
     response = t.query_on_name_and_freq()
     data = json.loads(response.get_data().decode('utf-8'))
