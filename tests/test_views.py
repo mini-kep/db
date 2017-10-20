@@ -94,8 +94,7 @@ class Test_API_Incoming(TestCaseBase):
         self._mount_blueprint()
         self._start_client()
 
-    #FIXME: test name should tell what is happening, why it fails
-    def test_on_no_auth_token_returns_forbidden_status_code(self):
+    def test_on_no_auth_token_returns_forbidden_status_code_403(self):
         response = self.client.post('/api/incoming')
         assert response.status_code == 403
 

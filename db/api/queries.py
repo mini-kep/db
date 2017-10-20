@@ -1,4 +1,3 @@
-import datetime
 from db.api.models import Datapoint
 
 def select_datapoints(freq: str, name: str, start_date, end_date):
@@ -15,6 +14,7 @@ def select_unique_frequencies():
                            .values(Datapoint.freq)
     return [row.freq for row in query]
 
+# FIXME: is this the same function? ---------------
 
 def possible_names_values(freq):
     query = Datapoint.query
@@ -30,7 +30,10 @@ def datapoint_possible_names(freq):
     return Datapoint.query.\
         filter_by(freq=freq).\
         group_by(Datapoint.name).\
-        values(Datapoint.name)        
+        values(Datapoint.name)    
+        
+# ---------------        
+        
 
 def get_boundary_date(freq, name, direction):
     sorter = dict(start=Datapoint.date,
