@@ -1,3 +1,6 @@
 # https://docs.codecov.io/v4.3.6/docs/ignoring-paths
 ignore:
   - "test_*.py"       # wildcards accepted
+  - run.py
+  - db_init.py
+  - config.py
