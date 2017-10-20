@@ -118,14 +118,13 @@ class DatapointParameters:
     
     @staticmethod
     def validate_name_exist_for_given_freq(freq, name):
-        possible_names_query = queries.datapoint_possible_names(freq)
-        possible_names_values = [row.name for row in possible_names_query]
-        if name in possible_names_values:
+        possible_names = queries.possible_names_values(freq)
+        if name in possible_names:
             return True
         else:
             msg = f'No such name <{name}> for <{freq}> frequency.'
             raise CustomError400(message=msg,
-                                 payload={"allowed": possible_names_values})
+                                 payload={"allowed": possible_names})
     
     @staticmethod
     def validate_start_is_not_in_future(start_date):

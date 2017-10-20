@@ -14,7 +14,6 @@ def select_unique_frequencies():
                            .values(Datapoint.freq)
     return [row.freq for row in query]
 
-# FIXME: is this the same function? ---------------
 
 def possible_names_values(freq):
     query = Datapoint.query
@@ -25,15 +24,6 @@ def possible_names_values(freq):
                   values(Datapoint.name)
     return [row.name for row in query] 
 
-
-def datapoint_possible_names(freq):
-    return Datapoint.query.\
-        filter_by(freq=freq).\
-        group_by(Datapoint.name).\
-        values(Datapoint.name)    
-        
-# ---------------        
-        
 
 def get_boundary_date(freq, name, direction):
     sorter = dict(start=Datapoint.date,
