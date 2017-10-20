@@ -14,6 +14,7 @@ def to_date(date_str: str):
         raise CustomError400(f'Invalid date parameter {date_str}')
 
 def date_as_str(dt):
+    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
     return datetime.strftime(dt.date, "%Y-%m-%d")
 
 def yield_csv_row(dicts):
@@ -39,6 +40,7 @@ def yield_csv_row(dicts):
 
 
 def to_csv(dicts):
+    """Wrapper for yield_csv_row()"""
     if dicts:
         rows = list(yield_csv_row(dicts))
         return '\n'.join(rows)
@@ -47,7 +49,7 @@ def to_csv(dicts):
 
 
 class DatapointParameters:
-    
+    """Parameter handler for api\datapoints endpoint."""    
     def __init__(self, args):
         self.args = args
         self.name = self.get_name() 
@@ -88,17 +90,18 @@ class DatapointParameters:
             dt = to_date(date_str)
         return dt
     
+    def _get_boundary(self, direction):
+        query = queries.get_boundary_date(self.freq, self.name, direction)
+        return date_as_str(query)       
+    
     def get_min_date(self):
-        query = queries.get_boundary_date(self.freq, self.name, 
-                                          direction='start')
-        return date_as_str(query) 
+        return self._get_boundary(self, direction='start')
 
     def get_max_date(self):
-        query = queries.get_boundary_date(self.freq, self.name, 
-                                          direction='end')
-        return date_as_str(query) 
-
+        return self._get_boundary(self, direction='end')
+    
     def get(self):
+        """Return query parameters as dictionary."""
         return dict(name=self.name,
                     freq=self.freq,
                     start_date=self.get_start(),
