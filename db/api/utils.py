@@ -95,10 +95,10 @@ class DatapointParameters:
         return date_as_str(query)       
     
     def get_min_date(self):
-        return self._get_boundary(self, direction='start')
+        return self._get_boundary(direction='start')
 
     def get_max_date(self):
-        return self._get_boundary(self, direction='end')
+        return self._get_boundary(direction='end')
     
     def get(self):
         """Return query parameters as dictionary."""
