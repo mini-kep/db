@@ -3,7 +3,8 @@ python:
   - "3.6"
 install:
   - pip install -r requirements.txt
-script:
-  - pytest
+  - pip install pytest-cov
+script: 
+  - python -m pytest --cov=./ --cov-config .coveragerc #apps #--doctest-modules
 after_success:
-  - codecov
+- codecov
