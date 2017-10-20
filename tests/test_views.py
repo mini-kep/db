@@ -21,7 +21,7 @@ from db.api import utils
 from db.api.models import Datapoint
 from db.api.views import api as api_module
 from db.api.errors import CustomError400
-from db.api.views import get_response_datapoints
+from db.api.views import get_datapoints_response
 
 def read_test_data(filename = 'test_data_2016H2.json'):
     tests_folder = os.path.abspath(os.path.dirname(__file__))
@@ -263,20 +263,20 @@ class TestGetResponseDatapoints(TestCaseBase):
 
     def test_json_serialising_is_valid(self):
         data = self._make_sample_datapoints_list()
-        response = get_response_datapoints(data, 'json')
+        response = get_datapoints_response(data, 'json')
         parsed_json = json.loads(response.data)
         self.assertEqual(self.data_dicts, parsed_json)
 
     def test_csv_serialising_is_valid(self):
         data = self._make_sample_datapoints_list()
-        response = get_response_datapoints(data, 'csv')
+        response = get_datapoints_response(data, 'csv')
         csv_string = str(response.data, 'utf-8')
         self.assertEqual(',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', csv_string)
 
     def test_invalid_output_format_should_fail(self):
         data = self._make_sample_datapoints_list()
         with self.assertRaises(CustomError400):
-            get_response_datapoints(data, 'html')
+            get_datapoints_response(data, 'html')
 
 if __name__ == '__main__':
     unittest.main(module='test_views')

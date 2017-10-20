@@ -115,10 +115,8 @@ class DatapointParameters:
     
     @staticmethod
     def validate_name_exist_for_given_freq(freq, name):
-        possible_names_values = queries.datapoint_possible_names(freq)
-        # EP: redefining same variable is a bit questionable
-        # FIXME: mayb eworks without this line
-        # possible_names_values = [row.name for row in possible_names_values]
+        possible_names_query = queries.datapoint_possible_names(freq)
+        possible_names_values = [row.name for row in possible_names_query]
         if name in possible_names_values:
             return True
         else:
