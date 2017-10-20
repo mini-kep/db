@@ -25,4 +25,6 @@ class TestingConfig(object):
     API_TOKEN = 'test'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database_test.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # if set to true, then tests that involes 'jsonify' function fails
+    JSONIFY_PRETTYPRINT_REGULAR = False 
     PORT=5000

@@ -12,7 +12,15 @@ class Datapoint(db.Model):
     freq = db.Column(db.String, nullable=False)    
     date = db.Column(db.Date, nullable=False)
     value = db.Column(db.Float, nullable=False)
-    
+
+    def __init__(self, name, freq, date, value):
+        self.name = name
+        self.freq = freq
+        self.date = datetime.strptime(date, "%Y-%m-%d").date()
+        # actually, utils.to_date should be called
+        # but if we import utils, we get import recursion
+        self.value = value
+
     @property
     def serialized(self): # Add serialize method for jsonify
        return {

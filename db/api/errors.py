@@ -1,6 +1,7 @@
+# Custom exception implemented by Flask pattern 
+# http://flask.pocoo.org/docs/0.12/patterns/apierrors/
 
-# Custom exception implemented by Flask pattern http://flask.pocoo.org/docs/0.12/patterns/apierrors/
-class Custom_error_code_400(Exception):
+class CustomError400(Exception):
     status_code = 400
 
     def __init__(self, message, status_code=None, payload=None):

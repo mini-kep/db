@@ -1,4 +1,4 @@
-# EP: comments to help understand the flask project flow
+import json
 
 # ----------- db.__init__.py -----------
 # from flask import Flask
@@ -14,11 +14,26 @@ from db import db
 from db import create_app
 # EP: we need to import models here explicitly, otherwise the tables created will be empty
 from db.api import models
+from db.api.views import api 
+from db.api.utils import to_date
 
-# EP: this creates tables speciified in db.api.models
-# EP: the tables will be created in config.DevelopmentConfig.SQLALCHEMY_DATABASE_URI)
-db.create_all(app=create_app('config.ProductionConfig'))
+# EP: this creates tables specified in db.api.models
+# EP: the tables will be created in config.DevelopmentConfig.SQLALCHEMY_DATABASE_URI
 
+# create app
+app = create_app('config.DevelopmentConfig') 
+app.register_blueprint(api)
+# create tables for models
+db.create_all(app=app)
 
-# EP (question): the  prescription is to run db_init.py before the first run of each configuration (Development, Production)? 
-# EK (answer): yes, that's right
+# populate database
+from pathlib import Path
+p = Path(__file__).parent / 'tests' / 'test_data_2016H2.json'
+
+data = json.loads(p.read_text())
+for datapoint in data:
+    datapoint['date'] = to_date(datapoint['date'])
+
+with app.app_context():
+    db.session.bulk_insert_mappings(models.Datapoint, data)
+    db.session.commit()
