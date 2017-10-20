@@ -46,7 +46,6 @@ def upload_data():
     try:
         data = json.loads(request.data)
         for datapoint in data:
-            #datapoint['date'] = utils.to_date(datapoint['date'])
             existing_datapoint = Datapoint.query.\
                 filter(Datapoint.freq==datapoint['freq']).\
                 filter(Datapoint.name==datapoint['name']).\
@@ -57,8 +56,6 @@ def upload_data():
             else:
                 db.session.add(Datapoint(**datapoint))
     except:
-        import traceback
-        print(traceback.print_exc())
         return abort(400)
     db.session.commit()
     return jsonify({})
