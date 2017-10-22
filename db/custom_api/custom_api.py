@@ -216,7 +216,7 @@ class CustomGET:
             datapoint_params = DatapointParameters(self.params).get()
             return select_datapoints(**datapoint_params)
         except Exception as e:
-            raise InvalidUsage(e.message)
+            raise InvalidUsage(f"Can't get datapoints with params: {self.params}")
 
     def get_csv(self):
         datapoints = self.get_datapoints()
