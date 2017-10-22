@@ -57,8 +57,10 @@ More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomme
 
 ## Custom api syntax
 Provides user-friendly http get syntax.
-Full specifications can be found here:
+Breif overview:
 <https://mini-kep.github.io/documentation/custom_api/>
+Latest documentation:
+<https://github.com/mini-kep/db/blob/master/db/custom_api/custom_api.py#L1> (in the docstring)
 #### Example calls
 - [/ru/series/CPI_ALCOHOL/m/2016/rog](https://minikep-db.herokuapp.com/ru/series/CPI_ALCOHOL/m/2016/rog)
 - [/ru/series/USDRUR_CB/d/2015/2016](https://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2015/2016)
