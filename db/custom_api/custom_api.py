@@ -46,7 +46,6 @@ Decomposition procedure involves:
 """
 
 from datetime import date
-import pandas as pd
 import requests
 from db.api.queries import select_datapoints
 from db.api.utils import DatapointParameters
