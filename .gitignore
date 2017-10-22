@@ -4,3 +4,4 @@ staticfiles
 .env
 run.py
 db_init.py
+database_test.db
