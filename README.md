@@ -53,3 +53,13 @@ For example, link below will provide quarterly year-on-year GDP growth rates as 
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
 More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
+
+
+## Custom api syntax
+Provides user-friendly http get syntax.
+Full specifications can be found here:
+<https://mini-kep.github.io/documentation/custom_api/>
+#### Example calls
+- [/ru/series/CPI_ALCOHOL/m/2016/rog](https://minikep-db.herokuapp.com/ru/series/CPI_ALCOHOL/m/2016/rog)
+- [/ru/series/USDRUR_CB/d/2015/2016](https://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2015/2016)
+- [/oil/series/BRENT/d/2007](https://minikep-db.herokuapp.com/oil/series/BRENT/d/2007)
