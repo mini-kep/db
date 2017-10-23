@@ -1,4 +1,5 @@
 from db.api.models import Datapoint
+from db import db
 
 def select_datapoints(freq: str, name: str, start_date, end_date):
     """Return dictionaries with datapoints, corresposding to *freq*, *name*
@@ -52,3 +53,21 @@ def get_boundary_date(freq, name, direction):
     return Datapoint.query.filter_by(freq=freq, name=name) \
                .order_by(sorter) \
                .first()
+
+
+def upsert(datapoint):
+    """Inserts *datapoint* into the DB if not present, updates its value otherwise.
+       Datapoint's unique constraint on ("name", "freq", "date") columns guarantees
+       there might be only one row found, therefore it is safe to retrieve a single
+       datapoint using .first()
+    """
+    existing_datapoint = Datapoint.query. \
+        filter(Datapoint.freq == datapoint['freq']). \
+        filter(Datapoint.name == datapoint['name']). \
+        filter(Datapoint.date == datapoint['date']). \
+        first()
+
+    if existing_datapoint:
+        existing_datapoint.value = datapoint['value']
+    else:
+        db.session.add(Datapoint(**datapoint))

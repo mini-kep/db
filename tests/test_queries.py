@@ -1,6 +1,6 @@
 import unittest
 from tests.test_basic import TestCaseBase
-from db.api.queries import select_datapoints
+from db.api.queries import select_datapoints, upsert
 from datetime import date
 
 
@@ -30,6 +30,34 @@ class TestSelectDataPoints(TestCaseBase):
         )
         number_of_results = select_datapoints(**params).count()
         self.assertEqual(number_of_results, 0)
+
+
+class TestUpsertDatapoint(TestCaseBase):
+
+    def setUp(self):
+        super(TestUpsertDatapoint, self).setUp()
+        self.dp1_raw = dict(date="2016-04-21", freq='q', name="CPI_rog", value=123.4)
+        self.dp1_params = dict(freq=self.dp1_raw['freq'],
+                               name=self.dp1_raw['name'],
+                               start_date=self.dp1_raw['date'],
+                               end_date=self.dp1_raw['date'])
+
+    def test_before_upsert_datapoint_not_found(self):
+        datapoints_count = select_datapoints(**self.dp1_params).count()
+        self.assertEqual(datapoints_count, 0)
+
+    def test_after_upsert_datapoint_found(self):
+        upsert(self.dp1_raw)
+        datapoint = select_datapoints(**self.dp1_params).first()
+        self.assertEqual(datapoint.serialized, self.dp1_raw)
+
+    def test_upsert_updates_value_for_existing_row(self):
+        upsert(self.dp1_raw)
+        dp1_updated_value = self.dp1_raw['value'] + 4.56
+        dp1_raw_with_new_value = {k: v if k != "value" else dp1_updated_value for k, v in self.dp1_raw.items()}
+        upsert(dp1_raw_with_new_value)
+        datapoint = select_datapoints(**self.dp1_params).first()
+        self.assertEqual(datapoint.value, dp1_updated_value)
 
 
 if __name__ == '__main__':

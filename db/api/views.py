@@ -24,29 +24,17 @@ def upload_data():
     token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
     if token_to_check != current_app.config['API_TOKEN']:
         return abort(403)
-    # FIXME: refactor, maybe use finally + separate function to write to db
-    
+
     # upload data
     try:
         data = json.loads(request.data)
         for datapoint in data:
-            # FIXME: move upsert function to queries.py
-            existing_datapoint = Datapoint.query.\
-                filter(Datapoint.freq==datapoint['freq']).\
-                filter(Datapoint.name==datapoint['name']).\
-                filter(Datapoint.date==datapoint['date']).\
-                first()
-            if existing_datapoint:
-                existing_datapoint.value = datapoint['value']
-            else:
-                db.session.add(Datapoint(**datapoint))
-            # ----------------------------------------------------   
+            queries.upsert(datapoint)
+        db.session.commit()
+        return jsonify({})
     except:
+        db.session.rollback()
         return abort(400)
-    db.session.commit()
-    
-    # ------------------------------------ 
-    return jsonify({})
 
 
 @api.route('/datapoints', methods=['GET'])
