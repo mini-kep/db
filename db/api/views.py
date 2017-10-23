@@ -3,7 +3,6 @@ from flask import Blueprint, request, abort, jsonify, current_app, Response
 
 from db import db
 import db.api.utils as utils
-from db.api.models import Datapoint
 from db.api.errors import CustomError400
 import db.api.queries as queries
 
