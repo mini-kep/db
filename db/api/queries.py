@@ -56,7 +56,7 @@ def get_boundary_date(freq, name, direction):
 
 
 def upsert(datapoint):
-    """Inserts *datapoint* into the DB if not present, updates its value otherwise.
+    """Inserts *datapoint* dictionary into the DB if not present, updates its value otherwise.
        Datapoint's unique constraint on ("name", "freq", "date") columns guarantees
        there might be only one row found, therefore it is safe to retrieve a single
        datapoint using .first()
