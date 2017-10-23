@@ -1,6 +1,6 @@
 from db import create_app
 from db.api.views import api as api_module
-from db.api.custom_api_blueprint import custom_api_bp as custom_api_module
+from db.custom_api.custom_api_blueprint import custom_api_bp as custom_api_module
 
 
 if __name__ == '__main__':

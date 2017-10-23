@@ -47,6 +47,7 @@ Decomposition procedure involves:
 
 from datetime import date
 import requests
+from flask import Response
 from db.api.queries import select_datapoints
 from db.api.utils import DatapointParameters
 from db.api.views import get_datapoints_response
@@ -193,7 +194,7 @@ class CustomGET:
         datapoint_params = DatapointParameters(self.params).get()
         return select_datapoints(**datapoint_params)
 
-    def get_csv(self):
+    def get_csv_response(self):
         datapoints = self.get_datapoints()
         response = get_datapoints_response(datapoints, 'csv')
-        return response.data
+        return response

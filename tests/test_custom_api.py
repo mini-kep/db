@@ -99,16 +99,16 @@ class TestCustomGET(TestCaseBase):
 
     def test_get_csv_on_valid_params_fetches_data(self):
         getter = custom_api.CustomGET('ru', 'USDRUR_CB', 'd', '2016')
-        api_csv_str = str(getter.get_csv(), 'utf-8')
+        api_csv_str = str(getter.get_csv_response().data, 'utf-8')
         assert '2016-06-24,64.3212\n' in api_csv_str
 
-    def test_get_csv_on_bad_params_returns_empty_csv_string(self):
+    def test_get_csv_on_bad_params_should_fail(self):
         getter = custom_api.CustomGET(domain=None,
                                       varname='ZZZ',
                                       freq='d',
                                       inner_path='')
         with pytest.raises(CustomError400):
-            _ = getter.get_csv()
+            _ = getter.get_csv_response()
 
 
 if __name__ == '__main__':
