@@ -70,9 +70,6 @@ ALLOWED_FINALISERS = (
     'xlsx'   # resereved: return Excel file
 )
 
-# http, not https
-ENDPOINT = 'http://minikep-db.herokuapp.com/api/datapoints'
-
 
 def make_freq(freq: str):
     if freq not in ALLOWED_FREQUENCIES:
