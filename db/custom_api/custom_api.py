@@ -50,7 +50,7 @@ import requests
 from db.api.queries import select_datapoints
 from db.api.utils import DatapointParameters
 from db.api.views import get_datapoints_response
-
+from db.api.errors import CustomError400
 
 ALLOWED_FREQUENCIES = ('d', 'w', 'm', 'q', 'a')
 
@@ -73,26 +73,8 @@ ALLOWED_FINALISERS = (
 
 def make_freq(freq: str):
     if freq not in ALLOWED_FREQUENCIES:
-        raise InvalidUsage(f'Frequency <{freq}> is not valid')
+        raise CustomError400(f'Frequency <{freq}> is not valid')
     return freq
-
-
-class InvalidUsage(Exception):
-    """Shorter version of
-       <http://flask.pocoo.org/docs/0.12/patterns/apierrors/>.
-
-       Must also register a handler (see link above).
-    """
-    status_code = 400
-
-    def __init__(self, message, status_code=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-
-    def to_dict(self):
-        return dict(message=self.message)
 
 
 class TokenHelper:
@@ -154,7 +136,7 @@ class TokenHelper:
             self._pop(x)
             return x
         else:
-            raise InvalidUsage(values_found)
+            raise CustomError400(values_found)
 
 
 class InnerPath:
@@ -178,7 +160,7 @@ class InnerPath:
         self.dict['rate'] = helper.rate()
         self.dict['agg'] = helper.agg()
         if self.dict['rate'] and self.dict['agg']:
-            raise InvalidUsage("Cannot combine rate and aggregation.")
+            raise CustomError400("Cannot combine rate and aggregation.")
         # find unit name, if present
         if tokens:
             self.dict['unit'] = tokens[0]
@@ -208,131 +190,10 @@ class CustomGET:
                 self.params[key] = val
 
     def get_datapoints(self):
-        try:
-            datapoint_params = DatapointParameters(self.params).get()
-            return select_datapoints(**datapoint_params)
-        except Exception as e:
-            raise InvalidUsage(f"Can't get datapoints with params: {self.params}")
+        datapoint_params = DatapointParameters(self.params).get()
+        return select_datapoints(**datapoint_params)
 
     def get_csv(self):
         datapoints = self.get_datapoints()
         response = get_datapoints_response(datapoints, 'csv')
         return response.data
-
-
-# def call_db_api(params, fmt):
-#     params['format'] = fmt
-#     r = requests.get(endpoint, params=params)
-#     if r.status_code == 200:
-#         return r.text
-#     else:
-#         msg = f'Cannot read {params} from {endpoint}.'
-#         raise InvalidUsage(msg)
-
-# serialiser moved to db api
-
-
-if __name__ == "__main__":
-    import pytest
-    from pprint import pprint
-
-    def mimic_custom_api(path: str):
-        """Decode path like:
-
-           oil/series/BRENT/m/eop/2015/2017/csv
-    index    0      1     2 3   4    5 ....
-
-        """
-        tokens = [token.strip() for token in path.split('/') if token]
-        # mandatoy part - in actual code taken care by flask
-        ctx = dict(domain=tokens[0],
-                   varname=tokens[2],
-                   freq=tokens[3])
-        # optional part
-        ctx['inner_path'] = "/".join(tokens[4:])
-        return ctx
-
-    # valid inner urls
-    'oil/series/BRENT/m/eop/2015/2017/csv'  # will fail of db GET call
-    'ru/series/EXPORT_GOODS/m/bln_rub'  # will pass
-    'ru/series/USDRUR_CB/d/xlsx'  # will fail
-
-    # invalid urls
-    'oil/series/BRENT/q/rog/eop'
-    'oil/series/BRENT/z/'
-
-    test_pairs = {
-        'api/oil/series/BRENT/m/eop/2015/2017/csv': {
-            'domain': 'oil',
-            'varname': 'BRENT',
-            'unit': None,
-            'freq': 'm',
-            'rate': None,
-            'start_date': '2015-01-01',
-            'end_date': '2017-12-31',
-            'agg': 'eop',
-            'fin': 'csv'
-        },
-        'api/ru/series/EXPORT_GOODS/m/bln_rub': {
-            'domain': 'ru',
-            'varname': 'EXPORT_GOODS',
-            'unit': 'bln_rub',
-            'freq': 'm',
-            'rate': None,
-            'agg': None,
-            'fin': None,
-            #'start_date': None,
-            #'end_date': None
-        },
-
-        'api/ru/series/USDRUR_CB/d/xlsx': {
-            'domain': 'ru',
-            'varname': 'USDRUR_CB',
-            'freq': 'd',
-            'unit': None,
-            'rate': None,
-            'agg': None,
-            'fin': 'xlsx',
-            #'start_date': None,
-            #'end_date': None
-        }
-
-    }
-
-    # cut out calls to API if in interpreter
-    d = {'format': 'json',
-         'freq': 'd',
-         'name': 'USDRUR_CB'}
-    try:
-        r
-    except NameError:
-        r = requests.get(ENDPOINT, params=d)
-    assert r.status_code == 200
-    data = r.json()
-    control_datapoint_1 = {
-        'date': '1992-07-01',
-        'freq': 'd',
-        'name': 'USDRUR_CB',
-        'value': 0.1253}
-    control_datapoint_2 = {
-        'date': '2017-09-28',
-        'freq': 'd',
-        'name': 'USDRUR_CB',
-        'value': 58.0102}
-    assert control_datapoint_1 in data
-    assert control_datapoint_2 in data
-
-    # reference dataframe
-    df = pd.DataFrame(data)
-    df.date = df.date.apply(pd.to_datetime)
-    df = df.pivot(index='date', values='value', columns='name')
-    df.index.name = None
-    df = df.sort_index()
-
-    assert df.USDRUR_CB['1992-07-01'] == control_datapoint_1['value']
-    assert df.USDRUR_CB['2017-09-28'] == control_datapoint_2['value']
-
-    getter = CustomGET(domain=None,
-                       varname='ZZZ',
-                       freq='d',
-                       inner_path='')

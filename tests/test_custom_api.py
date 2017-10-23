@@ -1,5 +1,6 @@
 import pytest
 import db.custom_api.custom_api as custom_api
+from db.api.errors import CustomError400
 from tests.test_basic import TestCaseBase
 
 class Test_make_freq:
@@ -7,16 +8,16 @@ class Test_make_freq:
         assert custom_api.make_freq('q') == 'q'
 
     def test_make_freq_with_invalid_param_should_fail(self):
-        with pytest.raises(custom_api.InvalidUsage):
+        with pytest.raises(CustomError400):
             custom_api.make_freq('z')
 
     def test_make_freq_with_empty_string_param_should_fail(self):
-        with pytest.raises(custom_api.InvalidUsage):
+        with pytest.raises(CustomError400):
             custom_api.make_freq('')
 
 
-def test_invalid_usage_is_initable():
-    assert custom_api.InvalidUsage(message='text').to_dict() == \
+def test_custom_error_is_initable():
+    assert CustomError400(message='text').to_dict() == \
         dict(message='text')
 
 
@@ -86,12 +87,8 @@ class Test_InnerPath:
         }
 
     def test_constructor_on_both_rate_and_agg_fails(self):
-        with pytest.raises(custom_api.InvalidUsage):
+        with pytest.raises(CustomError400):
             custom_api.InnerPath('eop/rog')
-
-
-def test_uses_http_not_https():
-    assert custom_api.ENDPOINT.startswith('http://')
 
 
 class TestCustomGET(TestCaseBase):
@@ -110,7 +107,7 @@ class TestCustomGET(TestCaseBase):
                                       varname='ZZZ',
                                       freq='d',
                                       inner_path='')
-        with pytest.raises(custom_api.InvalidUsage):
+        with pytest.raises(CustomError400):
             _ = getter.get_csv()
 
 
