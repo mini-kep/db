@@ -35,28 +35,28 @@ class TestSelectDataPoints(TestCaseBase):
 class TestUpsertDatapoint(TestCaseBase):
 
     def setUp(self):
-        super(TestUpsertDatapoint, self).setUp()
-        self.dp1_raw = dict(date="2016-04-21", freq='q', name="CPI_rog", value=123.4)
-        self.dp1_params = dict(freq=self.dp1_raw['freq'],
-                               name=self.dp1_raw['name'],
-                               start_date=self.dp1_raw['date'],
-                               end_date=self.dp1_raw['date'])
+        super().setUp()
+        self.dp1_dict = dict(date="2016-04-21", freq='q', name="CPI_rog", value=123.4)
+        self.dp1_search_param = dict(freq=self.dp1_dict['freq'],
+                                     name=self.dp1_dict['name'],
+                                     start_date=self.dp1_dict['date'],
+                                     end_date=self.dp1_dict['date'])
 
     def test_before_upsert_datapoint_not_found(self):
-        datapoints_count = select_datapoints(**self.dp1_params).count()
+        datapoints_count = select_datapoints(**self.dp1_search_param).count()
         self.assertEqual(datapoints_count, 0)
 
     def test_after_upsert_datapoint_found(self):
-        upsert(self.dp1_raw)
-        datapoint = select_datapoints(**self.dp1_params).first()
-        self.assertEqual(datapoint.serialized, self.dp1_raw)
+        upsert(self.dp1_dict)
+        datapoint = select_datapoints(**self.dp1_search_param).first()
+        self.assertEqual(datapoint.serialized, self.dp1_dict)
 
     def test_upsert_updates_value_for_existing_row(self):
-        upsert(self.dp1_raw)
-        dp1_updated_value = self.dp1_raw['value'] + 4.56
-        dp1_raw_with_new_value = {k: v if k != "value" else dp1_updated_value for k, v in self.dp1_raw.items()}
-        upsert(dp1_raw_with_new_value)
-        datapoint = select_datapoints(**self.dp1_params).first()
+        upsert(self.dp1_dict)
+        dp1_updated_value = self.dp1_dict['value'] + 4.56
+        dp1_dict_with_new_value = {k: v if k != "value" else dp1_updated_value for k, v in self.dp1_dict.items()}
+        upsert(dp1_dict_with_new_value)
+        datapoint = select_datapoints(**self.dp1_search_param).first()
         self.assertEqual(datapoint.value, dp1_updated_value)
 
 
