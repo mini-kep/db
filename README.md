@@ -2,11 +2,12 @@
 [![Assertible status](https://assertible.com/apis/56e34b07-ae3a-4248-937e-fef69d8ec2f2/status?api_token=VkiQoHOdjWU3vGv2)](https://assertible.com/dashboard#/services/56e34b07-ae3a-4248-937e-fef69d8ec2f2/results)
 [![Coverage badge](https://codecov.io/gh/mini-kep/db/branch/master/graphs/badge.svg)](https://codecov.io/gh/mini-kep/db)
 
-## Quickstart
+# Quickstart
 
 At ```api/datapoints``` you can query macroeconomic database by indicator name, frequency and date range. 
 
-For example, link below will provide quarterly year-on-year GDP growth rates as csv file, readable by R/pandas:
+For example, [this link](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01) 
+will provide quarterly year-on-year GDP growth rates as csv file, readable by R/pandas:
 
 <https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01>
 
@@ -20,12 +21,17 @@ For example, link below will provide quarterly year-on-year GDP growth rates as 
 2017-06-30,102.5
 ```
 
+# Standard API 
 
-## Specification document
+Standard API is REST-like interface to upload/retrieve time-series data. 
+Brief initial specification for it is [here](https://mini-kep.github.io/documentation/database/),
+updates are documented below.
 
-- <https://mini-kep.github.io/documentation/database/>
+## ```datapoints``` POST method
 
-## GET calls 
+Upsert data from json, as described in [intial spec](https://mini-kep.github.io/documentation/database/#post).
+
+## GET methods 
 
 #### ```names```:
 - [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
@@ -52,19 +58,44 @@ For example, link below will provide quarterly year-on-year GDP growth rates as 
 - [api/info?name=BRENT&freq=d](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d)
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
+#### new methods
+
 More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
 
 
-## Custom api syntax
-Provides user-friendly http get syntax.
+# Custom API
 
-Breif overview:
-<https://mini-kep.github.io/documentation/custom_api/>
+Provides more user-friendly syntax for ```GET \api\datapoints```. 
 
-Latest documentation:
-<https://github.com/mini-kep/db/blob/master/db/custom_api/custom_api.py#L1> (in the docstring)
+Breif overview [here](https://mini-kep.github.io/documentation/custom_api/) and
+latest comments in [custom_api.py docstring](https://github.com/mini-kep/db/blob/master/db/custom_api/custom_api.py#L1)
 
 #### Example calls
+- basic calls:
+  - [/ru/series/GDP/a/yoy/1998/2017](http://mini-kep.herokuapp.com/ru/series/GDP/a/yoy/1998/2017)
+- units:
+  - [ru/series/CPI_rog/m/2000/2010)](http://mini-kep.herokuapp.com/ru/series/CPI_rog/m/2000/2010)
+  - [ru/series/CPI/m/rog/2000/2010](http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2000/2010)
+- other:
 - [/ru/series/CPI_ALCOHOL/m/2016/rog](https://minikep-db.herokuapp.com/ru/series/CPI_ALCOHOL/m/2016/rog)
-- [/ru/series/USDRUR_CB/d/2015/2016](https://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2015/2016)
-- [/oil/series/BRENT/d/2007](https://minikep-db.herokuapp.com/oil/series/BRENT/d/2007)
+- [/ru/series/USDRUR_CB/d/2000/2001](https://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2015/2016)
+- [/oil/series/BRENT/d/2017](https://minikep-db.herokuapp.com/oil/series/BRENT/d/2017)
+
+#### Sample user code
+
+```python
+import pandas as pd
+
+def read_ts(source_url):
+	"""Read pandas time series from *source_url*."""
+	return pd.read_csv(source_url, 
+                      converters={0: pd.to_datetime}, 
+                      index_col=0,
+                      squeeze=True)
+
+er = read_ts('http://mini-kep.herokuapp.com/ru/series/USDRUR_CB/d/2017/')
+
+assert er['2017-09-28'] == 58.01022
+
+```
+
