@@ -79,7 +79,7 @@ class DatapointParameters:
     def get_end(self):
         end_dt = self.get_dt('end_date')
         start_dt = self.get_start()
-        if start_dt:
+        if start_dt and end_dt:
             self.validate_end_date_after_start_date(start_dt, end_dt)
         return end_dt     
     
