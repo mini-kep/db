@@ -4,16 +4,21 @@ from db.api.errors import CustomError400
 from tests.test_basic import TestCaseBase
 
 class Test_make_freq:
+    
+    @staticmethod
+    def make_freq(freq): 
+        return custom_api.CustomGET.make_freq(freq) 
+    
     def test_make_freq_with_valid_param_is_ok(self):
-        assert custom_api.make_freq('q') == 'q'
+        assert self.make_freq('q') == 'q'
 
     def test_make_freq_with_invalid_param_should_fail(self):
         with pytest.raises(CustomError400):
-            custom_api.make_freq('z')
+            self.make_freq('z')
 
     def test_make_freq_with_empty_string_param_should_fail(self):
         with pytest.raises(CustomError400):
-            custom_api.make_freq('')
+            self.make_freq('')
 
 
 def test_custom_error_is_initable():
@@ -77,14 +82,10 @@ class Test_as_date(object):
 class Test_InnerPath:
     def test_get_dict_on_valid_inner_path(self):
         path = custom_api.InnerPath('eop/2015/2018/csv')
-        assert path.get_dict() == {
+        assert path.get_dates() == {
             'start_date': '2015-01-01',
-            'end_date': '2018-12-31',
-            'fin': 'csv',
-            'rate': None,
-            'agg': 'eop',
-            'unit': None
-        }
+            'end_date': '2018-12-31'}        
+        assert path.get_unit() == None        
 
     def test_constructor_on_both_rate_and_agg_fails(self):
         with pytest.raises(CustomError400):

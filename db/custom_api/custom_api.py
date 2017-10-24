@@ -46,8 +46,6 @@ Decomposition procedure involves:
 """
 
 from datetime import date
-import requests
-from flask import Response
 from db.api.queries import select_datapoints
 from db.api.utils import DatapointParameters
 from db.api.views import get_datapoints_response
@@ -65,17 +63,13 @@ ALLOWED_AGGREGATORS = (
     'avg'
 )
 ALLOWED_FINALISERS = (
-    'info',  # resereved: retrun json with variable and url description
+    #'info',  # resereved: retrun json with variable and url description
     'csv',   # to implement: return csv (default)
     'json',  # to implement: return list of dictionaries
-    'xlsx'   # resereved: return Excel file
+    #'xlsx'   # resereved: return Excel file
 )
 
 
-def make_freq(freq: str):
-    if freq not in ALLOWED_FREQUENCIES:
-        raise CustomError400(f'Frequency <{freq}> is not valid')
-    return freq
 
 
 class TokenHelper:
@@ -151,50 +145,61 @@ class InnerPath:
            Methods:
               get_dict() returns inner path tokens as dictionary
         """
-        # list of non-empty strings
+        # make list of non-empty strings
         tokens = [token.strip() for token in inner_path.split('/') if token]
         helper = TokenHelper(tokens)
-        # extract dates
-        self.dict = helper.get_dates_dict()
-        # finaliser and transforms
-        self.dict['fin'] = helper.fin()
-        self.dict['rate'] = helper.rate()
-        self.dict['agg'] = helper.agg()
-        if self.dict['rate'] and self.dict['agg']:
+        self.dates = helper.get_dates_dict() 
+        # finaliser 
+        self.fin = helper.fin()
+        # transforms
+        self.rate = helper.rate()
+        self.agg = helper.agg()
+        if self.rate and self.agg:
             raise CustomError400("Cannot combine rate and aggregation.")
         # find unit name, if present
         if tokens:
-            self.dict['unit'] = tokens[0]
+            self.unit = tokens[0]
         else:
-            self.dict['unit'] = self.dict['rate'] or None
-
-    def get_dict(self):
-        return self.dict
+            self.unit = self.rate or None
+    
+    def get_unit(self):
+        return self.unit
+        
+    def get_dates(self):
+        return self.dates
 
 
 class CustomGET:
-
+    """Return response with data in csv format based on 
+       mandatory parameters and inner path.
+    """
     @staticmethod
     def make_name(varname, unit=None):
         name = varname
         if unit:
             name = f'{name}_{unit}'
         return name
+    
+    @staticmethod
+    def make_freq(freq: str):
+        if freq not in ALLOWED_FREQUENCIES:
+            raise CustomError400(f'Frequency <{freq}> is not valid')
+        return freq
 
     def __init__(self, domain, varname, freq, inner_path):
-        ip = InnerPath(inner_path).get_dict()
-        self.params = dict(name=self.make_name(varname, ip['unit']),
-                           freq=make_freq(freq))
-        for key in ['start_date', 'end_date']:
-            val = ip.get(key)
-            if val:
-                self.params[key] = val
-
+        ip = InnerPath(inner_path)
+        # frequency
+        self.params = dict(freq = self.make_freq(freq))
+        # name
+        self.params['name'] = self.make_name(varname, ip.get_unit())
+        # dates
+        dates_dict = ip.get_dates()
+        self.params.update(dates_dict)
+        
     def get_datapoints(self):
         datapoint_params = DatapointParameters(self.params).get()
         return select_datapoints(**datapoint_params)
 
     def get_csv_response(self):
         datapoints = self.get_datapoints()
-        response = get_datapoints_response(datapoints, 'csv')
-        return response
+        return get_datapoints_response(datapoints, 'csv')
