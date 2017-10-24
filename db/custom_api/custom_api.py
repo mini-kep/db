@@ -33,16 +33,6 @@
             aggregation command (agg):
                 eop - end of period
                 avg - average
-
-    To integrate here:
-        <https://github.com/mini-kep/frontend-app/blob/master/apps/views/time_series.py>
-
-Decomposition procedure involves:
-
-    CustomGET class
-    InnerPath class
-    to_csv()
-
 """
 
 from datetime import date
