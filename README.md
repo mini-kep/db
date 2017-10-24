@@ -27,9 +27,11 @@ Standard API is REST-like interface to upload/retrieve time-series data.
 Brief initial specification for it is [here](https://mini-kep.github.io/documentation/database/),
 updates are documented below.
 
-## ```datapoints``` POST method
+## POST method
 
 Upsert data from json, as described in [intial spec](https://mini-kep.github.io/documentation/database/#post).
+
+Endpoint: ```api/datapoints``` 
 
 ## GET methods 
 
@@ -65,21 +67,66 @@ More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomme
 
 # Custom API
 
-Provides more user-friendly syntax for ```GET \api\datapoints```. 
+Provides more user-friendly syntax for ```GET \api\datapoints```, 
+see brief overview [here](https://mini-kep.github.io/documentation/custom_api/). 
 
-Breif overview [here](https://mini-kep.github.io/documentation/custom_api/) and
-latest comments in [custom_api.py docstring](https://github.com/mini-kep/db/blob/master/db/custom_api/custom_api.py#L1)
+
+#### URL syntax
+
+From [custom_api.py docstring](https://github.com/mini-kep/db/blob/master/db/custom_api/custom_api.py#L1-L36):
+
+```
+URL format (? marks optional parameter):
+
+    {domain}/series/{varname}/{freq}/{?suffix}/{?start}/{?end}/{?finaliser}
+    
+    
+	
+Tokens:
+	{domain} is reserved, future use: 'all', 'ru', 'oil', 'ru:bank', 'ru:77'
+	
+	{varname} is GDP, GOODS_EXPORT, BRENT (capital letters with underscores)
+	
+	{freq} is any of:
+	    a (annual)
+	    q (quarterly)
+	    m (monthly)
+	    w (weekly)
+	    d (daily)
+	
+	{?suffix} may be:
+	
+	unit of measurement (unit):
+		example: bln_rub, bln_usd, tkm
+	
+	rate of change for real variable (rate):
+		rog - change to previous period
+		yoy - change to year ago
+		base - base index
+	
+	aggregation command (agg):
+		eop - end of period
+		avg - average
+```		
+
 
 #### Example calls
+
 - basic calls:
-  - [/ru/series/GDP/a/yoy/1998/2017](http://mini-kep.herokuapp.com/ru/series/GDP/a/yoy/1998/2017)
-- units:
-  - [ru/series/CPI_rog/m/2000/2010)](http://mini-kep.herokuapp.com/ru/series/CPI_rog/m/2000/2010)
-  - [ru/series/CPI/m/rog/2000/2010](http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2000/2010)
-- other:
-- [/ru/series/CPI_ALCOHOL/m/2016/rog](https://minikep-db.herokuapp.com/ru/series/CPI_ALCOHOL/m/2016/rog)
-- [/ru/series/USDRUR_CB/d/2000/2001](https://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2015/2016)
-- [/oil/series/BRENT/d/2017](https://minikep-db.herokuapp.com/oil/series/BRENT/d/2017)
+    - [/ru/series/GDP/a/yoy/1998/2017](http://mini-kep.herokuapp.com/ru/series/GDP/a/yoy/1998/2017)
+    - [ru/series/EXPORT_GOODS/m/bln_rub](http://mini-kep.herokuapp.com/ru/series/EXPORT_GOODS/m/bln_rub)
+    
+- units positioning:
+    - [/ru/series/CPI_rog/m/2000/2010)](http://mini-kep.herokuapp.com/ru/series/CPI_rog/m/2000/2010)
+    - [/ru/series/CPI/m/rog/2000/2010](http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2000/2010)
+    - [/ru/series/CP/m/2016/rog](https://minikep-db.herokuapp.com/ru/series/CPI/m/2016/rog)
+
+- no unit:
+    - [/ru/series/USDRUR_CB/d/2000/2001](https://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2015/2016)
+
+- reserved domain:
+    - [/oil/series/BRENT/d/2017](https://minikep-db.herokuapp.com/oil/series/BRENT/d/2017)
+    
 
 #### Sample user code
 
