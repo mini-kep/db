@@ -113,7 +113,7 @@ class DatapointParameters:
         if freq in allowed:
             return True
         else:     
-            raise CustomError400(message='Invalid frequency <{freq}>',
+            raise CustomError400(message=f'Invalid frequency <{freq}>',
                                  payload={'allowed': allowed})
     
     @staticmethod

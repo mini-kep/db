@@ -54,6 +54,16 @@ class TestDatapointParameters(TestCaseBase):
         with self.assertRaises(CustomError400):
             DatapointParameters(args)
 
+    def test_freq_exist_on_good_param(self):
+        freq_exist = DatapointParameters.validate_freq_exist('m')
+        self.assertTrue(freq_exist)
+
+    def test_freq_exist_on_bad_params_should_produce_correct_message(self):
+        with self.assertRaises(CustomError400) as fail:
+            DatapointParameters.validate_freq_exist('s')
+        self.assertEqual(fail.exception.message, 'Invalid frequency <s>')
+
+
 
 if __name__ == '__main__':
     unittest.main()
