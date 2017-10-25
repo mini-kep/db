@@ -140,7 +140,7 @@ def read_ts(source_url):
                       index_col=0,
                       squeeze=True)
 
-er = read_ts('http://mini-kep.herokuapp.com/ru/series/USDRUR_CB/d/2017/')
+er = read_ts('http://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2017/')
 
 assert er['2017-09-28'] == 58.01022
 
