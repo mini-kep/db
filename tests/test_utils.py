@@ -63,6 +63,12 @@ class TestDatapointParameters(TestCaseBase):
             DatapointParameters.validate_freq_exist('s')
         self.assertEqual(fail.exception.message, 'Invalid frequency <s>')
 
+    def test_ending_date_is_optional(self):
+        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', '2017-05-11', None)
+        dp = DatapointParameters(args)
+        assert dp.get_start() == datetime.date(year=2017, month=5, day=11)
+        assert dp.get_end() == None
+
 
 
 if __name__ == '__main__':
