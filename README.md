@@ -113,12 +113,12 @@ Tokens:
 #### Example calls
 
 - basic calls:
-    - [/ru/series/GDP/a/yoy/1998/2017](http://mini-kep.herokuapp.com/ru/series/GDP/a/yoy/1998/2017)
-    - [ru/series/EXPORT_GOODS/m/bln_rub](http://mini-kep.herokuapp.com/ru/series/EXPORT_GOODS/m/bln_rub)
+    - [/ru/series/GDP/a/yoy/1998/2017](http://minikep-db.herokuapp.com/ru/series/GDP/a/yoy/1998/2017)
+    - [ru/series/EXPORT_GOODS/m/bln_rub](http://minikep-db.herokuapp.com/ru/series/EXPORT_GOODS/m/bln_rub)
     
 - units positioning:
-    - [/ru/series/CPI_rog/m/2000/2010)](http://mini-kep.herokuapp.com/ru/series/CPI_rog/m/2000/2010)
-    - [/ru/series/CPI/m/rog/2000/2010](http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2000/2010)
+    - [/ru/series/CPI_rog/m/2000/2010)](http://minikep-db.herokuapp.com/ru/series/CPI_rog/m/2000/2010)
+    - [/ru/series/CPI/m/rog/2000/2010](http://minikep-db.herokuapp.com/ru/series/CPI/m/rog/2000/2010)
     - [/ru/series/CP/m/2016/rog](https://minikep-db.herokuapp.com/ru/series/CPI/m/2016/rog)
 
 - no unit:
