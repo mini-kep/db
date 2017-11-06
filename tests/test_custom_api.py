@@ -98,6 +98,11 @@ class TestCustomGET(TestCaseBase):
         self.prepare_db()
         self.mount_blueprint()
 
+    def test_get_csv_on_valid_params_fetches_data_for_CPI(self):
+        getter = custom_api.CustomGET('ru', 'CPI_rog', 'm', '')
+        api_csv_str = str(getter.get_csv_response().data, 'utf-8')
+        assert api_csv_str
+        
     def test_get_csv_on_valid_params_fetches_data(self):
         getter = custom_api.CustomGET('ru', 'USDRUR_CB', 'd', '2016')
         api_csv_str = str(getter.get_csv_response().data, 'utf-8')
@@ -111,6 +116,17 @@ class TestCustomGET(TestCaseBase):
         with pytest.raises(CustomError400):
             _ = getter.get_csv_response()
 
+class Test_CustomEndPoint(TestCaseBase):
+    def setUp(self):
+        self.prepare_app()
+        self.mount_blueprint()
+        self.start_client()
+            
+    def test_CPI_rog_m_is_found_with_code_200(self):        
+        response = self.client.get('/ru/series/CPI_rog/m')  
+        assert response.status_code == 200        
+        
+        
 
 if __name__ == '__main__':
     pytest.main([__file__])

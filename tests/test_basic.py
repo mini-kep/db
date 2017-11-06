@@ -19,6 +19,7 @@ from db import db as fsa_db
 from db.api import utils  
 from db.api.models import Datapoint
 from db.api.views import api as api_module
+from db.custom_api.views import custom_api_bp
 
 def read_test_data(filename = 'test_data_2016H2.json'):
     tests_folder = os.path.abspath(os.path.dirname(__file__))
@@ -67,6 +68,10 @@ class TestCaseBase(unittest.TestCase):
         
     def mount_blueprint(self):
         self.app.register_blueprint(api_module)
+        self.app.register_blueprint(custom_api_bp)
+        
+    def start_client(self):
+        self.client = self.app.test_client()    
         
     def setUp(self):   
         self.prepare_app()
