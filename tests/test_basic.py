@@ -111,6 +111,8 @@ class TestViewsDatapoints(TestCaseBase):
 if __name__ == '__main__':
     unittest.main(module='test_basic')
     z = read_test_data()
-    t = TestViewsDatapoints()
-    t.setUp()
-    response = t.query_on_name_and_freq()
+    q = TestViewsDatapoints()
+    q.setUp()
+    response = q.query_on_name_and_freq()
+    resp = q.client.get('/ru/series/CPI_rog/a')
+    print(resp.data)

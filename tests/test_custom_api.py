@@ -117,16 +117,26 @@ class TestCustomGET(TestCaseBase):
             _ = getter.get_csv_response()
 
 
-class Test_CustomEndPoint(TestCaseBase):
+class Test_CustomEndPoint_IntegrationTest(TestCaseBase):
     def setUp(self):
+        self.prepare_db()
         self.prepare_app()
         self.mount_blueprint()
-        self.start_client()
-            
-    def test_CPI_rog_m_is_found_with_code_400(self):
+                        
+    def test_CPI_rog_m_is_found_with_code_200(self):
         response = self.client.get('/ru/series/CPI_rog/m')
-        assert response.status_code == 400
+        assert response.status_code == 200
+    
+    def test_CPI_rog_m_is_found_with_code_200_on_outer_server(self):
+        import requests
+        r = requests.get('http://minikep-db.herokuapp.com/ru/series/CPI_rog/m')
+        assert r.status_code == 200        
         
 
 if __name__ == '__main__':
     pytest.main([__file__])
+    t = Test_CustomEndPoint()
+    t.setUp()
+    r = t.client.get('/ru/series/CPI_rog/m')
+    print(r.data)
+    
