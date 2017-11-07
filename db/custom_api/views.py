@@ -16,7 +16,7 @@ def handle_invalid_usage(error):
 
 BASE_URL = '/<string:domain>/series/<string:varname>'
 
-@custom_api_bp.route(f'{BASE_URL}/<string:freq>') 
+@custom_api_bp.route(f'{BASE_URL}/<string:freq>', strict_slashes=False)
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>/<path:inner_path>')
 def time_series_api_interface(domain, varname, freq, inner_path=''):
     return custom_api.CustomGET(domain, varname, freq, inner_path).get_csv_response()

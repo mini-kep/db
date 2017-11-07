@@ -116,16 +116,16 @@ class TestCustomGET(TestCaseBase):
         with pytest.raises(CustomError400):
             _ = getter.get_csv_response()
 
+
 class Test_CustomEndPoint(TestCaseBase):
     def setUp(self):
         self.prepare_app()
         self.mount_blueprint()
         self.start_client()
             
-    def test_CPI_rog_m_is_found_with_code_200(self):        
-        response = self.client.get('/ru/series/CPI_rog/m')  
-        assert response.status_code == 200        
-        
+    def test_CPI_rog_m_is_found_with_code_400(self):
+        response = self.client.get('/ru/series/CPI_rog/m')
+        assert response.status_code == 400
         
 
 if __name__ == '__main__':
