@@ -48,6 +48,21 @@ def to_csv(dicts):
         return ''
 
 
+def yield_csv_dataframe_row(dataframe, names):
+    yield ',{}'.format(','.join(names))
+    for date, datapoints in dataframe.items():
+        values = [str(dp.get('value', '')) for dp in datapoints]
+        yield '{},{}'.format(date, ','.join(values))
+    yield ''
+
+
+def dataframe_to_csv(dataframe, names):
+    if dataframe:
+        rows = list(yield_csv_dataframe_row(dataframe, names))
+        return '\n'.join(rows)
+    else:
+        return ''
+
 class DatapointParameters:
     """Parameter handler for api\datapoints endpoint."""    
     def __init__(self, args):
@@ -141,6 +156,31 @@ class DatapointParameters:
             raise CustomError400('End date must be after start date')          
         else:
             return True
+
+
+class DataframeParameters(DatapointParameters):
+    """Parameter handler for api/dataframe endpoint."""
+
+    def __init__(self, args):
+        self.args = args
+        self.names = self.get_names()
+        self.freq = self.get_freq()
+        if not self.freq:
+            raise CustomError400("<freq> parameter is required")
+
+    def get_names(self):
+        freq = self.get_freq()
+        names = self.args.get('name', '').split(',')
+        for name in names:
+            self.validate_name_exist_for_given_freq(freq, name)
+        return names
+
+    def get(self):
+        """Return query parameters as dictionary."""
+        return dict(names=self.names,
+                    freq=self.freq,
+                    start_date=self.get_start(),
+                    end_date=self.get_end())
 
 
 if __name__ == '__main__': # pragma: no cover

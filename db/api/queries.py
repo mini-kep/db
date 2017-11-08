@@ -1,5 +1,6 @@
 from db.api.models import Datapoint
 from db import db
+import datetime
 
 def select_datapoints(freq: str, name: str, start_date, end_date):
     """Return dictionaries with datapoints, corresposding to *freq*, *name*
@@ -15,6 +16,46 @@ def select_datapoints(freq: str, name: str, start_date, end_date):
     if end_date:
         data = data.filter(Datapoint.date <= end_date)
     return data
+
+
+def select_dataframe(freq: str, names: list, start_date, end_date):
+    """
+    Returns dataframe corresponding to *freq*, *names* and bounded by dates
+    dataframe is dict like
+    {
+        date0: [{
+                  'freq': *freq*,
+                  'name': *names[0]*,
+                  'date': *date0*
+                  'value': value of datapoint
+               },
+               {
+                  'freq': *freq*,
+                  'name': *names[1]*,
+                  'date': *date0*,
+                  'value': value of datapoint
+               } ...
+               ]
+        ...
+    }
+    Where keys are date strings
+    And values are array with dicts that represends datapoints (or empty dict if there's no datapoint)
+
+    """
+    data = Datapoint.query.filter_by(freq=freq).filter(Datapoint.name.in_(names)).order_by(Datapoint.date)
+    if start_date:
+        data = data.filter(Datapoint.date >= start_date)
+    if end_date:
+        data = data.filter(Datapoint.date <= end_date)
+    result = {}
+    for date in (d[0] for d in data.values(Datapoint.date)):
+        date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
+        result[date_str] = []
+        datapoints = data.filter_by(date=date)
+        for name in names:
+            dp = datapoints.filter_by(name=name).first()
+            result[date_str].append(dp.serialized if dp else {})
+    return result
 
 
 def select_unique_frequencies():

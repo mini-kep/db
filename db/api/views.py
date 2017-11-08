@@ -67,3 +67,16 @@ def get_date_range():
     result = dict(start_date = dp.get_min_date(), 
                   end_date = dp.get_max_date()) 
     return jsonify(result)
+
+
+# api/dataframe?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
+@api.route('/dataframe', methods=['GET'])
+def get_dataframe():
+    params = utils.DataframeParameters(request.args).get()
+    if params.keys() == ['freq']:
+        # if only freq is given, acts like get_possible_names
+        possible_names = queries.possible_names_values(params['freq'])
+        return jsonify(possible_names)
+    data = queries.select_dataframe(**params)
+    csv_str = utils.dataframe_to_csv(data, params.get('names'))
+    return Response(response=csv_str, mimetype='text/plain')
