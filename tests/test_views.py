@@ -146,13 +146,6 @@ class Test_API_Datapoints(TestCaseQuery):
         expected_data = subset_test_data('CPI_NONFOOD_rog', 'm')
         assert data == expected_data
 
-# COMMENT: -----------------------------------------------------------------
-# возможно потребуются дополнительные функции для Test_API_Names для валидации
-# тела ответа,
-# сейчас манипуляции с данными идут в теле теста, тут уже лучше вам сделать, 
-# как будет понятнее.
-# -------------------------------------------------------------------------
-
 class Test_API_Names(TestCaseQuery):
     """Endpoint under test: /api/names/<freq>"""
     def query_names_for_freq(self, freq):
