@@ -73,8 +73,8 @@ def get_date_range():
 @api.route('/dataframe', methods=['GET'])
 def get_dataframe():
     params = utils.DataframeParameters(request.args).get()
-    if params.keys() == ['freq']:
-        # if only freq is given, acts like get_possible_names
+    if params.get('name') is None:
+        # if no name is given, acts like get_possible_names
         possible_names = queries.possible_names_values(params['freq'])
         return jsonify(possible_names)
     data = queries.select_dataframe(**params)

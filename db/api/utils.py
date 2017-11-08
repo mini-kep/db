@@ -163,14 +163,17 @@ class DataframeParameters(DatapointParameters):
 
     def __init__(self, args):
         self.args = args
-        self.names = self.get_names()
+        if args.get('name'):
+            self.names = self.get_names()
+        else:
+            self.names = None
         self.freq = self.get_freq()
         if not self.freq:
             raise CustomError400("<freq> parameter is required")
 
     def get_names(self):
         freq = self.get_freq()
-        names = self.args.get('name', '').split(',')
+        names = self.args.get('name').split(',')
         for name in names:
             self.validate_name_exist_for_given_freq(freq, name)
         return names
