@@ -48,12 +48,16 @@ class TestUpsertDatapoint(TestCaseBase):
         self.assertEqual(datapoint.serialized, self.dp1_dict)
 
     def test_upsert_updates_value_for_existing_row(self):
+        # insert initial values and check
         upsert(self.dp1_dict)
-        dp1_updated_value = self.dp1_dict['value'] + 4.56
-        dp1_dict_with_new_value = {k: v if k != "value" else dp1_updated_value for k, v in self.dp1_dict.items()}
-        upsert(dp1_dict_with_new_value)
         datapoint = select_datapoints(**self.dp1_search_param).first()
-        self.assertEqual(datapoint.value, dp1_updated_value)
+        self.assertEqual(datapoint.serialized, self.dp1_dict)
+
+        # update values and check
+        dp1_dict_updated = dict(self.dp1_dict, value=234.5)
+        upsert(dp1_dict_updated)
+        datapoint = select_datapoints(**self.dp1_search_param).first()
+        self.assertEqual(datapoint.serialized, dp1_dict_updated)
 
 
 if __name__ == '__main__':
