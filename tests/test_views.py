@@ -40,6 +40,11 @@ class Test_API_Incoming(TestCaseBase):
         response = self.get_response(data=_data, headers=_token_dict)
         assert response.status_code == 200
 
+    def test_on_broken_data_upload_returns_status_code_400(self):
+        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
+        response = self.get_response(data="___broken_json_data__", headers=_token_dict)
+        assert response.status_code == 400
+
 
 class TestCaseQuery(TestCaseBase):
     """Prepare database for queries/GET method testing"""
@@ -70,6 +75,16 @@ class Test_API_Datapoints(TestCaseQuery):
         data = json.loads(response.get_data().decode('utf-8'))
         expected_data = self._subset_test_data('CPI_NONFOOD_rog', 'm')
         assert data == expected_data
+
+    def test_on_name_parameter_not_specified(self):
+        params = dict(freq='m', format='json')
+        response = self.client.get('/api/datapoints', query_string=params)
+        assert response.status_code == 400
+
+    def test_on_freq_parameter_not_specified(self):
+        params = dict(name='CPI_NONFOOD_rog', format='json')
+        response = self.client.get('/api/datapoints', query_string=params)
+        assert response.status_code == 400
 
 
 class Test_API_Names(TestCaseQuery):
