@@ -40,7 +40,7 @@ class Test_API_Incoming(TestCaseBase):
         response = self.get_response(data=_data, headers=_token_dict)
         assert response.status_code == 200
 
-
+#FIXME: should empty test case be deleted?
 class TestCaseQuery(TestCaseBase):
     """Prepare database for queries/GET method testing"""
     pass
