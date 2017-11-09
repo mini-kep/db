@@ -1,7 +1,7 @@
 import pytest
 import db.custom_api.custom_api as custom_api
 from db.api.errors import CustomError400
-from . import TestCaseBase
+from tests.test_basic import TestCaseBase
 
 
 class Test_make_freq:

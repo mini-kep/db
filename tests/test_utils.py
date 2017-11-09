@@ -1,5 +1,5 @@
 import unittest
-from . import TestCaseBase
+from tests.test_basic import TestCaseBase
 from db.api.errors import CustomError400
 from db.api.utils import DatapointParameters
 import datetime
