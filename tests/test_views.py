@@ -30,17 +30,17 @@ class Test_API_Incoming(TestCaseBase):
 
     def test_on_new_data_upload_successfull_with_code_200(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        _data = json.dumps(self._read_test_data())
+        _data = json.dumps(self.test_data)
         response = self.get_response(data=_data, headers=_token_dict)
         assert response.status_code == 200
 
     def test_on_existing_data_upload_successfull_with_code_200(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        _data = json.dumps(self._read_test_data()[0:10])
+        _data = json.dumps(self.test_data[0:10])
         response = self.get_response(data=_data, headers=_token_dict)
         assert response.status_code == 200
 
-#FIXME: should empty test case be deleted?
+
 class TestCaseQuery(TestCaseBase):
     """Prepare database for queries/GET method testing"""
     pass
@@ -87,7 +87,7 @@ class Test_API_Names(TestCaseQuery):
         response = self.query_names_for_freq(freq='all')
         result = json.loads(response.get_data().decode('utf-8'))
         # expected result
-        names = set([x['name'] for x in self._read_test_data()])
+        names = set([x['name'] for x in self.test_data])
         expected_result = sorted(list(names))
         # check
         assert result == expected_result
@@ -131,9 +131,8 @@ class Test_API_Info(TestCaseQuery):
         assert result['start_date'] == dates[0]
         assert result['end_date'] == dates[-1]
 
+
 # NOT TODO: may be paarmetrised
-
-
 class Test_API_Errors(TestCaseBase):
 
     def test_datapoints_empty_params_returns_400(self):
