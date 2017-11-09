@@ -89,6 +89,11 @@ def get_datapoints():
         type: string
         required: false
         description: end date.
+      - name: format
+        in: query
+        type: string
+        required: false
+        description: csv or json 
     responses:
         400:
             description: You have one the following errors. Wrong name or frequency.
@@ -173,4 +178,3 @@ def get_date_range():
     result = dict(start_date = dp.get_min_date(), 
                   end_date = dp.get_max_date()) 
     return jsonify(result)
-

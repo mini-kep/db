@@ -7,7 +7,7 @@ class ProductionConfig(object):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    PORT=int(os.getenv('PORT'))
+    PORT=int(os.getenv('PORT', 5000))
     # NOTE: must create config var API_TOKEN at heroku
     API_TOKEN = os.getenv('API_TOKEN')
 
