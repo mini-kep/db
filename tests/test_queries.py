@@ -1,5 +1,5 @@
 import unittest
-from . import TestCaseBase
+from tests.test_basic import TestCaseBase
 from db.api.queries import select_datapoints, upsert
 from datetime import date
 import copy

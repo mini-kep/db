@@ -1,4 +1,0 @@
-{
-  "test_custom_api.py::Test_CustomEndPoint::test_CPI_rog_m_is_found_with_code_200": true,
-  "test_custom_api.py::Test_CustomEndPoint::test_get_on_name_and_freq_is_found_with_code_200": true
-}

@@ -16,8 +16,19 @@ from db.api.models import Datapoint
 from db.api.errors import CustomError400
 from db.api.views import get_datapoints_response
 
-from . import TestCaseBase
+from tests.test_basic import TestCaseBase
 
+
+#t = TestCaseBase()
+#freq = 'a'
+#names = set([d['name'] for d in t.test_data if d['freq']==freq])
+#z = sorted(list(names))
+
+#            expected_result = []
+#            for row in self._read_test_data():
+#                if row['freq'] == freq and row['name'] not in expected_result:
+#                    expected_result.append(row['name'])
+#            expected_result = sorted(expected_result)
 
 class Test_API_Incoming(TestCaseBase):
 
@@ -195,4 +206,4 @@ class TestGetResponseDatapoints(TestCaseBase):
             get_datapoints_response(data, 'html')
 
 if __name__ == '__main__':
-    unittest.main(module='test_views')
+    unittest.main(module='tests.test_views')
