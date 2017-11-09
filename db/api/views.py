@@ -73,10 +73,11 @@ def get_date_range():
 @api.route('/dataframe', methods=['GET'])
 def get_dataframe():
     params = utils.DataframeParameters(request.args).get()
-    if params.get('name') is None:
+    if params.get('names') is None:
         # if no name is given, acts like get_possible_names
         possible_names = queries.possible_names_values(params['freq'])
-        return jsonify(possible_names)
+        csv_names = ','.join(possible_names) + '\n'
+        return Response(response=csv_names, mimetype='text/plain')
     data = queries.select_dataframe(**params)
     csv_str = utils.dataframe_to_csv(data, params.get('names'))
     return Response(response=csv_str, mimetype='text/plain')

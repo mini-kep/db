@@ -51,7 +51,7 @@ def to_csv(dicts):
 def yield_csv_dataframe_row(dataframe, names):
     yield ',{}'.format(','.join(names))
     for date, datapoints in dataframe.items():
-        values = [str(dp.get('value', '')) for dp in datapoints]
+        values = [dp['value'] for dp in datapoints]
         yield '{},{}'.format(date, ','.join(values))
     yield ''
 
