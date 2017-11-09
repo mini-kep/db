@@ -4,10 +4,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class ProductionConfig(object):
     #Config for deploying with Heroku 
-    DEBUG = False
+    DEBUG = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    PORT=os.getenv('PORT')
+    PORT=int(os.getenv('PORT'))
     # NOTE: must create config var API_TOKEN at heroku
     API_TOKEN = os.getenv('API_TOKEN')
 

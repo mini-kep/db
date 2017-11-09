@@ -9,4 +9,5 @@ if __name__ == '__main__':
     app.register_blueprint(api_module)
     app.register_blueprint(custom_api_module)
     Swagger(app)
-    app.run(host="0.0.0.0")
+    #app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=int(app.config['PORT']))
