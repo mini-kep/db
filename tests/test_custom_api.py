@@ -1,14 +1,14 @@
 import pytest
 import db.custom_api.custom_api as custom_api
 from db.api.errors import CustomError400
-from tests.test_basic import TestCaseBase
+from . import TestCaseBase
+
 
 class Test_make_freq:
-    
     @staticmethod
-    def make_freq(freq): 
-        return custom_api.CustomGET.make_freq(freq) 
-    
+    def make_freq(freq):
+        return custom_api.CustomGET.make_freq(freq)
+
     def test_make_freq_with_valid_param_is_ok(self):
         assert self.make_freq('q') == 'q'
 
@@ -93,10 +93,6 @@ class Test_InnerPath:
 
 
 class TestCustomGET(TestCaseBase):
-    def setUp(self):
-        self.prepare_app()
-        self.prepare_db()
-        self.mount_blueprint()
 
     def test_get_csv_on_valid_params_fetches_data_for_CPI(self):
         getter = custom_api.CustomGET('ru', 'CPI_rog', 'm', '')
@@ -118,10 +114,6 @@ class TestCustomGET(TestCaseBase):
 
 
 class Test_CustomEndPoint_Integration_Test(TestCaseBase):
-    def setUp(self):
-        self.prepare_app()
-        self.prepare_db()
-        self.mount_blueprint()
                         
     def test_CPI_rog_m_is_found_with_code_200(self):
         response = self.client.get('/ru/series/CPI_rog/m')

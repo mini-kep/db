@@ -1,5 +1,5 @@
 import unittest
-from tests.test_basic import TestCaseBase
+from . import TestCaseBase
 from db.api.errors import CustomError400
 from db.api.utils import DatapointParameters
 import datetime
@@ -11,10 +11,6 @@ def days_ahead(k):
 
 
 class TestDatapointParameters(TestCaseBase):
-    def setUp(self):
-        self.prepare_app()
-        self.prepare_db()
-        self.mount_blueprint()
 
     @staticmethod
     def _make_args(freq, name, start, end):

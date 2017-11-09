@@ -1,14 +1,10 @@
 import unittest
-from tests.test_basic import TestCaseBase
+from . import TestCaseBase
 from db.api.queries import select_datapoints, upsert
 from datetime import date
 
 
 class TestSelectDataPoints(TestCaseBase):
-    def setUp(self):
-        self.prepare_app()
-        self.prepare_db()
-        self.mount_blueprint()
 
     def test_data_is_fetching(self):
         params = dict(freq='m',
