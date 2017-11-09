@@ -11,8 +11,6 @@ and testing guidelines at
 
 import json
 import unittest
-import os
-from random import randint
 
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
@@ -76,12 +74,9 @@ class Test_API_Datapoints(TestCaseQuery):
 
 class Test_API_Names(TestCaseQuery):
     """Endpoint under test: /api/names/<freq>"""
-    def query_names_for_freq(self, freq):
-        return self.client.get(f'/api/names/{freq}')
 
-    def query_random_freq_from_test_data(self):
-        data = self._read_test_data()
-        return data[randint(0, len(data))].get('freq')
+    def query_names_for_freq(self, freq):
+        return self.client.get('/api/names/{freq}'.format(freq=freq))
 
     def test_get_all_names_response_code_200(self):
         response = self.query_names_for_freq(freq='all')
@@ -97,25 +92,19 @@ class Test_API_Names(TestCaseQuery):
         # check
         assert result == expected_result
 
-    def test_get_random_freq_response_code_200(self):
-        random_freq = self.query_random_freq_from_test_data()
-        response = self.query_names_for_freq(freq=random_freq)
-        assert response.status_code == 200
-
-    # FIXME: ------------------------------------------------------------------
-    def test_get_names_on_random_freq_returns_sorted_list_of_names_for_given_random_freq(self):
-        random_freq = self.query_random_freq_from_test_data()
-        response = self.query_names_for_freq(freq=random_freq)
-        result = json.loads(response.get_data().decode('utf-8'))
-        # expected result
-        expected_result = []
-        for row in self._read_test_data():
-            if row['freq'] == random_freq and row['name'] not in expected_result:
-                expected_result.append(row['name'])
-        expected_result = sorted(expected_result)
-        # check
-        assert result == expected_result
-    # ------------------------------------------------------------------------
+    def test_get_names_returns_sorted_list_of_names_for_given_freq(self):
+        for freq in ['a', 'q', 'm', 'w', 'd']:
+            response = self.query_names_for_freq(freq=freq)
+            assert response.status_code == 200
+            result = json.loads(response.get_data().decode('utf-8'))
+            # expected result
+            expected_result = []
+            for row in self._read_test_data():
+                if row['freq'] == freq and row['name'] not in expected_result:
+                    expected_result.append(row['name'])
+            expected_result = sorted(expected_result)
+            # check
+            assert result == expected_result
 
 
 class Test_API_Info(TestCaseQuery):
