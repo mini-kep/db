@@ -2,6 +2,7 @@ import unittest
 from . import TestCaseBase
 from db.api.queries import select_datapoints, upsert
 from datetime import date
+import copy
 
 
 class TestSelectDataPoints(TestCaseBase):
@@ -37,6 +38,9 @@ class TestUpsertDatapoint(TestCaseBase):
                                      name=self.dp1_dict['name'],
                                      start_date=self.dp1_dict['date'],
                                      end_date=self.dp1_dict['date'])
+        # new value
+        self.dp1_dict_updated = copy.copy(self.dp1_dict)
+        self.dp1_dict_updated['value'] = 234.5        
 
     def test_before_upsert_datapoint_not_found(self):
         datapoints_count = select_datapoints(**self.dp1_search_param).count()
@@ -47,18 +51,11 @@ class TestUpsertDatapoint(TestCaseBase):
         datapoint = select_datapoints(**self.dp1_search_param).first()
         self.assertEqual(datapoint.serialized, self.dp1_dict)
 
-    def test_upsert_updates_value_for_existing_row(self):
-        # insert initial values and check
+    def test_upsert_updates_value_for_existing_row(self):        
         upsert(self.dp1_dict)
+        upsert(self.dp1_dict_updated)
         datapoint = select_datapoints(**self.dp1_search_param).first()
-        self.assertEqual(datapoint.serialized, self.dp1_dict)
-
-        # update values and check
-        dp1_dict_updated = dict(self.dp1_dict, value=234.5)
-        upsert(dp1_dict_updated)
-        datapoint = select_datapoints(**self.dp1_search_param).first()
-        self.assertEqual(datapoint.serialized, dp1_dict_updated)
-
+        self.assertEqual(datapoint.serialized, self.dp1_dict_updated)
 
 if __name__ == '__main__':
     unittest.main()
