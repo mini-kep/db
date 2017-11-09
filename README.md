@@ -27,7 +27,7 @@ Standard API is REST-like interface to upload/retrieve time-series data.
 Brief initial specification for it is [here](https://mini-kep.github.io/documentation/database/),
 updates are documented below.
 
-See also experimental [Swagger documentatin](http://minikep-db.herokuapp.com/apidocs) 
+See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/apidocs) 
 for nice interface and colors. 
 
 ## POST method
