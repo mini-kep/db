@@ -66,7 +66,7 @@ class TestDatapointParameters(TestCaseBase):
         assert dp.get_start() == datetime.date(year=2017, month=5, day=11)
         assert dp.get_end() == None
 
-    def test_split_label():
+    def test_split_label(self):
         assert label.split_label('GDP_bln_rub') == ('GDP', 'bln_rub')
         assert label.split_label('GDP_rog') == ('GDP', 'rog')
         assert label.split_label('PROD_E_TWh') == ('PROD_E', 'TWh')
@@ -74,11 +74,12 @@ class TestDatapointParameters(TestCaseBase):
         with pytest.raises(AssertionError):
             assert label.split_label('GDP_bln_rub') == 'GDP', 'bln_rub'
 
-    def test_extract_varname():
+    def test_extract_varname(self):
         assert label.extract_varname('GDP_bln_rub') == 'GDP'
         assert label.extract_varname('GDP_rog') == 'GDP'
         assert label.extract_varname('PROD_E_TWh') == 'PROD_E'
-    def test_extract_unit():
+
+    def test_extract_unit(self):
         assert label.extract_unit('GDP_bln_rub') == 'bln_rub'
         assert label.extract_unit('GDP_rog') == 'rog'
         assert label.extract_unit('PROD_E_TWh') == 'TWh'
