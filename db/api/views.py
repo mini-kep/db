@@ -19,14 +19,14 @@ def handle_invalid_usage(error):
     return response
 
 
-@api.route('/incoming', methods=['POST'])
+@api.route('/datapoints', methods=['POST'])
 def upload_data():
     """
     Upload data to database
     This endpoint is not used please use /datapoints endpoint
     ---
     tags:
-        - incoming
+        - datapoints
 
     parameters:
        - name: API_TOKEN
