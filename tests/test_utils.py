@@ -73,7 +73,7 @@ class TestDatapointParameters(TestCaseBase):
             to_date('Not valid date')
 
     def test_split_label(self):
-       assert label.split_label('GDP_bln_rub') == ('GDP', 'bln_rub')
+        assert label.split_label('GDP_bln_rub') == ('GDP', 'bln_rub')
         assert label.split_label('GDP_rog') == ('GDP', 'rog')
         assert label.split_label('PROD_E_TWh') == ('PROD_E', 'TWh')
         # note the () for tuple above
