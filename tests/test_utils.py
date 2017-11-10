@@ -1,8 +1,11 @@
 import unittest
+import datetime
+
 from tests.test_basic import TestCaseBase
 from db.api.errors import CustomError400
 from db.api.utils import DatapointParameters, to_date
-import datetime
+from db.utils import label
+
 
 
 def days_ahead(k):
@@ -68,7 +71,6 @@ class TestDatapointParameters(TestCaseBase):
     def test_try_to_parse_inavlid_date(self):
         with self.assertRaises(CustomError400):
             to_date('Not valid date')
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,13 +19,13 @@ from db.api.views import get_datapoints_response
 from tests.test_basic import TestCaseBase
 
 
-class Test_API_Incoming(TestCaseBase):
+class Test_API_Datapoints_POST(TestCaseBase):
 
     def get_response(self, data, headers):
-        return self.client.post('/api/incoming', data=data, headers=headers)
+        return self.client.post('/api/datapoints', data=data, headers=headers)
 
     def test_on_no_auth_token_returns_forbidden_status_code_403(self):
-        response = self.client.post('/api/incoming')
+        response = self.client.post('/api/datapoints')
         assert response.status_code == 403
 
     def test_on_new_data_upload_successfull_with_code_200(self):
@@ -51,7 +51,7 @@ class TestCaseQuery(TestCaseBase):
     pass
 
 
-class Test_API_Datapoints(TestCaseQuery):
+class Test_API_Datapoints_GET(TestCaseQuery):
 
     def query_on_name_and_freq(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m', format='json')
