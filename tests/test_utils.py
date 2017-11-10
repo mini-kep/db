@@ -71,7 +71,7 @@ class TestDatapointParameters(TestCaseBase):
         assert label.split_label('GDP_rog') == ('GDP', 'rog')
         assert label.split_label('PROD_E_TWh') == ('PROD_E', 'TWh')
         # note the () for tuple above
-        with pytest.raises(AssertionError):
+        with self.assertRaises(AssertionError):
             assert label.split_label('GDP_bln_rub') == 'GDP', 'bln_rub'
 
     def test_extract_varname(self):
