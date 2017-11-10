@@ -4,11 +4,11 @@ from db import db
 def select_datapoints(freq: str, name: str, start_date, end_date):
     """Return dictionaries with datapoints, corresposding to *freq*, *name*
         and bounded by dates.
-        
-        Returns:   
+
+        Returns:
            Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
-           It is iterable. 
-    """   
+           It is iterable.
+    """
     data = Datapoint.query.filter_by(name=name, freq=freq).order_by(Datapoint.date)
     if start_date:
         data = data.filter(Datapoint.date >= start_date)
@@ -18,8 +18,8 @@ def select_datapoints(freq: str, name: str, start_date, end_date):
 
 
 def select_unique_frequencies():
-    """Return a list of allowed frequencies.    
-       Returns:   
+    """Return a list of allowed frequencies.
+       Returns:
            list of strings, likely ['a', 'q', 'm', 'w', 'd'].
     """
     query = Datapoint.query.group_by(Datapoint.freq) \
@@ -28,10 +28,10 @@ def select_unique_frequencies():
 
 
 def possible_names_values(freq):
-    """Return a list of variable names corresponding to frequency *freq*.    
+    """Return a list of variable names corresponding to frequency *freq*.
        Args:
-           freq(str) - one letter from 'aqmwd' or 'all', not checked          
-       Returns:   
+           freq(str) - one letter from 'aqmwd' or 'all', not checked
+       Returns:
            list of strings
     """
     query = Datapoint.query
@@ -40,11 +40,11 @@ def possible_names_values(freq):
     query = query.group_by(Datapoint.name).\
                   order_by(Datapoint.name).\
                   values(Datapoint.name)
-    return [row.name for row in query] 
+    return [row.name for row in query]
 
 
 def get_boundary_date(freq, name, direction):
-    """Get first or last date for timeseries  *freq*, *name*.    
+    """Get first or last date for timeseries  *freq*, *name*.
        Returns:
            SQLA own date object (?)
     """
@@ -71,3 +71,12 @@ def upsert(datapoint):
         existing_datapoint.value = datapoint['value']
     else:
         db.session.add(Datapoint(**datapoint))
+
+
+def delete_datapoint(name,unit):
+    """Deletes all datapoints with a specified name or unit
+    """
+    if name:
+        Datapoint.query.filter(Datapoint.name.startswith(name)).delete()
+    elif unit:
+        Datapoint.query.filter(Datapoint.name.startswith(unit)).delete()
