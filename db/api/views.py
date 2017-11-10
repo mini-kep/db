@@ -93,7 +93,7 @@ def get_datapoints():
         in: query
         type: string
         required: false
-        description: csv or json 
+        description: csv or json
     responses:
         400:
             description: You have one the following errors. Wrong name or frequency.
@@ -175,6 +175,19 @@ def get_date_range():
 
     """
     dp = utils.DatapointParameters(request.args)
-    result = dict(start_date = dp.get_min_date(), 
-                  end_date = dp.get_max_date()) 
+    result = dict(start_date = dp.get_min_date(),
+                  end_date = dp.get_max_date())
     return jsonify(result)
+
+@api.route('/delete', methods=['DELETE'])
+def delete_datapoints():
+    #check identity
+    token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
+    if token_to_check != current_app.config['API_TOKEN']:
+        return abort(403)
+    #delete datapoints
+    try:
+        queries.delete(request.args.get('name'),request.args.get('unit'))
+        return jsonify({})
+    except:
+        abort(500)

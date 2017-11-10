@@ -73,10 +73,12 @@ def upsert(datapoint):
         db.session.add(Datapoint(**datapoint))
 
 
-def delete_datapoint(name, unit):
+def delete(name=None, unit=None):
     """Deletes all datapoints with a specified name or unit
     """
     if name:
         Datapoint.query.filter(Datapoint.name.startswith(name)).delete(synchronize_session=False)
     elif unit:
         Datapoint.query.filter(Datapoint.name.startswith(unit)).delete(synchronize_session=False)
+    else:
+        raise ValueError("No parameters given")
