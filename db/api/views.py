@@ -181,6 +181,29 @@ def get_date_range():
 
 @api.route('/delete', methods=['DELETE'])
 def delete_datapoints():
+    """
+    Deletes a datapoint based on it's name or units.
+    ---
+    tags:
+        -delete
+    parameters:
+        -name: name
+         in: query
+         type: string
+         required: false
+         description: the datapoint name
+        -unit: unit
+         in: querry
+         type:string
+         required: false
+         description: the unit of datapoint
+    responses:
+        403:
+            description: Failed to authenticate correctly
+        400:
+            description: Request lacks either name or unit
+            
+    """
     #check identity
     token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
     if token_to_check != current_app.config['API_TOKEN']:
@@ -189,5 +212,5 @@ def delete_datapoints():
     try:
         queries.delete(request.args.get('name'),request.args.get('unit'))
         return jsonify({})
-    except:
-        abort(500)
+    except ValueError:
+        abort(400)
