@@ -78,7 +78,9 @@ def delete(name=None, unit=None):
     """
     if name:
         Datapoint.query.filter(Datapoint.name.startswith(name)).delete(synchronize_session=False)
+        db.session.commit()
     elif unit:
         Datapoint.query.filter(Datapoint.name.startswith(unit)).delete(synchronize_session=False)
+        db.session.commit()
     else:
         raise ValueError("No parameters given")
