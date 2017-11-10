@@ -198,19 +198,19 @@ class Test_API_Deletion(TestCaseBase):
 
     def test_on_no_data_returns_bad_request_400(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        response = self.client.delete('/api/delete',headers=_token_dict)
+        response = self.client.delete('/api/delete', headers=_token_dict)
         assert response.status_code == 400
 
     def test_on_name_delete_successfull_200(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
         params = dict(name="BRENT")
-        response = self.client.delete(query_string=params, headers=_token_dict)
+        response = self.client.delete('/api/delete', query_string=params, headers=_token_dict)
         assert response.status_code == 200
 
     def test_on_name_delete_successfull_200(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
         params = dict(unit="rog")
-        response = self.client.delete(query_string=params, headers=_token_dict)
+        response = self.client.delete('/api/delete', query_string=params, headers=_token_dict)
         assert response.status_code == 200
 
 if __name__ == '__main__':

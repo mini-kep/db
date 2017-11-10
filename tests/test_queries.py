@@ -2,6 +2,7 @@ import unittest
 from tests.test_basic import TestCaseBase
 from db.api.queries import select_datapoints, upsert, delete
 from db.api.models import Datapoint
+from db import db as fsa_db
 from datetime import date
 import copy
 
@@ -73,7 +74,7 @@ class TestDeleteDatapoint(TestCaseBase):
     def test_deletion_by_unit(self):
         _unit="rog"
         delete(unit=_unit)
-        num_after=fsa_db.session.query(Datapoint).filter(Datapoint.unit.startswith(_unit)).count()
+        num_after=fsa_db.session.query(Datapoint).filter(Datapoint.name.endswith(_unit)).count()
         assert num_after == 0
 
     def test_no_deletion_without_match(self):
