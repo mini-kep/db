@@ -74,7 +74,13 @@ def get_date_range():
 def get_dataframe():
     params = utils.DataframeParameters(request.args).get()
     if params.get('names') is None:
-        # if no name is given, acts like get_possible_names
+        # FIXME: this is still wrong!
+        #
+        #        when no name is provided must return utils.dataframe_to_csv()
+        #        possible_names = queries.possible_names_values(params['freq'])
+        #        csv_str = utils.dataframe_to_csv(data, possible_names)
+        #        return Response(response=csv_str, mimetype='text/plain')
+        #
         possible_names = queries.possible_names_values(params['freq'])
         csv_names = ','.join(possible_names) + '\n'
         return Response(response=csv_names, mimetype='text/plain')
