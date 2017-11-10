@@ -98,7 +98,7 @@ class Test_API_Names(TestCaseQuery):
             assert response.status_code == 200
             result = json.loads(response.get_data().decode('utf-8'))
             # expected result
-            names = set([d['name'] for d in self.test_data if d['freq']==freq])            
+            names = set([d['name'] for d in self.test_data if d['freq']==freq])
             expected_result = sorted(names)
             # check
             assert result == expected_result
@@ -190,5 +190,31 @@ class TestGetResponseDatapoints(TestCaseBase):
         with self.assertRaises(CustomError400):
             get_datapoints_response(data, 'html')
 
+class Test_API_Deletion(TestCaseBase):
+    """Testing /api/delete"""
+    def test_on_no_auth_token_returns_forbidden_status_code_403(self):
+        response = self.client.delete('/api/delete')
+        assert response.status_code == 403
+
+    def test_on_no_data_returns_bad_request_400(self):
+        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
+        response = self.client.delete('/api/delete',headers=_token_dict)
+        assert response.status_code == 400
+
+    def test_on_name_delete_successfull_200(self):
+        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
+        params = dict(name="BRENT")
+        response = self.get_response(query_string=params, headers=_token_dict)
+        assert response.status_code == 200
+
+    def test_on_name_delete_successfull_200(self):
+        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
+        params = dict(unit="rog")
+        response = self.get_response(query_string=params, headers=_token_dict)
+        assert response.status_code == 200
+
 if __name__ == '__main__':
     unittest.main(module='tests.test_views')
+
+
+
