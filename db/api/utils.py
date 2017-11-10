@@ -47,9 +47,14 @@ def to_csv(dicts):
     else:
         return ''
 
-
+# FIXME: 
+#       - rename to yield_csv_dataframe_rows, because yeilding one row is only this yield '{},{}'.format(date, ','.join(values))
+#         OR split into two funcs and use them in dataframe_to_csv()
+#       - document what datatipe dataframe is? pandas dataframe? dictionary? 
+#       - provide dataframe argument example is docstring  
 def yield_csv_dataframe_row(dataframe, names):
     yield ',{}'.format(','.join(names))
+    # FIXME: names could be used here as well to guarantee order. order is not guaranteed now, responsibility outside function 
     for date, datapoints in dataframe.items():
         values = [dp['value'] for dp in datapoints]
         yield '{},{}'.format(date, ','.join(values))
@@ -58,6 +63,7 @@ def yield_csv_dataframe_row(dataframe, names):
 
 def dataframe_to_csv(dataframe, names):
     if dataframe:
+        # FIXME: option: can contruct from csv header and csv body here  
         rows = list(yield_csv_dataframe_row(dataframe, names))
         return '\n'.join(rows)
     else:
