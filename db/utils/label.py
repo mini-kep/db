@@ -19,4 +19,4 @@ def extract_varname(label,sep=SEP):
 
 def extract_unit(label,sep=SEP):
     words = label.split(sep)
-return sep.join(itertools.dropwhile(lambda word: word.isupper(), words))
+    return sep.join(itertools.dropwhile(lambda word: word.isupper(), words))
