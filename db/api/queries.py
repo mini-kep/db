@@ -73,10 +73,10 @@ def upsert(datapoint):
         db.session.add(Datapoint(**datapoint))
 
 
-def delete_datapoint(name,unit):
+def delete_datapoint(name, unit):
     """Deletes all datapoints with a specified name or unit
     """
     if name:
-        Datapoint.query.filter(Datapoint.name.startswith(name)).delete()
+        Datapoint.query.filter(Datapoint.name.startswith(name)).delete(synchronize_session=False)
     elif unit:
-        Datapoint.query.filter(Datapoint.name.startswith(unit)).delete()
+        Datapoint.query.filter(Datapoint.name.startswith(unit)).delete(synchronize_session=False)
