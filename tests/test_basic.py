@@ -32,14 +32,7 @@ class TestCaseBase(unittest.TestCase):
         app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
         app.config['API_TOKEN'] = 'token'
         return app
-    
-    @property
-    def token(self):
-        return self.app.config['API_TOKEN']
-    
-    @property
-    def token_dict(self):
-        return dict(API_TOKEN=self.token)
+
 
     @property
     def test_data(self):
@@ -47,7 +40,7 @@ class TestCaseBase(unittest.TestCase):
 
     def _read_test_data(self, filename='test_data_2016H2.json'):
         tests_folder = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(tests_folder, filename)
+        path = os.path.join(tests_folder, 'test_data', filename)
         with open(path) as file:
             return json.load(file)
 

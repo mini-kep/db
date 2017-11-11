@@ -19,7 +19,7 @@ api = Blueprint('api', __name__, url_prefix='/api')
 @api.errorhandler(400)
 def handle_validation_error(err):
     exc = err.exc
-    return jsonify({'errors': exc.messages}), 422
+    return jsonify({'errors': exc.messages}), 400
 
 #@api.errorhandler(CustomError400)
 #def handle_invalid_usage(error):
