@@ -3,56 +3,46 @@
 
 
 Testing guidelines at
-    <https://github.com/mini-kep/intro/blob/master/testing_guidelines/README.md>.
+    <https://github.com/mini-kep/testing_guidelines/blob/master/README.md>.
 
 """
 
 import pytest
 import json
 
-#not used
-from db.api.models import Datapoint
-
 from tests.test_basic import TestCaseBase
 
 
+# TODO - must separate which code is which
 ERROR_CODES = (422, 400, 403)
 
 
 class Test_API_Datapoints_POST(TestCaseBase):
 
-    def get_response(self, data, headers):
-        return self.client.post('/api/datapoints', data=data, headers=headers)
+    def get_response(self, data):
+        return self.client.post('/api/datapoints', data=data, headers=self.token_dict)
 
-# FIXME ----------------------------------------------
-
-    @pytest.mark.xfail
     def test_on_no_auth_token_returns_forbidden_status_error_code(self):
         response = self.client.post('/api/datapoints')
-        assert response.status_code is ERROR_CODES 
+        assert response.status_code in ERROR_CODES 
     
-    @pytest.mark.xfail
     def test_on_new_data_upload_successfull_with_code_200(self):
-        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        _data = json.dumps(self.test_data)
-        response = self.get_response(data=_data, headers=_token_dict)
+        upload_json = json.dumps(self.test_data)
+        response = self.get_response(data=upload_json)
         assert response.status_code == 200
 
-    @pytest.mark.xfail
     def test_on_existing_data_upload_successfull_with_code_200(self):
-        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        _data = json.dumps(self.test_data[0:10])
-        response = self.get_response(data=_data, headers=_token_dict)
+        upload_json = json.dumps(self.test_data[0:10])
+        response = self.get_response(data=upload_json)
+        # second call
+        response = self.get_response(data=upload_json)
         assert response.status_code == 200
 
     @pytest.mark.xfail
     def test_on_broken_data_upload_returns_error_code(self):
-        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        response = self.get_response(data="___broken_json_data__", headers=_token_dict)
+        response = self.get_response(data="___broken_json_data__")
         assert response.status_code in ERROR_CODES
-
-# -----------------------------------------------------
-
+        
 
 class TestCaseQuery(TestCaseBase):
     """Prepare database for queries/GET method testing"""
@@ -129,7 +119,7 @@ class Test_API_Names(TestCaseQuery):
 
 
 class Test_API_Info(TestCaseQuery):
-    """API under test: /api/info?name=<name>&freq=<freq>"""
+    """API under test: /api/info/?name=<name>"""
 
     def query_get_start_and_end_date(self, _name='CPI_NONFOOD_rog', _freq='m'):
         params = dict(name=_name, freq=_freq)
@@ -152,8 +142,8 @@ class Test_API_Info(TestCaseQuery):
         # expected
         dates = self.get_dates('CPI_NONFOOD_rog', 'm')
         # check
-        assert result['frequencies']['m']['start_date'] == dates[0]
-        assert result['frequencies']['m']['latest_date'] == dates[-1]
+        assert result['m']['start_date'] == dates[0]
+        assert result['m']['latest_date'] == dates[-1]
 
 
 # NOT TODO: may be paarmetrised
@@ -219,35 +209,29 @@ class Test_API_Errors(TestCaseBase):
 class Test_API_Deletion(TestCaseBase):
     """Testing /api/delete"""
     
-# FIXME:    this is bad request handling
+# FIXME: DELETE not implemented 
+
+    endpoint = "api/datapoints" 
     
     @pytest.mark.xfail
     def test_on_no_auth_token_returns_forbidden_status_code_403(self):
-        response = self.client.delete('/api/delete')
+        response = self.client.delete(self.endpoint)
         assert response.status_code in ERROR_CODES
         
     @pytest.mark.xfail
     def test_on_no_data_returns_bad_request_error(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        response = self.client.delete('/api/delete', headers=_token_dict)
+        response = self.client.delete(self.endpoint, headers=_token_dict)
         assert response.status_code in ERROR_CODES
 
-# --- end this is bad request handling
 
+    @pytest.mark.xfail
     def test_on_name_delete_successfull_200(self):
         _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
         params = dict(name="BRENT")
-        response = self.client.delete('/api/delete', query_string=params, headers=_token_dict)
+        response = self.client.delete(self.endpoint, query_string=params, headers=_token_dict)
         assert response.status_code == 200
 
-
-# FIXME: Why this was successful test with only rog as parameter?
-#
-#    def test_on_name_delete_successfull_200(self):
-#        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-#        params = dict(unit="rog")
-#        response = self.client.delete('/api/delete', query_string=params, headers=_token_dict)
-#        assert response.status_code == 200
 
 if __name__ == '__main__':
     import pytest

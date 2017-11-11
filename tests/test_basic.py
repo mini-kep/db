@@ -32,6 +32,14 @@ class TestCaseBase(unittest.TestCase):
         app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
         app.config['API_TOKEN'] = 'token'
         return app
+    
+    @property
+    def token(self):
+        return self.app.config['API_TOKEN']
+    
+    @property
+    def token_dict(self):
+        return dict(API_TOKEN=self.token)
 
     @property
     def test_data(self):
@@ -98,10 +106,9 @@ class TestViewsDatapoints(TestCaseBase):
 
 
 if __name__ == '__main__':
-    unittest.main(module='test_basic')
-    # z = read_test_data()
-    # q = TestViewsDatapoints()
-    # q.setUp()
-    # response = q.query_on_name_and_freq()
-    # resp = q.client.get('/ru/series/CPI_rog/a')
-    # print(resp.data)
+    #unittest.main(module='test_basic')
+    q = TestViewsDatapoints()
+    q.setUp()
+    response = q.query_on_name_and_freq()
+    resp = q.client.get('/ru/series/CPI_rog/a')
+    print(resp.data)

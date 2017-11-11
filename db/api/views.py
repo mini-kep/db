@@ -2,7 +2,6 @@ import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 
 from db import db
-from db.api.errors import CustomError400
 import db.api.utils as utils
 import db.helper.label as label
 import db.api.queries as queries
@@ -32,7 +31,22 @@ def handle_validation_error(err):
 #    return response
 
 
-@api.route('/datapoints', methods=['POST'])
+def authorise():
+    token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
+    if token_to_check != current_app.config['API_TOKEN']:
+        return abort(403)
+    
+
+@api.route('/datapoints', methods=['POST', 'GET', 'DELETE'])
+def datapoints_endpoint():
+    if request.method == 'POST':
+       return upload_data()
+    elif request.method == 'DELETE':
+       return delete_datapoints()
+    # GET is default    
+    else:    
+       return get_datapoints()
+        
 def upload_data():
     """
     Upload incoming data to database.
@@ -57,9 +71,7 @@ def upload_data():
             description: Returns empty dictionary on success.
     """
     # authorisation
-    token_to_check = RequestArgs()['API_TOKEN']
-    if token_to_check != current_app.config['API_TOKEN']:
-        return abort(403)
+    authorise()
     # upload data
     try:
         data = json.loads(request.data)
@@ -72,7 +84,6 @@ def upload_data():
         return abort(400)
 
 
-@api.route('/datapoints', methods=['GET'])
 def get_datapoints():
     """
     Returns formatted data of specified name and frequency
@@ -112,7 +123,6 @@ def get_datapoints():
         200:
             description:  Json or Csv response of queried data with specified format.
    """
-
     args = RequestArgs()
     data = queries.select_datapoints(**args.query_param)
     if args.format == 'json':
@@ -134,8 +144,45 @@ def publish_json(data):
     return jsonify([row.serialized for row in data])
 
 
+def delete_datapoints():
+    pass
+#    """
+#    Deletes a datapoint based on it's name or units.
+#    ---
+#    tags:
+#        -delete
+#    parameters:
+#        -name: name
+#         in: query
+#         type: string
+#         required: false
+#         description: the datapoint name
+#        -unit: unit
+#         in: querry
+#         type:string
+#         required: false
+#         description: the unit of datapoint
+#    responses:
+#        403:
+#            description: Failed to authenticate correctly
+#        400:
+#            description: ...
+#            
+#    """
+#    #check identity
+#    authorise()
+#    #delete datapoints
+#    args = RequestArgs()
+#    try:        
+#        queries.delete_datapoints(**args.query_param)
+#        return jsonify({'exit': 0})
+#    # FIXME: why a value error?
+#    except ValueError:
+#        abort(400)
+
+
 @api.route('/frequencies', methods=['GET'])
-def get_freq(freq):
+def get_freq():
     return jsonify(Allowed.frequencies())
 
 
@@ -163,7 +210,7 @@ def get_possible_names(freq):
 
 
 @api.route('/info', methods=['GET'])
-def get_date_range():
+def variable_info():
     """
     Gets a json with start_date and end_date of a give name and frequency pair
     ---
@@ -189,56 +236,18 @@ def get_date_range():
             description: Returns a start_date and end_date json.
 
     """
-    args = RequestArgs()    
-    #NOT TODO YET: query on available frequencies + make frequency an optional parameter
-    var, unit = label.split_label(args.name)
-    result = dict(name = args.name,
+    name = request.args.get('name')  
+    freq = request.args.get('freq')  
+    var, unit = label.split_label(name)
+    result = dict(name = name,
                   var = {'id': var, 'en': 'reserved', 'ru': 'reserved'},
                   unit = {'id': unit, 'en': 'reserved', 'ru': 'reserved'}
                   )
-    dr = queries.DateRange(freq=args.freq, name=args.name)
-    result['frequencies'] = {args.freq: {'start_date': dr.min, 
-                                         'latest_date': dr.max,
-                                         'latest_value': 'reserved'}   
-                            }
-    return jsonify(result)
-
-    
-@api.route('/delete', methods=['DELETE'])
-def delete_datapoints():
-    """
-    Deletes a datapoint based on it's name or units.
-    ---
-    tags:
-        -delete
-    parameters:
-        -name: name
-         in: query
-         type: string
-         required: false
-         description: the datapoint name
-        -unit: unit
-         in: querry
-         type:string
-         required: false
-         description: the unit of datapoint
-    responses:
-        403:
-            description: Failed to authenticate correctly
-        400:
-            description: Request lacks either name or unit
-            
-    """
-    #check identity
-    token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
-    if token_to_check != current_app.config['API_TOKEN']:
-        return abort(403)
-    #delete datapoints
-    try:
-        queries.delete(request.args.get('name'),request.args.get('unit'))
-        return jsonify({})
-    except ValueError:
-        abort(400)
+    dr = queries.DateRange(freq=freq, name=name)
+    result[freq] = {'start_date': dr.min, 
+                    'latest_date': dr.max,
+                    'latest_value': 'reserved'}   
+    return jsonify(result)    
 
 # api/dataframe?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
 @api.route('/dataframe', methods=['GET'])

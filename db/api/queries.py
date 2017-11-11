@@ -27,19 +27,29 @@ class Allowed(object):
         return possible_names_values(freq)
 
 
-def select_datapoints(freq: str, name: str, start_date, end_date):
+def _select_datapoints(freq: str, name: str, start_date, end_date):
     """Return dictionaries with datapoints, corresposding to *freq*, *name*
        and bounded by dates.
         
        Returns:   
            Iterable Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
     """   
-    data = Datapoint.query.filter_by(name=name, freq=freq).order_by(Datapoint.date)
+    data = Datapoint.query.filter_by(name=name, freq=freq)
     if start_date:
         data = data.filter(Datapoint.date >= start_date)
     if end_date:
         data = data.filter(Datapoint.date <= end_date)
     return data
+
+
+def select_datapoints(**kwargs):
+    """Return dictionaries with datapoints, corresposding to *freq*, *name*
+       and bounded by dates.
+        
+       Returns:   
+           Iterable Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
+    """   
+    return _select_datapoints(**kwargs).order_by(Datapoint.date)
 
 
 def select_dataframe(freq: str, names: list, start_date, end_date):
@@ -156,24 +166,20 @@ def upsert(datapoint):
         filter(Datapoint.name == datapoint['name']). \
         filter(Datapoint.date == datapoint['date']). \
         first()
-
     if existing_datapoint:
         existing_datapoint.value = datapoint['value']
     else:
         db.session.add(Datapoint(**datapoint))
 
 
-def delete(name=None, unit=None):
-    """Deletes all datapoints with a specified name or unit
-    """
-    if name:
-        Datapoint.query.filter(Datapoint.name.startswith(name)).delete(synchronize_session=False)
-        db.session.commit()
-    elif unit:
-        Datapoint.query.filter(Datapoint.name.endswith(unit)).delete(synchronize_session=False)
-        db.session.commit()
-    else:
-        raise ValueError("No parameters given")
+# FIXME - delete fails
+
+#def delete_datapoints(freq: str, name: str, start_date, end_date):
+#    """Deletes datapoints with a specified arguments."""
+#    data = _select_datapoints(freq, name, start_date, end_date)
+#    data.delete()
+#    db.session.commit()
+#    
 
 if __name__ == '__main__': # pragma: no cover
     from db import create_app
@@ -190,6 +196,7 @@ if __name__ == '__main__': # pragma: no cover
     with app.app_context():       
         dr = DateRange('a', 'GDP_yoy')
         print(dr.min)
+                
         
     
     
