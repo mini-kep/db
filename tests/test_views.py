@@ -9,12 +9,15 @@ and testing guidelines at
 
 """
 
+# TODO: fix tests for new veiws.py
+
+
 import json
 import unittest
 
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
-from db.api.views import get_datapoints_response
+#from db.api.views import get_datapoints_response
 
 from tests.test_basic import TestCaseBase
 
