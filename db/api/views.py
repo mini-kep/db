@@ -1,6 +1,7 @@
 import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 from db import db
+from db.api.errors import CustomError400
 import db.api.utils as utils
 import db.api.queries as queries
 from db.api.parameters import RequestArgs, RequestFrameArgs, Allowed
@@ -8,7 +9,7 @@ from db.api.parameters import RequestArgs, RequestFrameArgs, Allowed
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
-# FIXME: possibly shuts down validation error messages
+# FIXME: this shuts down validation error messages
 
 #<<<<<<< api-dataframe
 # Return validation errors as JSON
@@ -29,7 +30,7 @@ def handle_invalid_usage(error):
 
 @api.route('/datapoints', methods=['POST'])
 def upload_data():
-"""
+    """
     Upload data to database
     This endpoint is not used please use /datapoints endpoint
     ---
@@ -52,7 +53,7 @@ def upload_data():
             description: Failed to authenticate correctly
         200:
             description: Empty dictionary
-"""
+    """
     # authorisation
     token_to_check = RequestArgs()['API_TOKEN']
     if token_to_check != current_app.config['API_TOKEN']:
