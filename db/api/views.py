@@ -11,21 +11,20 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 # FIXME: this shuts down validation error messages
 
-#<<<<<<< api-dataframe
 # Return validation errors as JSON
-#@api.errorhandler(422)
-#def handle_validation_error(err):
-#    exc = err.exc
-#    return jsonify({'errors': exc.messages}), 422
+@api.errorhandler(400)
+def handle_validation_error(err):
+    exc = err.exc
+    return jsonify({'errors': exc.messages}), 422
 
-@api.errorhandler(CustomError400)
-def handle_invalid_usage(error):
-    """
-    Generate a json object of a custom error
-    """
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
+#@api.errorhandler(CustomError400)
+#def handle_invalid_usage(error):
+#    """
+#    Generate a json object of a custom error
+#    """
+#    response = jsonify(error.to_dict())
+#    response.status_code = error.status_code
+#    return response
 
 
 @api.route('/datapoints', methods=['POST'])
@@ -188,7 +187,7 @@ def get_date_range():
 
     """
     args = RequestArgs()    
-    dr = queries.DataRange(freq=args.freq, name=args.name)
+    dr = queries.DateRange(freq=args.freq, name=args.name)
     result = dict(start_date = dr.min, end_date = dr.max) 
     return jsonify(result)
 

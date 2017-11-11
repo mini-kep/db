@@ -126,7 +126,7 @@ def get_boundary_date(freq, name, direction):
     dt = Datapoint.query.filter_by(freq=freq, name=name) \
                .order_by(sorter) \
                .first()
-    return date_as_str(dt)
+    return date_as_str(dt.date)
      
           
 class DateRange:
@@ -135,10 +135,12 @@ class DateRange:
         
     def get_boundary(self, direction):
         return get_boundary_date(self.freq, self.name, direction)
-        
+       
+    @property    
     def min(self):
         return self.get_boundary(direction='start')
 
+    @property    
     def max(self):
         return self.get_boundary(direction='end')    
                
@@ -172,3 +174,22 @@ def delete(name=None, unit=None):
         db.session.commit()
     else:
         raise ValueError("No parameters given")
+
+if __name__ == '__main__': # pragma: no cover
+    from db import create_app
+    from db.api.views import api 
+
+    # create test app
+    app = create_app('config.DevelopmentConfig') 
+    app.register_blueprint(api)
+    
+    #EP: works without db creation after done once
+    #from db import db
+    #db.create_all(app=create_app('config.DevelopmentConfig'))
+
+    with app.app_context():       
+        dr = DateRange('a', 'GDP_yoy')
+        print(dr.min)
+        
+    
+    
