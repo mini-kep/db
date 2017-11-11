@@ -7,18 +7,10 @@ Testing guidelines at
 
 """
 
-# TODO: fix tests for new veiws.py
-
 import pytest
 import json
 
 from db.api.models import Datapoint
-
-# FIXME: are they needed?
-#from db.api.errors import CustomError400
-#from webargs import ValidationError
-
-#from db.api.views import get_datapoints_response
 
 from tests.test_basic import TestCaseBase
 
