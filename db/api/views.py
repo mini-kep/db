@@ -101,7 +101,7 @@ def get_datapoints():
         in: query
         type: string
         required: false
-        description: csv or json 
+        description: csv or json
     responses:
         400:
             description: You have one the following errors. Wrong name or frequency.
@@ -191,6 +191,43 @@ def get_date_range():
     result = dict(start_date = dr.min, end_date = dr.max) 
     return jsonify(result)
 
+    
+@api.route('/delete', methods=['DELETE'])
+def delete_datapoints():
+    """
+    Deletes a datapoint based on it's name or units.
+    ---
+    tags:
+        -delete
+    parameters:
+        -name: name
+         in: query
+         type: string
+         required: false
+         description: the datapoint name
+        -unit: unit
+         in: querry
+         type:string
+         required: false
+         description: the unit of datapoint
+    responses:
+        403:
+            description: Failed to authenticate correctly
+        400:
+            description: Request lacks either name or unit
+            
+    """
+    #check identity
+    token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
+    if token_to_check != current_app.config['API_TOKEN']:
+        return abort(403)
+    #delete datapoints
+    try:
+        queries.delete(request.args.get('name'),request.args.get('unit'))
+        return jsonify({})
+    except ValueError:
+        abort(400)
+
 # api/dataframe?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
 @api.route('/dataframe', methods=['GET'])
 def get_dataframe():
@@ -201,4 +238,3 @@ def get_dataframe():
     data = queries.select_dataframe(**param)
     csv_str = utils.dataframe_to_csv(data, param['names'])
     return no_download(csv_str)
-

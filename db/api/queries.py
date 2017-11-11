@@ -91,8 +91,8 @@ def select_dataframe(freq: str, names: list, start_date, end_date):
 
 
 def select_unique_frequencies():
-    """Return a list of allowed frequencies.    
-       Returns:   
+    """Return a list of allowed frequencies.
+       Returns:
            list of strings, likely ['a', 'q', 'm', 'w', 'd'].
     """
     query = Datapoint.query.group_by(Datapoint.freq) \
@@ -101,10 +101,10 @@ def select_unique_frequencies():
 
 
 def possible_names_values(freq):
-    """Return a list of variable names corresponding to frequency *freq*.    
+    """Return a list of variable names corresponding to frequency *freq*.
        Args:
-           freq(str) - one letter from 'aqmwd' or 'all', not checked          
-       Returns:   
+           freq(str) - one letter from 'aqmwd' or 'all', not checked
+       Returns:
            list of strings
     """
     query = Datapoint.query
@@ -113,11 +113,11 @@ def possible_names_values(freq):
     query = query.group_by(Datapoint.name).\
                   order_by(Datapoint.name).\
                   values(Datapoint.name)
-    return [row.name for row in query] 
+    return [row.name for row in query]
 
 
 def get_boundary_date(freq, name, direction):
-    """Get first or last date for timeseries  *freq*, *name*.    
+    """Get first or last date for timeseries  *freq*, *name*.
        Returns:
            SQLA own date object (?)
     """
@@ -159,3 +159,16 @@ def upsert(datapoint):
         existing_datapoint.value = datapoint['value']
     else:
         db.session.add(Datapoint(**datapoint))
+
+
+def delete(name=None, unit=None):
+    """Deletes all datapoints with a specified name or unit
+    """
+    if name:
+        Datapoint.query.filter(Datapoint.name.startswith(name)).delete(synchronize_session=False)
+        db.session.commit()
+    elif unit:
+        Datapoint.query.filter(Datapoint.name.endswith(unit)).delete(synchronize_session=False)
+        db.session.commit()
+    else:
+        raise ValueError("No parameters given")

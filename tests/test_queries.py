@@ -1,6 +1,8 @@
 import unittest
 from tests.test_basic import TestCaseBase
-from db.api.queries import select_datapoints, upsert
+from db.api.queries import select_datapoints, upsert, delete
+from db.api.models import Datapoint
+from db import db as fsa_db
 from datetime import date
 import copy
 
@@ -40,7 +42,7 @@ class TestUpsertDatapoint(TestCaseBase):
                                      end_date=self.dp1_dict['date'])
         # new value
         self.dp1_dict_updated = copy.copy(self.dp1_dict)
-        self.dp1_dict_updated['value'] = 234.5        
+        self.dp1_dict_updated['value'] = 234.5
 
     def test_before_upsert_datapoint_not_found(self):
         datapoints_count = select_datapoints(**self.dp1_search_param).count()
@@ -51,11 +53,37 @@ class TestUpsertDatapoint(TestCaseBase):
         datapoint = select_datapoints(**self.dp1_search_param).first()
         self.assertEqual(datapoint.serialized, self.dp1_dict)
 
-    def test_upsert_updates_value_for_existing_row(self):        
+    def test_upsert_updates_value_for_existing_row(self):
         upsert(self.dp1_dict)
         upsert(self.dp1_dict_updated)
         datapoint = select_datapoints(**self.dp1_search_param).first()
         self.assertEqual(datapoint.serialized, self.dp1_dict_updated)
+
+
+class TestDeleteDatapoint(TestCaseBase):
+    def test_error_on_no_input(self):
+        with self.assertRaises(ValueError):
+            delete()
+
+    def test_deletion_by_name(self):
+        _name="BRENT"
+        delete(name=_name)
+        num_after=fsa_db.session.query(Datapoint).filter(Datapoint.name.startswith(_name)).count()
+        assert num_after == 0
+
+    def test_deletion_by_unit(self):
+        _unit="rog"
+        delete(unit=_unit)
+        num_after=fsa_db.session.query(Datapoint).filter(Datapoint.name.endswith(_unit)).count()
+        assert num_after == 0
+
+    def test_no_deletion_without_match(self):
+        db_before = fsa_db.session.query(Datapoint).all()
+        _name="does_not_match"
+        delete(name=_name)
+        db_after = fsa_db.session.query(Datapoint).all()
+        assert db_before == db_after
+
 
 if __name__ == '__main__':
     unittest.main()
