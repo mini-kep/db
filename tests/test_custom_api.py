@@ -80,16 +80,20 @@ class Test_as_date(object):
 
 
 class Test_InnerPath:
-    def test_get_dict_on_valid_inner_path(self):
-        path = custom_api.InnerPath('eop/2015/2018/csv')
-        assert path.get_dates() == {
-            'start_date': '2015-01-01',
-            'end_date': '2018-12-31'}        
-        assert path.get_unit() == None        
-
     def test_constructor_on_both_rate_and_agg_fails(self):
         with pytest.raises(CustomError400):
             custom_api.InnerPath('eop/rog')
+
+
+@pytest.mark.parametrize("test_input,expected_dates,expected_unit", [
+    ('eop/2015/2018/csv', {'start_date': '2015-01-01', 'end_date': '2018-12-31'}, None),
+    ('eop/2014/2017/csv', {'start_date': '2014-01-01', 'end_date': '2017-12-31'}, None),
+    ('eop/2010/1970/csv', {'start_date': '2010-01-01', 'end_date': '1970-12-31'}, None),
+])
+def test_get_dict_on_valid_inner_path(test_input, expected_dates, expected_unit):
+    path = custom_api.InnerPath(test_input)
+    assert path.get_dates() == expected_dates
+    assert path.get_unit() == expected_unit
 
 
 class TestCustomGET(TestCaseBase):
@@ -98,7 +102,7 @@ class TestCustomGET(TestCaseBase):
         getter = custom_api.CustomGET('ru', 'CPI_rog', 'm', '')
         api_csv_str = str(getter.get_csv_response().data, 'utf-8')
         assert api_csv_str
-        
+
     def test_get_csv_on_valid_params_fetches_data(self):
         getter = custom_api.CustomGET('ru', 'USDRUR_CB', 'd', '2016')
         api_csv_str = str(getter.get_csv_response().data, 'utf-8')
@@ -112,17 +116,20 @@ class TestCustomGET(TestCaseBase):
         with pytest.raises(CustomError400):
             _ = getter.get_csv_response()
 
+    def test_make_name(self):
+        assert custom_api.CustomGET.make_name('varname', 'unit') == 'varname_unit'
+
 
 class Test_CustomEndPoint_Integration_Test(TestCaseBase):
-                        
     def test_CPI_rog_m_is_found_with_code_200(self):
         response = self.client.get('/ru/series/CPI_rog/m')
         assert response.status_code == 200
-    
+
     def test_CPI_rog_m_is_found_with_code_200_on_outer_server(self):
         import requests
         r = requests.get('http://minikep-db.herokuapp.com/ru/series/CPI_rog/m')
-        assert r.status_code == 200        
+        assert r.status_code == 200
+
 
 if __name__ == '__main__':
     pytest.main([__file__])

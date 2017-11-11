@@ -47,6 +47,27 @@ def to_csv(dicts):
     else:
         return ''
 
+# FIXME: 
+#       - rename to yield_csv_dataframe_rows, because yeilding one row is only this yield '{},{}'.format(date, ','.join(values))
+#         OR split into two funcs and use them in dataframe_to_csv()
+#       - document what datatipe dataframe is? pandas dataframe? dictionary? 
+#       - provide dataframe argument example is docstring  
+def yield_csv_dataframe_row(dataframe, names):
+    yield ',{}'.format(','.join(names))
+    # FIXME: names could be used here as well to guarantee order. order is not guaranteed now, responsibility outside function 
+    for date, datapoints in dataframe.items():
+        values = [dp['value'] for dp in datapoints]
+        yield '{},{}'.format(date, ','.join(values))
+    yield ''
+
+
+def dataframe_to_csv(dataframe, names):
+    if dataframe:
+        # FIXME: option: can contruct from csv header and csv body here  
+        rows = list(yield_csv_dataframe_row(dataframe, names))
+        return '\n'.join(rows)
+    else:
+        return ''
 
 class DatapointParameters:
     """Parameter handler for api\datapoints endpoint."""    
@@ -141,6 +162,34 @@ class DatapointParameters:
             raise CustomError400('End date must be after start date')          
         else:
             return True
+
+
+class DataframeParameters(DatapointParameters):
+    """Parameter handler for api/dataframe endpoint."""
+
+    def __init__(self, args):
+        self.args = args
+        if args.get('name'):
+            self.names = self.get_names()
+        else:
+            self.names = None
+        self.freq = self.get_freq()
+        if not self.freq:
+            raise CustomError400("<freq> parameter is required")
+
+    def get_names(self):
+        freq = self.get_freq()
+        names = self.args.get('name').split(',')
+        for name in names:
+            self.validate_name_exist_for_given_freq(freq, name)
+        return names
+
+    def get(self):
+        """Return query parameters as dictionary."""
+        return dict(names=self.names,
+                    freq=self.freq,
+                    start_date=self.get_start(),
+                    end_date=self.get_end())
 
 
 if __name__ == '__main__': # pragma: no cover

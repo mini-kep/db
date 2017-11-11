@@ -1,11 +1,10 @@
-#FIXME: can this file be db/custom_api/views.py?
-
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from db.api.errors import CustomError400
-import db.custom_api.custom_api as custom_api
+from db.api.queries import select_datapoints
+from db.api.views import publish_csv
+from db.custom_api.decomposer import Indicator
 
 custom_api_bp = Blueprint('custom_api', __name__, url_prefix='')
-
 
 @custom_api_bp.errorhandler(CustomError400)
 def handle_invalid_usage(error):
@@ -19,4 +18,6 @@ BASE_URL = '/<string:domain>/series/<string:varname>'
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>', strict_slashes=False)
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>/<path:inner_path>')
 def time_series_api_interface(domain, varname, freq, inner_path=''):
-    return custom_api.CustomGET(domain, varname, freq, inner_path).get_csv_response()
+    this_variable = Indicator(domain, varname, freq, inner_path)
+    data = select_datapoints(**this_variable.query_param)
+    return publish_csv(data)
