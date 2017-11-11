@@ -10,6 +10,7 @@ Testing guidelines at
 import pytest
 import json
 
+#not used
 from db.api.models import Datapoint
 
 from tests.test_basic import TestCaseBase
