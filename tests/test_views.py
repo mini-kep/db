@@ -148,19 +148,19 @@ class Test_API_Info(TestCaseQuery):
 
     def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_response_code_200(self):
         response = self.query_get_start_and_end_date()
-        # check
         assert response.status_code == 200
 
     # NOT TODO: may be parametrised
     def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_proper_dates(self):
         # call
         response = self.query_get_start_and_end_date('CPI_NONFOOD_rog', 'm')
-        result = json.loads(response.get_data().decode('utf-8'))
+        data = response.get_data().decode('utf-8')
+        result = json.loads(data)
         # expected
         dates = self.get_dates('CPI_NONFOOD_rog', 'm')
         # check
-        assert result['start_date'] == dates[0]
-        assert result['end_date'] == dates[-1]
+        assert result['frequencies']['m']['start_date'] == dates[0]
+        assert result['frequencies']['m']['latest_date'] == dates[-1]
 
 
 # NOT TODO: may be paarmetrised
@@ -248,7 +248,7 @@ class Test_API_Deletion(TestCaseBase):
         assert response.status_code == 200
 
 
-# FIXME: Why this was successful tet with only rog as parameter?
+# FIXME: Why this was successful test with only rog as parameter?
 #
 #    def test_on_name_delete_successfull_200(self):
 #        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])

@@ -1,13 +1,18 @@
 import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
+
 from db import db
 from db.api.errors import CustomError400
 import db.api.utils as utils
+import db.helper.label as label
 import db.api.queries as queries
-from db.api.parameters import RequestArgs, RequestFrameArgs, Allowed
+
+from db.api.queries import Allowed
+from db.api.parameters import RequestArgs, RequestFrameArgs
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
+
 
 # FIXME: this shuts down validation error messages
 
@@ -30,12 +35,10 @@ def handle_validation_error(err):
 @api.route('/datapoints', methods=['POST'])
 def upload_data():
     """
-    Upload data to database
-    This endpoint is not used please use /datapoints endpoint
+    Upload incoming data to database.
     ---
     tags:
         - datapoints
-
     parameters:
        - name: API_TOKEN
          in: query
@@ -46,12 +49,12 @@ def upload_data():
          in: query
          type: list
          required: true
-         description: list of datpoints to upload
+         description: List of dictionaries to upload
     responses:
         403:
-            description: Failed to authenticate correctly
+            description: Failed to authenticate correctly.
         200:
-            description: Empty dictionary
+            description: Returns empty dictionary on success.
     """
     # authorisation
     token_to_check = RequestArgs()['API_TOKEN']
@@ -187,8 +190,17 @@ def get_date_range():
 
     """
     args = RequestArgs()    
+    #NOT TODO YET: query on available frequencies + make frequency an optional parameter
+    var, unit = label.split_label(args.name)
+    result = dict(name = args.name,
+                  var = {'id': var, 'en': 'reserved', 'ru': 'reserved'},
+                  unit = {'id': unit, 'en': 'reserved', 'ru': 'reserved'}
+                  )
     dr = queries.DateRange(freq=args.freq, name=args.name)
-    result = dict(start_date = dr.min, end_date = dr.max) 
+    result['frequencies'] = {args.freq: {'start_date': dr.min, 
+                                         'latest_date': dr.max,
+                                         'latest_value': 'reserved'}   
+                            }
     return jsonify(result)
 
     
