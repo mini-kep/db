@@ -3,27 +3,26 @@ from flask import Blueprint, request, abort, jsonify, current_app, Response
 
 from db import db
 import db.api.utils as utils
-from db.api.errors import CustomError400
 import db.api.queries as queries
+from db.api.parameters import RequestArgs, RequestFrameArgs, Allowed
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@api.errorhandler(CustomError400)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
+# Return validation errors as JSON
+@api.errorhandler(422)
+def handle_validation_error(err):
+    exc = err.exc
+    return jsonify({'errors': exc.messages}), 422
 
 
 @api.route('/incoming', methods=['POST'])
 def upload_data():
     # authorisation
-    token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
+    token_to_check = RequestArgs()['API_TOKEN']
     if token_to_check != current_app.config['API_TOKEN']:
         return abort(403)
-
     # upload data
     try:
         data = json.loads(request.data)
@@ -37,53 +36,53 @@ def upload_data():
 
 
 @api.route('/datapoints', methods=['GET'])
-def get_datapoints():    
-    params = utils.DatapointParameters(request.args).get()
-    data = queries.select_datapoints(**params)
-    fmt = request.args.get('format')
-    return get_datapoints_response(data, fmt)
-
-def get_datapoints_response(data, output_format: str):
-    if output_format == 'csv' or not output_format:
-        csv_str = utils.to_csv([row.serialized for row in data])
-        return Response(response=csv_str, mimetype='text/plain')
-    elif output_format == 'json':
-        return jsonify([row.serialized for row in data])
+def get_datapoints():
+    args = RequestArgs()
+    data = queries.select_datapoints(**args.query_param)
+    if args.format == 'json':
+        return publish_json(data)
     else:
-        msg = (f"Wrong value for parameter 'format': <{output_format}>."
-                "\n'csv' (default) or 'json' expected")
-        raise CustomError400(msg)
+        return publish_csv(data)        
+
+
+def no_download(csv_str):
+    return Response(response=csv_str, mimetype='text/plain')
+
+        
+def publish_csv(data):
+    csv_str = utils.to_csv([row.serialized for row in data])
+    return no_download(csv_str)
+
+        
+def publish_json(data):
+    return jsonify([row.serialized for row in data])
+
+
+@api.route('/frequencies', methods=['GET'])
+def get_freq(freq):
+    return jsonify(Allowed.frequencies())
 
 
 @api.route('/names/<freq>', methods=['GET'])
 def get_possible_names(freq):
-    possible_names = queries.possible_names_values(freq)
-    return jsonify(possible_names)
+    return jsonify(Allowed.names(freq))
 
 
 @api.route('/info', methods=['GET'])
 def get_date_range():
-    dp = utils.DatapointParameters(request.args)
-    result = dict(start_date = dp.get_min_date(), 
-                  end_date = dp.get_max_date()) 
+    args = RequestArgs()    
+    dr = queries.DataRange(freq=args.freq, name=args.name)
+    result = dict(start_date = dr.min, end_date = dr.max) 
     return jsonify(result)
-
 
 # api/dataframe?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
 @api.route('/dataframe', methods=['GET'])
 def get_dataframe():
-    params = utils.DataframeParameters(request.args).get()
-    if params.get('names') is None:
-        # FIXME: this is still wrong!
-        #
-        #        when no name is provided must return utils.dataframe_to_csv()
-        #        possible_names = queries.possible_names_values(params['freq'])
-        #        csv_str = utils.dataframe_to_csv(data, possible_names)
-        #        return Response(response=csv_str, mimetype='text/plain')
-        #
-        possible_names = queries.possible_names_values(params['freq'])
-        csv_names = ','.join(possible_names) + '\n'
-        return Response(response=csv_names, mimetype='text/plain')
-    data = queries.select_dataframe(**params)
-    csv_str = utils.dataframe_to_csv(data, params.get('names'))
-    return Response(response=csv_str, mimetype='text/plain')
+    args = RequestFrameArgs()
+    param = args.query_param
+    if not args.names:
+         param['names'] = Allowed.names(args.freq)    
+    data = queries.select_dataframe(**param)
+    csv_str = utils.dataframe_to_csv(data, param['names'])
+    return no_download(csv_str)
+
