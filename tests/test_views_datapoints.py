@@ -4,8 +4,9 @@ import json
 
 from tests.test_basic import TestCaseBase
 
-# TODO - must separate codes
-ERROR_CODES = (422, 400, 403)
+# ERROR_CODES:
+# 422 - bad parameters
+# 403 - not authorised
 
 
 ENDPOINT = "api/datapoints" 
@@ -84,41 +85,41 @@ class Test_GET(TestDatapoints):
     def test_on_name_parameter_not_specified_fails(self):
         params = dict(freq='m', format='json')
         response = self.client.get('/api/datapoints', query_string=params)
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
     def test_on_freq_parameter_not_specified_fails(self):
         params = dict()
         response = self.client.get('/api/datapoints', query_string=params)
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
-
+#FIXME: this should not be a separate testing class
 class Test_GET_Errors(TestDatapoints):
 
     def test_datapoints_empty_params_returns_error(self):
         response = self.client.get('/api/datapoints')
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
     def test_datapoints_wrong_freq_returns_error(self):
         params = dict(name='CPI_NONFOOD_rog', freq='wrong_freq')
         response = self.client.get('/api/datapoints', query_string=params)
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
     def test_datapoints_wrong_name_returns_error(self):
         params = dict(name='wrong_name', freq='q')
         response = self.client.get('/api/datapoints', query_string=params)
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
     def test_datapoints_start_date_in_future_returns_error(self):
         params = dict(name='CPI_NONFOOD_rog', freq='q',
                       start_date='2099-01-01')
         response = self.client.get('/api/datapoints', query_string=params)
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
     def test_datapoints_end_date_after_start_date_returns_error(self):
         params = dict(name='CPI_NONFOOD_rog', freq='q', start_date='2010-01-01',
                       end_date='2000-01-01')
         response = self.client.get('/api/datapoints', query_string=params)
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 422
 
 
 class Test_DELETE(TestDatapoints):
