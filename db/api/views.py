@@ -4,9 +4,9 @@ from flask import Blueprint, request, abort, jsonify, current_app, Response
 from db import db
 import db.api.utils as utils
 import db.helper.label as label
-import db.api.queries as queries
 
-from db.api.queries import Allowed
+
+from db.api.queries import All, Allowed, DatapointOperations, DateRange, select_dataframe
 from db.api.parameters import RequestArgs, RequestFrameArgs
 
 
@@ -76,7 +76,7 @@ def upload_data():
     try:
         data = json.loads(request.data)
         for datapoint in data:
-            queries.upsert(datapoint)
+            DatapointOperations.upsert(datapoint)
         db.session.commit()
         return jsonify({})
     except:
@@ -124,7 +124,7 @@ def get_datapoints():
             description:  Json or Csv response of queried data with specified format.
    """
     args = RequestArgs()
-    data = queries.select_datapoints(**args.query_param)
+    data = DatapointOperations.select(**args.query_param)
     if args.format == 'json':
         return publish_json(data)
     else:
@@ -145,40 +145,39 @@ def publish_json(data):
 
 
 def delete_datapoints():
-    pass
-#    """
-#    Deletes a datapoint based on it's name or units.
-#    ---
-#    tags:
-#        -delete
-#    parameters:
-#        -name: name
-#         in: query
-#         type: string
-#         required: false
-#         description: the datapoint name
-#        -unit: unit
-#         in: querry
-#         type:string
-#         required: false
-#         description: the unit of datapoint
-#    responses:
-#        403:
-#            description: Failed to authenticate correctly
-#        400:
-#            description: ...
-#            
-#    """
-#    #check identity
-#    authorise()
-#    #delete datapoints
-#    args = RequestArgs()
-#    try:        
-#        queries.delete_datapoints(**args.query_param)
-#        return jsonify({'exit': 0})
-#    # FIXME: why a value error?
-#    except ValueError:
-#        abort(400)
+    """
+    Deletes a datapoint based on it's name or units.
+    ---
+    tags:
+        -delete
+    parameters:
+        -name: name
+         in: query
+         type: string
+         required: false
+         description: the datapoint name
+        -unit: unit
+         in: querry
+         type:string
+         required: false
+         description: the unit of datapoint
+    responses:
+        403:
+            description: Failed to authenticate correctly
+        400:
+            description: ...
+            
+    """
+    #check identity
+    authorise()
+    #delete datapoints
+    args = RequestArgs()
+    try:        
+        DatapointOperations.delete(**args.query_param)
+        return jsonify({'exit': 0})
+    # FIXME: currently value error not checked
+    except ValueError:
+        abort(400)
 
 
 @api.route('/frequencies', methods=['GET'])
@@ -186,8 +185,13 @@ def get_freq():
     return jsonify(Allowed.frequencies())
 
 
+@api.route('/names', methods=['GET'])
+def get_all_variable_names():
+    return jsonify(All.names())
+
+
 @api.route('/names/<freq>', methods=['GET'])
-def get_possible_names(freq):
+def get_all_variable_names_for_frequency(freq):
     """
     Gets all possible names to a given freq
     ---
@@ -205,8 +209,7 @@ def get_possible_names(freq):
         200:
             description: Returns a list of names
     """
-    possible_names = queries.possible_names_values(freq)
-    return jsonify(possible_names)
+    return jsonify(All.names(freq))
 
 
 @api.route('/info', methods=['GET'])
@@ -243,7 +246,7 @@ def variable_info():
                   var = {'id': var, 'en': 'reserved', 'ru': 'reserved'},
                   unit = {'id': unit, 'en': 'reserved', 'ru': 'reserved'}
                   )
-    dr = queries.DateRange(freq=freq, name=name)
+    dr = DateRange(freq=freq, name=name)
     result[freq] = {'start_date': dr.min, 
                     'latest_date': dr.max,
                     'latest_value': 'reserved'}   
@@ -256,6 +259,6 @@ def get_dataframe():
     param = args.query_param
     if not args.names:
          param['names'] = Allowed.names(args.freq)    
-    data = queries.select_dataframe(**param)
+    data = select_dataframe(**param)
     csv_str = utils.dataframe_to_csv(data, param['names'])
     return no_download(csv_str)

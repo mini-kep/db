@@ -1,11 +1,9 @@
-import unittest
 from tests.test_basic import TestCaseBase
 from db.api.queries import select_datapoints, upsert
-#from db.api.queries import delete_datapoints
-from db.api.models import Datapoint
-from db import db as fsa_db
+from db.api.queries import delete_datapoints
+#from db.api.models import Datapoint
 from datetime import date
-import copy
+
 
 
 class TestSelectDataPoints(TestCaseBase):
@@ -42,44 +40,46 @@ class TestUpsertDatapoint(TestCaseBase):
                                      start_date=self.dp1_dict['date'],
                                      end_date=self.dp1_dict['date'])
         # new value
-        self.dp1_dict_updated = copy.copy(self.dp1_dict)
-        self.dp1_dict_updated['value'] = 234.5
+        self.dp1_dict_updated = self.dp1_dict.copy()
+        self.dp1_dict_updated['value'] = 432.1
 
     def test_before_upsert_datapoint_not_found(self):
         datapoints_count = select_datapoints(**self.dp1_search_param).count()
-        self.assertEqual(datapoints_count, 0)
+        assert datapoints_count == 0
 
     def test_after_upsert_datapoint_found(self):
         upsert(self.dp1_dict)
         datapoint = select_datapoints(**self.dp1_search_param).first()
-        self.assertEqual(datapoint.serialized, self.dp1_dict)
+        assert datapoint.serialized, self.dp1_dict
 
     def test_upsert_updates_value_for_existing_row(self):
         upsert(self.dp1_dict)
         upsert(self.dp1_dict_updated)
         datapoint = select_datapoints(**self.dp1_search_param).first()
-        self.assertEqual(datapoint.serialized, self.dp1_dict_updated)
+        assert datapoint.serialized == self.dp1_dict_updated
 
 # FIXME: delete fails
 
-#class TestDeleteDatapoint(TestCaseBase):
-#    
-#    # FIXME - this fails 
-#    def test_error_on_no_input(self):
-#        #FIXME: this shoudl not be value error
-#        with self.assertRaises(ValueError):
-#            delete_datapoints()
-#    
-#    # FIXME - this fails 
-#    def test_deletion_by_name(self):
-#        _name = 'BRENT' 
-#        delete_datapoints(freq='a', name=_name, start_date=None, end_date=None)
-#        num_after=fsa_db.session.query(Datapoint).filter(Datapoint.name.startswith(_name)).count()
-#        assert num_after == 0
+class TestDeleteDatapoint(TestCaseBase):    
+
+    def test_delete(self):
+        param = dict(freq='q', name='GDP_yoy', start_date=None, end_date=None)
+        count_before_delete = select_datapoints(**param).count()
+        assert count_before_delete > 0
+        delete_datapoints(**param)
+        count_after_delete = select_datapoints(**param).count()
+        assert count_after_delete == 0
 #
+# WONTFIX: we are skipping a check if datapoint exist in the original function 
+#          (but the idea is good)
+#    
 #    def test_no_deletion_without_match(self):
 #        db_before = fsa_db.session.query(Datapoint).all()
 #        _name="does_not_match"
 #        delete_datapoints(name=_name)
 #        db_after = fsa_db.session.query(Datapoint).all()
 #        assert db_before == db_after
+
+if __name__ == '__main__':
+    import pytest
+    pytest.main([__file__])

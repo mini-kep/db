@@ -1,6 +1,6 @@
 from flask import Blueprint
 from db.api.errors import CustomError400
-from db.api.queries import select_datapoints
+from db.api.queries import DatapointOperations
 from db.api.views import publish_csv
 from db.custom_api.decomposer import Indicator
 
@@ -19,5 +19,5 @@ BASE_URL = '/<string:domain>/series/<string:varname>'
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>/<path:inner_path>')
 def time_series_api_interface(domain, varname, freq, inner_path=''):
     this_variable = Indicator(domain, varname, freq, inner_path)
-    data = select_datapoints(**this_variable.query_param)
+    data = DatapointOperations.select(**this_variable.query_param)
     return publish_csv(data)
