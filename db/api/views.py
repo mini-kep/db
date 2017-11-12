@@ -13,13 +13,27 @@ from db.api.parameters import RequestArgs, RequestFrameArgs
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-# FIXME: this shuts down validation error messages
+class CustomError400(Exception):
+    status_code = 400
 
-# Return validation errors as JSON
-@api.errorhandler(400)
-def handle_validation_error(err):
-    exc = err.exc
-    return jsonify({'errors': exc.messages}), 400
+    def __init__(self, message, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        self.payload = payload
+
+    @property     
+    def dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@api.errorhandler(422)
+def handle_validation_error(error):
+    view_dict = error.exc.kwargs['load'].copy()
+    view_dict['message'] = error.exc.messages[0]
+    response = jsonify(view_dict)
+    response.status_code = error.exc.status_code
+    return response
 
 #@api.errorhandler(CustomError400)
 #def handle_invalid_usage(error):
