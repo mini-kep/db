@@ -26,30 +26,28 @@ class Allowed(object):
     def names(freq):
         return possible_names_values(freq)
 
-
-def _select_datapoints(freq: str, name: str, start_date, end_date):
-    """Return dictionaries with datapoints, corresposding to *freq*, *name*
-       and bounded by dates.
+#TODO: to test with one argument-only
+def select_datapoints(freq: str, name: str, start_date, end_date):
+    """Return dictionaries with datapoints, corresposding to 
+       *freq*, *name* and *start_date* and *end_date*.
+       
+       Can search just by few arguments, the rest can be None or False. 
+       Example:
+           select_datapoints('a', None, None, None)
         
        Returns:   
            Iterable Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
-    """   
-    data = Datapoint.query.filter_by(name=name, freq=freq)
+    """
+    data = Datapoint.query
+    if freq:
+        data = data.filter_by(freq=freq)
+    if name: 
+        data = Datapoint.filter_by(name=name)
     if start_date:
         data = data.filter(Datapoint.date >= start_date)
     if end_date:
         data = data.filter(Datapoint.date <= end_date)
-    return data
-
-
-def select_datapoints(**kwargs):
-    """Return dictionaries with datapoints, corresposding to *freq*, *name*
-       and bounded by dates.
-        
-       Returns:   
-           Iterable Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
-    """   
-    return _select_datapoints(**kwargs).order_by(Datapoint.date)
+    return data.order_by(Datapoint.date)
 
 
 def select_dataframe(freq: str, names: list, start_date, end_date):
@@ -161,26 +159,24 @@ def upsert(datapoint):
        there might be only one row found, therefore it is safe to retrieve a single
        datapoint using .first()
     """
-    existing_datapoint = Datapoint.query. \
-        filter(Datapoint.freq == datapoint['freq']). \
-        filter(Datapoint.name == datapoint['name']). \
-        filter(Datapoint.date == datapoint['date']). \
-        first()
+    existing_datapoint = Datapoint.query \
+        .filter(Datapoint.freq == datapoint['freq']) \
+        .filter(Datapoint.name == datapoint['name']) \
+        .filter(Datapoint.date == datapoint['date']) \
+        .first()
     if existing_datapoint:
         existing_datapoint.value = datapoint['value']
     else:
         db.session.add(Datapoint(**datapoint))
 
 
-# FIXME - delete fails
+def delete_datapoints(freq: str, name: str, start_date, end_date):
+    """Deletes datapoints with a specified arguments."""
+    for item in select_datapoints(freq, name, start_date, end_date):
+        db.session.delete(item)
+    db.session.commit()
 
-#def delete_datapoints(freq: str, name: str, start_date, end_date):
-#    """Deletes datapoints with a specified arguments."""
-#    data = _select_datapoints(freq, name, start_date, end_date)
-#    data.delete()
-#    db.session.commit()
-#    
-
+# 'pragma: no cover' exludes code block from coverage
 if __name__ == '__main__': # pragma: no cover
     from db import create_app
     from db.api.views import api 
@@ -190,13 +186,15 @@ if __name__ == '__main__': # pragma: no cover
     app.register_blueprint(api)
     
     #EP: works without db creation after done once
-    #from db import db
-    #db.create_all(app=create_app('config.DevelopmentConfig'))
+    db.create_all(app=create_app('config.DevelopmentConfig'))
 
     with app.app_context():       
-        dr = DateRange('a', 'GDP_yoy')
+        dr = DateRange('q', 'GDP_yoy')
         print(dr.min)
-                
+        #delete_datapoints("a", None, None, None)
+        q = select_datapoints(freq = 'a', 
+                              name = None,
+                              start_date = None, 
+                              end_date = None) 
+        print(q.count())
         
-    
-    
