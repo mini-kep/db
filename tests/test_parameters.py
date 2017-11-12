@@ -121,9 +121,12 @@ def days_ahead(k):
 
 class Test_RequestFrameArgs(TestCaseBase):
     def test_init_on_well_formed_args_is_success(self):
+        # prepare
         incoming_args = dict(names="GDP_yoy,CPI_rog", freq='a')
         req = SimRequest(**incoming_args)   
+        # call
         args = RequestFrameArgs(req)
+        # check
         assert args.names == ['GDP_yoy', 'CPI_rog']
         assert args.freq == 'a'
         assert args.start_date is None

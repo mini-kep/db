@@ -13,26 +13,6 @@ import json
 from tests.test_basic import TestCaseBase
 
 
-## TODO - must separate which code is which
-#ERROR_CODES = (422, 400, 403)
-#
-#class Test_api_Names(TestCaseBase):
-#
-#
-#    def test_get_all_names_response_code_200(self):
-#        response = self.query_names('all')
-#        assert response.status_code == 200
-#
-#    def test_get_all_names_returns_sorted_list_of_all_names(self):
-#        # call
-#        response = self.query_names('all')
-#        result = json.loads(response.get_data().decode('utf-8'))
-#        # expected result
-#        names = set([x['name'] for x in self.test_data])
-#        expected_result = sorted(list(names))
-#        # check
-#        assert result == expected_result
-
 
 class Test_API_Names(TestCaseBase):
     """Endpoint under test: /api/names/<freq>"""
@@ -129,11 +109,5 @@ if __name__ == '__main__': # pragma: no cover
     params = dict(name=_name, freq=_freq)
     resp = v.client.get('/api/info', query_string=params)
     print(resp)
-    
-    
-    dict(name="BRENT")
-    
-    # class werkzeug.EnvironBuilder(path='/', base_url=None, query_string=None, method='GET', input_stream=None, content_type=None, content_length=None, errors_stream=None, multithread=False, multiprocess=False, run_once=False, headers=None, data=None, environ_base=None, environ_overrides=None, charset='utf-8')
-    
-    
+   
     

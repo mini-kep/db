@@ -58,6 +58,7 @@ class Test_POST(TestDatapoints):
 
 class Test_GET(TestDatapoints):
 
+    
     def query_on_name_and_freq(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m', format='json')
         return self.client.get('/api/datapoints', query_string=params)
@@ -75,7 +76,7 @@ class Test_GET(TestDatapoints):
                            'value': 100.5}
 
     # NOT TODO: may be parametrised
-    def test_test_get_on_name_and_freq_returns_list_of_dicts(self):
+    def test_get_on_name_and_freq_returns_list_of_dicts(self):
         response = self.query_on_name_and_freq()
         data = json.loads(response.get_data().decode('utf-8'))
         expected_data = self._subset_test_data('CPI_NONFOOD_rog', 'm')
