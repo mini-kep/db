@@ -66,7 +66,7 @@ class DatapointOperations:
         """Delete datapoints with specified arguments. 
            Arguments is the same as in *select_datapoints()*.
         """
-        query = DatapointOperations.select_datapoints(freq, name, start_date, end_date)
+        query = DatapointOperations.select(freq, name, start_date, end_date)
         # WONTFIX: may check length query.count() and raise error if nothing to delete
         for item in query:
             db.session.delete(item)
@@ -144,8 +144,8 @@ def select_unique_frequencies(name=None):
     query = Datapoint.query
     if name:
         query = query.filter_by(name=name)
-    query = Datapoint.query.group_by(Datapoint.freq) \
-                           .order_by(Datapoint.freq)
+    query = query.group_by(Datapoint.freq) \
+                 .order_by(Datapoint.freq)
     return [row.freq for row in query]
 
 
@@ -210,7 +210,7 @@ if __name__ == '__main__': # pragma: no cover
         dr = DateRange('q', 'GDP_yoy')
         print(dr.min)
         #delete_datapoints("a", None, None, None)
-        q = select_datapoints(freq = 'd', 
+        q = DatapointOperations.select(freq = 'd', 
                               name = None,
                               start_date = None, 
                               end_date = None) 
@@ -221,12 +221,11 @@ if __name__ == '__main__': # pragma: no cover
                      name='CPI_ALCOHOL_rog',
                      start_date= date(year=2016, month=6, day=1),
                      end_date= date(year=2016, month=7, day=1))
-        q3 = select_datapoints(**param)
+        q3 = DatapointOperations.select(**param)
         
         # TODO: make test + approve + parametrise it
-        assert ['a', 'q'] == possible_frequencies_values('GDP_yoy')
-        assert possible_frequencies_values('BRENT') == ['d']
+        assert ['a', 'q'] == Allowed.frequencies('GDP_yoy')
+        assert ['d'] == Allowed.frequencies('BRENT')
         
-                                    
-        
+        do = DatapointOperations.select(None, None, None, None)
     

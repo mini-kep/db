@@ -28,15 +28,15 @@ class TestDatapoints(TestCaseBase):
         return self.client.get(ENDPOINT, query_string=param)
         
     def delete(self, param): 
-        return self.client.get(ENDPOINT, query_string=param,
-                               headers=self.token_dict)    
+        return self.client.delete(ENDPOINT, query_string=param,
+                                  headers=self.token_dict)    
     
 
 class Test_POST(TestDatapoints):
 
     def test_on_no_auth_token_returns_forbidden_status_error_code(self):
         response = self.client.post('/api/datapoints')
-        assert response.status_code in ERROR_CODES 
+        assert response.status_code == 403
     
     def test_on_new_data_upload_successfull_with_code_200(self):
         upload_json = json.dumps(self.test_data)
@@ -50,12 +50,9 @@ class Test_POST(TestDatapoints):
         response = self.post(data=upload_json)
         assert response.status_code == 200
 
-# FIXME: fails with VERY LONG error stack
-
-    @pytest.mark.xfail
     def test_on_broken_data_upload_returns_error_code(self):
         response = self.post(data="___broken_json_data__")
-        assert response.status_code in ERROR_CODES
+        assert response.status_code == 400
         
 
 class Test_GET(TestDatapoints):
@@ -90,7 +87,7 @@ class Test_GET(TestDatapoints):
         assert response.status_code in ERROR_CODES
 
     def test_on_freq_parameter_not_specified_fails(self):
-        params = dict(name='CPI_NONFOOD_rog', format='json')
+        params = dict()
         response = self.client.get('/api/datapoints', query_string=params)
         assert response.status_code in ERROR_CODES
 
@@ -127,30 +124,25 @@ class Test_GET_Errors(TestDatapoints):
 class Test_DELETE(TestDatapoints):
     """Testing /api/delete"""
     
-# TODO: DELETE not implemented 
-    
-    @pytest.mark.xfail
+   
     def test_on_no_auth_token_returns_forbidden_status_code_403(self):
-        response = self.client.delete(ENDPOINT)
-        assert response.status_code in ERROR_CODES
+        response = self.client.delete(ENDPOINT,
+                                      headers=dict(API_TOKEN='000'))
+        assert response.status_code == 403
         
-    @pytest.mark.xfail
-    def test_on_no_data_returns_bad_request_error(self):
-        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        response = self.client.delete(self.endpoint, headers=_token_dict)
-        assert response.status_code in ERROR_CODES
-
-    @pytest.mark.xfail
+    def test_on_no_data_returns_invalid_entry_error_422(self):
+        response = self.delete({})
+        assert response.status_code == 422
+    
+    # FIXME: may parametrise        
     def test_on_name_delete_successfull_200(self):
-        _token_dict = dict(API_TOKEN=self.app.config['API_TOKEN'])
-        params = dict(name="BRENT")
-        response = self.client.delete(self.endpoint, query_string=params, headers=_token_dict)
+        param = dict(name="BRENT")
+        response = self.delete(param)
         assert response.status_code == 200
 
 
 if __name__ == '__main__':
-    import pytest
-    pytest.main([__file__])
+    pytest.main([__file__, '--maxfail=1'])
     
     v = TestDatapoints()
     v.setUp()
@@ -159,8 +151,20 @@ if __name__ == '__main__':
     resp = v.client.post('/api/datapoints', data=sample, headers=v.token_dict)
     print(resp)
     
-    #_name='CPI_NONFOOD_rog'
-    #_freq='m'
-    #params = dict(name=_name, freq=_freq)
-    #resp = v.client.get('/api/info', query_string=params)
-    #print(resp)
+    _name='CPI_NONFOOD_rog'
+    _freq='m'
+    params = dict(name=_name, freq=_freq)
+    resp = v.client.get('/api/info', query_string=params)
+    print(resp)
+
+    resp = v.client.delete('/api/datapoints', 
+                           query_string={'name':'DRENT'}, 
+                           headers=v.token_dict)
+    print(resp)
+
+    
+    _name='CPI_NONFOOD_rog'
+    _freq='m'
+    params = dict(name=_name, freq=_freq)
+    resp = v.client.get('/api/info', query_string=params)
+    print(resp)

@@ -29,10 +29,9 @@ class ArgError(ValidationError):
         super().__init__(message, status_code = 422, load=load)
 
 class Check:    
-    """
-    """
+    """Collectin of argument validation functions."""
     def __init__(self, args):
-        self.freq = args['freq']
+        self.freq = args.get('freq')
         self.name = args.get('name')
         self.names = args.get('names')
         self.start_date = args.get('start_date')
@@ -75,31 +74,35 @@ class Check:
 
     def name_is_valid(self):
         self._name_exists(self.name)
-
+        
+    def not_all_are_none(self):  
+        is_none = [x is None 
+                   for x in [self.freq, self.name, self.start_date, self.end_date]]
+        return not all(is_none)
+        
+        
 def get_func(func_name):
     return lambda args: getattr(Check(args), func_name)()  
 
 def make_func_list(func_names):
     return [get_func(func_name) for func_name in func_names]
     
-DATAPOINT_ARGS = {
+
+class RequestArgs:    
+
+    schema = {
     'freq': fields.Str(required=True),
     'name': fields.Str(required=True),
     'start_date': fields.Date(required=False),
     'end_date': fields.Date(required=False),
-    'format': fields.Str(missing='csv'),                      
-}
-
-DATAPOINT_VALIDATION_FUNCTIONS = make_func_list(
+    'format': fields.Str(missing='csv')}
+    
+    validate_with = make_func_list(
                       ['start_is_not_in_future', 
                        'end_date_after_start_date',
                        'freq_exist',
                        'name_is_valid'])
 
-class RequestArgs:    
-
-    schema = DATAPOINT_ARGS
-    validate_with = DATAPOINT_VALIDATION_FUNCTIONS
     query_keys = ['name', 'freq', 'start_date', 'end_date']
         
     def __init__(self, request = flask.request):        
@@ -114,26 +117,21 @@ class RequestArgs:
         return self._args.get(x)
 
       
+   
+class RequestFrameArgs(RequestArgs):    
 
-DATAFRAME_ARGS = {
-    'freq': fields.Str(required=True),
-    'names': fields.Str(required=False),
-    'start_date': fields.Date(required=False),
-    'end_date': fields.Date(required=False),
-}
-
-
-FRAME_VALIDATION_FUNCTIONS = make_func_list(
+    schema = {
+        'freq': fields.Str(required=True),
+        'names': fields.Str(required=False),
+        'start_date': fields.Date(required=False),
+        'end_date': fields.Date(required=False),
+    }
+    validate_with = make_func_list(
                       ['start_is_not_in_future', 
                        'end_date_after_start_date',
                        'freq_exist',
                        'names_are_valid'])
 
-    
-class RequestFrameArgs(RequestArgs):    
-
-    schema = DATAFRAME_ARGS
-    validate_with = FRAME_VALIDATION_FUNCTIONS
     query_keys = ['names', 'freq', 'start_date', 'end_date']    
 
     def __init__(self, request = flask.request):        
@@ -144,14 +142,27 @@ class RequestFrameArgs(RequestArgs):
         if names:
              self._args['names'] = names.split(',')
 
+             
+class SimplifiedArgs(RequestArgs):
+    schema = {
+        'freq': fields.Str(required=False),
+        'name': fields.Str(required=False),
+        'start_date': fields.Date(required=False),
+        'end_date': fields.Date(required=False),
+    }             
+    validate_with = make_func_list(['not_all_are_none']) 
+    query_keys = ['name', 'freq', 'start_date', 'end_date']    
 
-if __name__ == "__main__":
+
+             
+if __name__ == "__main__": # pragma: no cover
+
     msg_str = 'Start date cannot be in future'
     load_dict = dict(start_date=123, today=456)
     z = ArgError(message = msg_str, load = load_dict)
     assert z.kwargs['load']
  
-    # this was moved to test_parameters.py  
+    # code below was moved to test_parameters.py  
     class SimRequest:  
         mimetype = None
         json = None        
@@ -196,8 +207,5 @@ if __name__ == "__main__":
         
     incoming_args = dict(names="GDP_yoy,CPI_rog", freq='a')
     req = SimRequest(**incoming_args)   
-    args = RequestFrameArgs(req)  
-    
-    
-    
+    args = RequestFrameArgs(req)
     

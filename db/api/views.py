@@ -2,47 +2,37 @@ import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 
 from db import db
+from db.api.errors import CustomError400
+from db.api.queries import All, Allowed, DatapointOperations, DateRange, select_dataframe
+from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
+
 import db.api.utils as utils
 import db.helper.label as label
-
-
-from db.api.queries import All, Allowed, DatapointOperations, DateRange, select_dataframe
-from db.api.parameters import RequestArgs, RequestFrameArgs
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-class CustomError400(Exception):
-    status_code = 400
-
-    def __init__(self, message, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        self.payload = payload
-
-    @property     
-    def dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
 @api.errorhandler(422)
 def handle_validation_error(error):
-    view_dict = error.exc.kwargs['load'].copy()
-    view_dict['message'] = error.exc.messages[0]
+    # ArgError part
+    try:
+        view_dict = error.exc.kwargs['load'].copy()
+    except KeyError:    
+        view_dict = {}    
+    # other validation errors parts
+    view_dict['messages'] = error.exc.messages
     response = jsonify(view_dict)
     response.status_code = error.exc.status_code
     return response
 
-#@api.errorhandler(CustomError400)
-#def handle_invalid_usage(error):
-#    """
-#    Generate a json object of a custom error
-#    """
-#    response = jsonify(error.to_dict())
-#    response.status_code = error.status_code
-#    return response
+
+@api.errorhandler(CustomError400)
+def handle_invalid_usage(error):
+    """Generate a json object of a custom error"""
+    response = jsonify(error.dict)
+    response.status_code = error.status_code
+    return response
 
 
 def authorise():
@@ -57,7 +47,6 @@ def datapoints_endpoint():
        return upload_data()
     elif request.method == 'DELETE':
        return delete_datapoints()
-    # GET is default    
     else:    
        return get_datapoints()
         
@@ -66,7 +55,7 @@ def upload_data():
     Upload incoming data to database.
     ---
     tags:
-        - datapoints
+       - datapoints
     parameters:
        - name: API_TOKEN
          in: query
@@ -77,7 +66,7 @@ def upload_data():
          in: query
          type: list
          required: true
-         description: List of dictionaries to upload
+         description: list of dictionaries to upload, each of dicts is one datapoint obsrevation
     responses:
         403:
             description: Failed to authenticate correctly.
@@ -100,42 +89,38 @@ def upload_data():
 
 def get_datapoints():
     """
-    Returns formatted data of specified name and frequency
+    Select and return time series as csv or json
     ---
     tags:
-        - datapoints
+      - datapoints
     parameters:
       - name: name
         in: query
         type: string
         required: true
-        description: the datapoint name
       - name: freq
         in: query
         type: string
         required: true
-        description: frequency from [a, d, m, q]
+        description: a, q, or d
       - name: start_date
         in: query
         type: string
         required: false
-        description: start date.
       - name: end_date
         in: query
         type: string
         required: false
-        description: end date.
       - name: format
         in: query
         type: string
         required: false
-        description: csv or json
+        description: 'csv'(default) or 'json'
     responses:
-        400:
-            description: You have one the following errors. Wrong name or frequency.
-                        start date in future or end_date greater than start_date
+        422:
+            description: bad arguments, eg start_date > end_date
         200:
-            description:  Json or Csv response of queried data with specified format.
+            description: sent json or csv
    """
     args = RequestArgs()
     data = DatapointOperations.select(**args.query_param)
@@ -146,6 +131,7 @@ def get_datapoints():
 
 
 def no_download(csv_str):
+    """Show document in browser, do not start a download dialog."""
     return Response(response=csv_str, mimetype='text/plain')
 
         
@@ -160,43 +146,44 @@ def publish_json(data):
 
 def delete_datapoints():
     """
-    Deletes a datapoint based on it's name or units.
+    Delete datapoints.
     ---
     tags:
         -delete
     parameters:
-        -name: name
-         in: query
-         type: string
-         required: false
-         description: the datapoint name
-        -unit: unit
-         in: querry
-         type:string
-         required: false
-         description: the unit of datapoint
+      - name: name
+        in: query
+        type: string
+        required: false
+      - name: freq
+        in: query
+        type: string
+        required: false
+        description: a, q, or d
+      - name: start_date
+        in: query
+        type: string
+        required: false
+      - name: end_date
+        in: query
+        type: string
+        required: false
     responses:
         403:
             description: Failed to authenticate correctly
         400:
-            description: ...
+            description: Returns {'exit': 0}
             
     """
-    #check identity
     authorise()
-    #delete datapoints
-    args = RequestArgs()
-    try:        
-        DatapointOperations.delete(**args.query_param)
-        return jsonify({'exit': 0})
-    # FIXME: currently value error not checked
-    except ValueError:
-        abort(400)
-
+    args = SimplifiedArgs()
+    DatapointOperations.delete(**args.query_param)
+    return jsonify({'exit': 0})
+    
 
 @api.route('/frequencies', methods=['GET'])
 def get_freq():
-    return jsonify(Allowed.frequencies())
+    return jsonify(All.frequencies())
 
 
 @api.route('/names', methods=['GET'])
@@ -223,7 +210,7 @@ def get_all_variable_names_for_frequency(freq):
         200:
             description: Returns a list of names
     """
-    return jsonify(All.names(freq))
+    return jsonify(Allowed.names(freq))
 
 
 @api.route('/info', methods=['GET'])

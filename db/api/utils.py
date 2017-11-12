@@ -1,3 +1,9 @@
+"""Helpers:
+
+    - date functions
+    - serialisers
+
+"""
 from datetime import datetime
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
@@ -12,10 +18,10 @@ def to_date(date_str: str):
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
-
-def date_as_str(dt):
-    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
-    return datetime.strftime(dt.date, "%Y-%m-%d")
+#
+#def date_as_str(dt):
+#    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
+#    return datetime.strftime(dt.date, "%Y-%m-%d")
 
 def yield_csv_row(dicts):
     """Serialiser function to create CSV rows as strings.
@@ -68,128 +74,6 @@ def dataframe_to_csv(dataframe, names):
         return '\n'.join(rows)
     else:
         return ''
-
-class DatapointParameters:
-    """Parameter handler for api\datapoints endpoint."""    
-    def __init__(self, args):
-        self.args = args
-        self.name = self.get_name() 
-        if not self.name: 
-            raise CustomError400("<name> parameter is required")
-        self.freq = self.get_freq() 
-        if not self.freq: 
-            raise CustomError400("<freq> parameter is required")
-        
-    def get_freq(self): 
-        freq = self.args.get('freq')  
-        self.validate_freq_exist(freq)
-        return freq
-       
-    def get_name(self):
-        freq = self.get_freq()
-        name = self.args.get('name')  
-        self.validate_name_exist_for_given_freq(freq, name)
-        return name
-    
-    def get_start(self):
-        start_dt = self.get_dt('start_date')  
-        if start_dt:
-            self.validate_start_is_not_in_future(start_dt)
-        return start_dt     
-    
-    def get_end(self):
-        end_dt = self.get_dt('end_date')
-        start_dt = self.get_start()
-        if start_dt and end_dt:
-            self.validate_end_date_after_start_date(start_dt, end_dt)
-        return end_dt     
-    
-    def get_dt(self, key: str):
-        dt = None
-        date_str = self.args.get(key)  
-        if date_str:
-            dt = to_date(date_str)
-        return dt
-    
-    def _get_boundary(self, direction):
-        query = queries.get_boundary_date(self.freq, self.name, direction)
-        return date_as_str(query)       
-    
-    def get_min_date(self):
-        return self._get_boundary(direction='start')
-
-    def get_max_date(self):
-        return self._get_boundary(direction='end')
-    
-    def get(self):
-        """Return query parameters as dictionary."""
-        return dict(name=self.name,
-                    freq=self.freq,
-                    start_date=self.get_start(),
-                    end_date=self.get_end())
-
-    @staticmethod
-    def validate_freq_exist(freq):
-        allowed = list(queries.select_unique_frequencies())
-        if freq in allowed:
-            return True
-        else:     
-            raise CustomError400(message=f'Invalid frequency <{freq}>',
-                                 payload={'allowed': allowed})
-    
-    @staticmethod
-    def validate_name_exist_for_given_freq(freq, name):
-        possible_names = queries.possible_names_values(freq)
-        if name in possible_names:
-            return True
-        else:
-            msg = f'No such name <{name}> for <{freq}> frequency.'
-            raise CustomError400(message=msg,
-                                 payload={"allowed": possible_names})
-    
-    @staticmethod
-    def validate_start_is_not_in_future(start_date):
-        current_date = datetime.date(datetime.utcnow())
-        #TODO: test on date = today must pass
-        if start_date > current_date:
-            raise CustomError400('Start date cannot be in future')
-        else:
-            return True            
-    
-    @staticmethod
-    def validate_end_date_after_start_date(start_date, end_date):
-        if end_date < start_date:
-            raise CustomError400('End date must be after start date')          
-        else:
-            return True
-
-
-class DataframeParameters(DatapointParameters):
-    """Parameter handler for api/dataframe endpoint."""
-
-    def __init__(self, args):
-        self.args = args
-        if args.get('name'):
-            self.names = self.get_names()
-        else:
-            self.names = None
-        self.freq = self.get_freq()
-        if not self.freq:
-            raise CustomError400("<freq> parameter is required")
-
-    def get_names(self):
-        freq = self.get_freq()
-        names = self.args.get('name').split(',')
-        for name in names:
-            self.validate_name_exist_for_given_freq(freq, name)
-        return names
-
-    def get(self):
-        """Return query parameters as dictionary."""
-        return dict(names=self.names,
-                    freq=self.freq,
-                    start_date=self.get_start(),
-                    end_date=self.get_end())
 
 
 if __name__ == '__main__': # pragma: no cover
