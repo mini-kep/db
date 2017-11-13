@@ -15,13 +15,14 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 @api.errorhandler(422)
 def handle_validation_error(error):
-    # ArgError part
-    try:
-        view_dict = error.exc.kwargs['load'].copy()
-    except KeyError:    
-        view_dict = {}    
-    # other validation errors parts
+    # when custom class ArgError is raised we will have 'kwargs.['load']' available 
+    # this happens when own validation function on parser level raises error
+    view_dict = error.exc.kwargs.get('load', {}) 
+    # other validation paths for error 422 in webargs will just have .messages
+    # this happens when webord own validation raises error on argument check 
+    #    right about here
     view_dict['messages'] = error.exc.messages
+    # send view_dict to user screen
     response = jsonify(view_dict)
     response.status_code = error.exc.status_code
     return response
@@ -181,7 +182,7 @@ def delete_datapoints():
     return jsonify({'exit': 0})
     
 
-@api.route('/frequencies', methods=['GET'])
+@api.route('/freq', methods=['GET'])
 def get_freq():
     return jsonify(All.frequencies())
 

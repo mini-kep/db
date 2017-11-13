@@ -33,7 +33,7 @@ class DatapointOperations:
            Returns:   
                Iterable Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
         """
-        data = Datapoint.query
+        data = Datapoint.query.order_by(Datapoint.date)
         if freq:
             data = data.filter_by(freq=freq)
         if name: 
@@ -42,7 +42,7 @@ class DatapointOperations:
             data = data.filter(Datapoint.date >= start_date)
         if end_date:
             data = data.filter(Datapoint.date <= end_date)
-        return data.order_by(Datapoint.date)
+        return data
     
     
     def upsert(datapoint):
@@ -145,7 +145,8 @@ def select_unique_frequencies(name=None):
     if name:
         query = query.filter_by(name=name)
     query = query.group_by(Datapoint.freq) \
-                 .order_by(Datapoint.freq)
+                 .order_by(Datapoint.freq) \
+                 .values(Datapoint.freq)
     return [row.freq for row in query]
 
 
@@ -160,7 +161,8 @@ def name_values(freq=None):
     if freq:
         query = query.filter_by(freq=freq)
     query = query.group_by(Datapoint.name) \
-                 .order_by(Datapoint.name)
+                 .order_by(Datapoint.name) \
+                 .values(Datapoint.name)
     return [row.name for row in query]
 
 
@@ -228,4 +230,7 @@ if __name__ == '__main__': # pragma: no cover
         assert ['d'] == Allowed.frequencies('BRENT')
         
         do = DatapointOperations.select(None, None, None, None)
+        
+        freqs = select_unique_frequencies(None)
+        assert freqs ==  ['a', 'd', 'm', 'q']
     
