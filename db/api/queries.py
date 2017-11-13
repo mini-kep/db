@@ -146,6 +146,8 @@ def select_unique_frequencies(name=None):
         query = query.filter_by(name=name)
     query = query.group_by(Datapoint.freq) \
                  .order_by(Datapoint.freq) \
+                 # the query result will be undefined without .values(...)
+                 # it passes on sqlite, but fails on postgres
                  .values(Datapoint.freq)
     return [row.freq for row in query]
 
@@ -162,6 +164,8 @@ def name_values(freq=None):
         query = query.filter_by(freq=freq)
     query = query.group_by(Datapoint.name) \
                  .order_by(Datapoint.name) \
+                 # the query result will be undefined without .values(...)
+                 # it passes on sqlite, but fails on postgres
                  .values(Datapoint.name)
     return [row.name for row in query]
 
@@ -191,9 +195,7 @@ def get_boundary_date(freq, name, direction):
     dt = Datapoint.query.filter_by(freq=freq, name=name) \
                .order_by(sorter) \
                .first()
-    return date_as_str(dt.date)
-
-               
+    return date_as_str(dt.date)               
 
 
 # 'pragma: no cover' exludes code block from coverage

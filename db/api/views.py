@@ -15,14 +15,20 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 @api.errorhandler(422)
 def handle_validation_error(error):
+    # error 422 is raised by webargs, on two accasions:
+    #
+    # 1. argument check on input (eg required argument missing)
+    #    webarg raises some exception internally
+    #
+    # 2. argument check inside parser class (eg start date must be before or equal end date)
+    #    we raise ArgError(ValidationError)    
+    #
+    
     # when custom class ArgError is raised we will have 'kwargs.['load']' available 
-    # this happens when own validation function on parser level raises error
     view_dict = error.exc.kwargs.get('load', {}) 
     # other validation paths for error 422 in webargs will just have .messages
-    # this happens when webord own validation raises error on argument check 
-    #    right about here
     view_dict['messages'] = error.exc.messages
-    # send view_dict to user screen
+    # send combination of the above to user screen
     response = jsonify(view_dict)
     response.status_code = error.exc.status_code
     return response
