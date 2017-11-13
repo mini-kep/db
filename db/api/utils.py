@@ -58,20 +58,25 @@ def to_csv(dicts):
         return ''
 
 
+def unique(seq):
+    return sorted(list(set(seq)))
+
 class CSV_Maker:
     def __init__(self, datapoint_query):
         self.query = datapoint_query
         
-    # FIXME: this passes on sqlite but fails on postgres    
+    # had to simplify this to make work on postgres to avooid getting
+    # sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) SELECT DISTINCT ON expressions must match initial ORDER BY expressions
+    # 2017-11-13T23:45:26.537734+00:00 app[web.1]: LINE 1: SELECT DISTINCT ON (datapoint.name) datapoint.name AS datapo...
     @property    
     def names(self):
-        names = self.query.distinct(Datapoint.name).values(Datapoint.name)
-        return sorted([x.name for x in names])
-
+        names = [x.name for x in self.query.values(Datapoint.name)]
+        return unique(names)
+    
     @property    
     def dates(self):
-        dates = self.query.distinct(Datapoint.date).values(Datapoint.date)
-        return sorted([x.date for x in dates])
+        dates = [x.date for x in self.query.values(Datapoint.date)]
+        return unique(dates)
     
     @property
     def header(self):
