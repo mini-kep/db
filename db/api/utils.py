@@ -65,17 +65,13 @@ class CSV_Maker:
     # FIXME: this passes on sqlite but fails on postgres    
     @property    
     def names(self):
-        names = self.query.distinct(Datapoint.name) \
-                          .group_by(Datapoint.name) \
-                          .values(Datapoint.name)
+        names = self.query.distinct(Datapoint.name).values(Datapoint.name)
         return sorted([x.name for x in names])
 
     @property    
     def dates(self):
-        dates = self.query.order_by(Datapoint.date) \
-                          .group_by(Datapoint.date) \
-                          .values(Datapoint.date)
-        return [x.date for x in dates]
+        dates = self.query.distinct(Datapoint.date).values(Datapoint.date)
+        return sorted([x.date for x in dates])
     
     @property
     def header(self):
