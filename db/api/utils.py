@@ -134,3 +134,14 @@ if __name__ == '__main__': # pragma: no cover
             
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
         
+        
+        # test this result for daily frequency
+        """,BRENT,USDRUR_CB
+2016-06-01,48.81,65.9962
+2016-06-02,49.05,66.6156
+2016-06-03,48.5,66.7491
+2016-06-04,,66.8529
+2016-06-06,48.94,
+2016-06-07,49.76,65.7894"""
+        
+        

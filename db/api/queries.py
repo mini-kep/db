@@ -2,9 +2,9 @@ from datetime import datetime
 
 from db.api.models import Datapoint
 from db import db
-from collections import OrderedDict
 
-# TODO: duplicate of utilf fucntion
+
+# TODO: duplicate of util.py fucntion
 def to_date(date_str: str):
     """Convert YYYY-MM-DD *date_str* to datetime.date object.
        Raises error if *date_str* not in YYYY-MM-DD format.

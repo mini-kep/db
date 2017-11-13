@@ -3,7 +3,7 @@ from flask import Blueprint, request, abort, jsonify, current_app, Response
 
 from db import db
 from db.api.errors import CustomError400
-from db.api.queries import All, Allowed, DatapointOperations, DateRange, select_dataframe
+from db.api.queries import All, Allowed, DatapointOperations, DateRange
 from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
 
 import db.api.utils as utils
@@ -44,8 +44,25 @@ def authorise():
     token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
     if token_to_check != current_app.config['API_TOKEN']:
         return abort(403)
-    
 
+
+def no_download(csv_str):
+    """Show document in browser, do not start a download dialog."""
+    return Response(response=csv_str, mimetype='text/plain')
+
+        
+def publish_csv(data):
+    csv_str = utils.to_csv([row.serialized for row in data])
+    return no_download(csv_str)
+
+        
+def publish_json(data):
+    return jsonify([row.serialized for row in data])
+
+    
+# FIXME: change this to class + restore swagger documentation
+# https://github.com/mini-kep/db/issues/69
+# http://flask.pocoo.org/docs/0.12/views/
 @api.route('/datapoints', methods=['POST', 'GET', 'DELETE'])
 def datapoints_endpoint():
     if request.method == 'POST':
@@ -134,21 +151,6 @@ def get_datapoints():
     else:
         return publish_csv(data)        
 
-
-def no_download(csv_str):
-    """Show document in browser, do not start a download dialog."""
-    return Response(response=csv_str, mimetype='text/plain')
-
-        
-def publish_csv(data):
-    csv_str = utils.to_csv([row.serialized for row in data])
-    return no_download(csv_str)
-
-        
-def publish_json(data):
-    return jsonify([row.serialized for row in data])
-
-
 def delete_datapoints():
     """
     Delete datapoints.
@@ -185,6 +187,20 @@ def delete_datapoints():
     DatapointOperations.delete(**args.query_param)
     return jsonify({'exit': 0})
     
+# end FIXME -------------------------------------------------------------------
+
+
+# api/frame?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
+@api.route('/frame', methods=['GET'])
+def get_dataframe():
+    args = RequestFrameArgs()
+    param = args.query_param
+    if not args.names:
+         param['names'] = Allowed.names(args.freq)    
+    data = DatapointOperations.select_frame(**param)
+    csv_str = utils.CSV_Maker(data).to_csv()
+    return no_download(csv_str)
+
 
 @api.route('/freq', methods=['GET'])
 def get_freq():
@@ -217,7 +233,8 @@ def get_all_variable_names_for_frequency(freq):
     """
     return jsonify(Allowed.names(freq))
 
-
+# experimental: variable infprmation, response dict may change
+  
 @api.route('/info', methods=['GET'])
 def variable_info():
     """
@@ -257,14 +274,3 @@ def variable_info():
                     'latest_date': dr.max,
                     'latest_value': 'reserved'}   
     return jsonify(result)    
-
-# api/dataframe?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
-@api.route('/dataframe', methods=['GET'])
-def get_dataframe():
-    args = RequestFrameArgs()
-    param = args.query_param
-    if not args.names:
-         param['names'] = Allowed.names(args.freq)    
-    data = select_dataframe(**param)
-    csv_str = utils.dataframe_to_csv(data, param['names'])
-    return no_download(csv_str)
