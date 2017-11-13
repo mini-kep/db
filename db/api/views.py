@@ -15,14 +15,12 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 @api.errorhandler(422)
 def handle_validation_error(error):
+    
     # error 422 is raised by webargs, on two accasions:
-    #
     # 1. argument check on input (eg required argument missing)
     #    webarg raises some exception internally
-    #
     # 2. argument check inside parser class (eg start date must be before or equal end date)
     #    we raise ArgError(ValidationError)    
-    #
     
     # when custom class ArgError is raised we will have 'kwargs.['load']' available 
     view_dict = error.exc.kwargs.get('load', {}) 
