@@ -64,7 +64,10 @@ class CSV_Maker:
         
     @property    
     def names(self):
-        names = self.query.order_by(Datapoint.name).group_by(Datapoint.name).distinct()
+        names = self.query.distinct(Datapoint.name) \
+                          .order_by(Datapoint.name) \
+                          .group_by(Datapoint.name) \
+                          .values(Datapoint.name)
         return [x.name for x in names]
 
     @property    
