@@ -9,6 +9,10 @@ from db.api.models import Datapoint
 from db.api.errors import CustomError400
 import db.api.queries as queries
 
+def date_as_str(dt):
+    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
+    return datetime.strftime(dt, "%Y-%m-%d")
+
 
 def to_date(date_str: str):
     """Convert YYYY-MM-DD *date_str* to datetime.date object.
@@ -53,29 +57,51 @@ def to_csv(dicts):
     else:
         return ''
 
-# FIXME: 
-#       - rename to yield_csv_dataframe_rows, because yeilding one row is only this yield '{},{}'.format(date, ','.join(values))
-#         OR split into two funcs and use them in dataframe_to_csv()
-#       - document what datatipe dataframe is? pandas dataframe? dictionary? 
-#       - provide dataframe argument example is docstring  
-def yield_csv_dataframe_row(dataframe, names):
-    yield ',{}'.format(','.join(names))
-    # FIXME: names could be used here as well to guarantee order. order is not guaranteed now, responsibility outside function 
-    for date, datapoints in dataframe.items():
-        values = [dp['value'] for dp in datapoints]
-        yield '{},{}'.format(date, ','.join(values))
-    yield ''
 
+class CSV_Maker:
+    def __init__(self, datapoint_query):
+        self.query = datapoint_query
+        
+    @property    
+    def names(self):
+        names = self.query.order_by(Datapoint.name) \
+                          .group_by(Datapoint.name) \
+                          .values(Datapoint.name)
+        return [x.name for x in names]
 
-def dataframe_to_csv(dataframe, names):
-    if dataframe:
-        # FIXME: option: can contruct from csv header and csv body here  
-        rows = list(yield_csv_dataframe_row(dataframe, names))
-        return '\n'.join(rows)
-    else:
-        return ''
-
-
+    @property    
+    def dates(self):
+        dates = self.query.order_by(Datapoint.date) \
+                          .group_by(Datapoint.date) \
+                          .values(Datapoint.date)
+        return [x.date for x in dates]
+    
+    @property
+    def header(self):
+        return ',{}'.format(','.join(self.names))           
+    
+    def yield_data_rows(self):
+        for dt in self.dates:
+            row = [date_as_str(dt)]
+            row_query = self.query.filter(Datapoint.date == dt)
+            for name in self.names:                
+                x = row_query.filter_by(name=name).first()   
+                if x: 
+                    row.append(x.value)
+                else:
+                    row.append('')
+            yield row
+    
+    def yield_rows(self):
+        yield self.header
+        for row in self.yield_data_rows():
+            yield ','.join(map(str, row))
+        yield ''    
+            
+    def to_csv(self):
+        return '\n'.join(self.yield_rows())        
+                
+        
 if __name__ == '__main__': # pragma: no cover
     from db import create_app
     from db.api.views import api 
@@ -88,13 +114,23 @@ if __name__ == '__main__': # pragma: no cover
     #from db import db
     #db.create_all(app=create_app('config.DevelopmentConfig'))
 
-    with app.app_context():       
-        z = [d.value for d in Datapoint.query.filter(Datapoint.freq == 'd').all()]
-        query = Datapoint.query.filter(Datapoint.freq == 'd') \
-                               .group_by(Datapoint.name) \
-                               .values(Datapoint.name)
-        k = [x.name for x in query]    
-        assert k == ['BRENT', 'USDRUR_CB']
-        assert set(['a', 'd', 'm', 'q']) == \
-               set(queries.select_unique_frequencies())
+    with app.app_context():
+        
+        # TODO: convert to test
+        names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
+        sample_query = queries.DatapointOperations.select_frame('q', names, None, None)
+        m = CSV_Maker(sample_query) 
+        assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
+        rows = m.yield_data_rows()
+        next(rows) == ['2016-06-30', 101.2, 67.9]
+        next(rows) == ['2016-09-30', 100.7, 70.9]
+        next(rows) == ['2016-12-31', 101.3, 82.6]
+        
+        assert m.to_csv() == """,CPI_rog,EXPORT_GOODS_bln_usd
+2016-06-30,101.2,67.9
+2016-09-30,100.7,70.9
+2016-12-31,101.3,82.6
+"""
+            
+        assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
         

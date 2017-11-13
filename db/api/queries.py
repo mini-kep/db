@@ -20,7 +20,18 @@ def date_as_str(dt):
     return datetime.strftime(dt, "%Y-%m-%d")
 
 
-class DatapointOperations:   
+class DatapointOperations:  
+    
+    @staticmethod
+    def _base_select(freq: str, start_date, end_date):
+        data = Datapoint.query.order_by(Datapoint.date)
+        if freq:
+            data = data.filter_by(freq=freq)
+        if start_date:
+            data = data.filter(Datapoint.date >= start_date)
+        if end_date:
+            data = data.filter(Datapoint.date <= end_date)
+        return data
 
     def select(freq: str, name: str, start_date, end_date):
         """Return dictionaries with datapoints, corresposding to 
@@ -33,15 +44,15 @@ class DatapointOperations:
            Returns:   
                Iterable Query object <http://docs.sqlalchemy.org/en/latest/orm/query.html>
         """
-        data = Datapoint.query.order_by(Datapoint.date)
-        if freq:
-            data = data.filter_by(freq=freq)
+        data = DatapointOperations._base_select(freq, start_date, end_date)
         if name: 
             data = data.filter_by(name=name)
-        if start_date:
-            data = data.filter(Datapoint.date >= start_date)
-        if end_date:
-            data = data.filter(Datapoint.date <= end_date)
+        return data
+
+    def select_frame(freq: str, names: list, start_date, end_date):
+        data = DatapointOperations._base_select(freq, start_date, end_date)
+        if names: 
+            data = data.filter(Datapoint.name.in_(names))
         return data
     
     
@@ -73,54 +84,7 @@ class DatapointOperations:
         db.session.commit()
 
 
-def select_dataframe(freq: str, names: list, start_date, end_date):
-    # FIXME: edit docstring 
-    """
-    Returns dataframe corresponding to *freq*, *names* and bounded by dates
-    dataframe is OrderedDict like
-    (
-        ('2017-11-05', [{
-                  'name': *names[0]*,
-                  'value': str(value of datapoint)
-               },
-               {
-                  'name': *names[1]*,
-                  'value': str(value of datapoint)
-               } ...
-               ]
-        ...
-    )
-    Where keys are date strings
-    And values are array with dicts that represends datapoints
-    If there's no datapoint, 'value' would be an empty string
-    """
-    # FIXME: is this select dataframe code repeated?
-    data = Datapoint.query.filter_by(freq=freq).filter(Datapoint.name.in_(names)).order_by(Datapoint.date)
-    if start_date:
-        data = data.filter(Datapoint.date >= start_date)
-    if end_date:
-        data = data.filter(Datapoint.date <= end_date)
-    # -----------------------------------------------
-    # FIXME: this is a separate serialiser function
-    result = OrderedDict()
-    # FIXME:
-    # what does this comprehension mean? d[0] for d in data.values(Datapoint.date)
-    for dt in (date_as_str(d[0]) for d in data.values(Datapoint.date)):
-        result[date] = []
-        datapoints = data.filter_by(date=dt)
-        for name in names:
-            dp = datapoints.filter_by(name=name).first()
-            datapoint = {
-                # FIXME: why we need 'name' here? are we double-checkingthe data structure later?     
-                #        why this needs to be a dictionary?
-                'name': name,
-                'value': str(dp.value) if dp else ''
-            }
-            # FIXME: does this guarantee order is Ordereddict?
-            result[date].append(datapoint)
-    return result
-
-
+   
 class All:
     def frequencies():
         return select_unique_frequencies()
