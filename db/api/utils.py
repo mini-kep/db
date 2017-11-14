@@ -61,37 +61,55 @@ def to_csv(dicts):
 def unique(seq):
     return sorted(list(set(seq)))
 
-class CSV_Maker:
+
+def serialiser(datapoint_query):
+    dicts = [d.serialized for d in datapoint_query]
+    dates = unique([x['name'] for x in dicts])
+    result = dict()
+    for dt in dates:
+        this_date = {x['name']:x['value'] for x in dicts if x['date'] == dt}
+        result[dt] = this_date
+    return result              
+            
+    
+
+class DictionaryRepresentation:
     def __init__(self, datapoint_query):
-        self.query = datapoint_query
+        self.source_dict = [d.serialized for d in datapoint_query]
         
-    # had to simplify this to make work on postgres to avooid getting
-    # sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) SELECT DISTINCT ON expressions must match initial ORDER BY expressions
-    # 2017-11-13T23:45:26.537734+00:00 app[web.1]: LINE 1: SELECT DISTINCT ON (datapoint.name) datapoint.name AS datapo...
     @property    
     def names(self):
-        names = [x.name for x in self.query.values(Datapoint.name)]
+        names = [x['name'] for x in self.source_dict]
         return unique(names)
     
     @property    
     def dates(self):
-        dates = [x.date for x in self.query.values(Datapoint.date)]
+        dates = [x['date'] for x in  self.source_dict]
         return unique(dates)
     
+    @property
+    def dicts(self):
+        result = dict()
+        for dt in self.dates:
+            this_date = {x['name']:x['value'] 
+                         for x in self.source_dict if x['date'] == dt}
+            result[dt] = this_date
+        return result      
+        
     @property
     def header(self):
         return ',{}'.format(','.join(self.names))           
     
     def yield_data_rows(self):
         for dt in self.dates:
-            row = [date_as_str(dt)]
-            row_query = self.query.filter(Datapoint.date == dt)
-            for name in self.names:                
-                x = row_query.filter_by(name=name).first()   
-                if x: 
-                    row.append(x.value)
-                else:
-                    row.append('')
+            row = [dt]
+            for name in self.names:     
+                try:
+                    x = self.dicts[dt][name]
+                except KeyError:
+                    x = ''
+                finally:
+                    row.append(x)
             yield row
     
     def yield_rows(self):
@@ -121,7 +139,7 @@ if __name__ == '__main__': # pragma: no cover
         # TODO: convert to test
         names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
         sample_query = queries.DatapointOperations.select_frame('q', names, None, None)
-        m = CSV_Maker(sample_query) 
+        m = DictionaryRepresentation(sample_query) 
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
         rows = m.yield_data_rows()
         next(rows) == ['2016-06-30', 101.2, 67.9]
@@ -134,10 +152,8 @@ if __name__ == '__main__': # pragma: no cover
 2016-12-31,101.3,82.6
 """
             
-        assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
-        
-        
-        # test this result for daily frequency
+        assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'                
+        # TODO: test this result for daily frequency - note it has missing values, which is correct
         """,BRENT,USDRUR_CB
 2016-06-01,48.81,65.9962
 2016-06-02,49.05,66.6156
