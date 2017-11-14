@@ -9,7 +9,7 @@ class Datapoint(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    freq = db.Column(db.String, nullable=False)    
+    freq = db.Column(db.String, nullable=False)
     date = db.Column(db.Date, nullable=False)
     value = db.Column(db.Float, nullable=False)
 
@@ -22,10 +22,10 @@ class Datapoint(db.Model):
         self.value = value
 
     @property
-    def serialized(self): # Add serialize method for jsonify
-       return {
-           'freq': self.freq,
-           'name': self.name,
-           'date': datetime.strftime(self.date, "%Y-%m-%d"),
-           'value':self.value
-       }
+    def serialized(self):  # Add serialize method for jsonify
+        return {
+            'freq': self.freq,
+            'name': self.name,
+            'date': datetime.strftime(self.date, "%Y-%m-%d"),
+            'value': self.value
+        }

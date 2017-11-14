@@ -9,34 +9,26 @@ from werkzeug.exceptions import HTTPException
 
 # COMMENT 2: part of these tests can be recycled for views?
 
+
 def days_ahead(k):
     return arrow.utcnow().shift(days=k).format('YYYY-MM-DD')
 
 
 BAD_ARGS_LIST = [
 
-    # caught by argument inspection    
+    # caught by argument inspection
     # parameters are required
-      (None, None, None, None)
-    , (None, 'BRENT', None, None)
-    , ('q', None, None, None)
-    # date type
-    , ('q', 'BRENT', 'today', 'tomorrow') # start and end date must be parsable   
-
+    (None, None, None, None), (None, 'BRENT', None,
+                               None), ('q', None, None, None)    # date type
+    # start and end date must be parsable
     # caught by parser validation functions
-    # args must be real variables 
-    , ('q', 'ZZZZ', None, None) 
-    , ('m', 'BIBA_boba', None, None) 
-    , ('z', 'BRENT', None, None) 
-    , ('holdays', 'soon', None, None) 
+    , ('q', 'BRENT', 'today', 'tomorrow')    # args must be real variables
     # no such var at 'm' frequency
-    , ('m', 'GDP_yoy', None, None) 
-    # !start after end 
-    , ('m', 'RETAIL_SALES_FOOD_rog', '2015-10-30', '1999-10-01')   
-    , ('d', 'BRENT', days_ahead(-1), days_ahead(-7))   
-    # !start in the future 
-    , ('d', 'BRENT', days_ahead(1), None)   
+    , ('q', 'ZZZZ', None, None), ('m', 'BIBA_boba', None, None), ('z', 'BRENT', None, None), ('holdays', 'soon', None, None), ('m', 'GDP_yoy', None, None)    # !start after end
+    # !start in the future
+    , ('m', 'RETAIL_SALES_FOOD_rog', '2015-10-30', '1999-10-01'), ('d', 'BRENT', days_ahead(-1), days_ahead(-7)), ('d', 'BRENT', days_ahead(1), None)
 ]
+
 
 @pytest.fixture(scope="module",
                 params=BAD_ARGS_LIST)
@@ -81,7 +73,7 @@ class Test_RequestArgs(TestCaseBase):
         assert args.start_date == arrow.get(2017, 1, 1).date()
         assert args.end_date == arrow.get(2017, 2, 28).date()
         assert args.query_param
-        
+
         def test_init_on_bad_args_fails(self, malformed_args):
             req = SimRequest(**malformed_args)
             with pytest.raises(HTTPException):
@@ -109,10 +101,9 @@ class Test_RequestFrameArgs(TestCaseBase):
         req = SimRequest(**malformed_args)
         with pytest.raises(HTTPException):
             RequestArgs(req)
-            
-            
+
+
 # TODO: simple args class not testsed
 
 if __name__ == '__main__':
     pytest.main([__file__])
-    

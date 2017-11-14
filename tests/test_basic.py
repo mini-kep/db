@@ -33,7 +33,6 @@ class TestCaseBase(unittest.TestCase):
         app.config['API_TOKEN'] = 'token'
         return app
 
-
     @property
     def test_data(self):
         return self._read_test_data()
@@ -46,8 +45,10 @@ class TestCaseBase(unittest.TestCase):
 
     def _subset_test_data(self, name, freq):
         data = self._read_test_data()
-        is_var = lambda d: d['name'] == name and d['freq'] == freq
-        sorter_func = lambda item: utils.to_date(item['date'])
+
+        def is_var(d): return d['name'] == name and d['freq'] == freq
+
+        def sorter_func(item): return utils.to_date(item['date'])
         return sorted(filter(is_var, data), key=sorter_func)
 
     def _prepare_db(self):
@@ -99,7 +100,7 @@ class TestViewsDatapoints(TestCaseBase):
 
 
 if __name__ == '__main__':
-    #unittest.main(module='test_basic')
+    # unittest.main(module='test_basic')
     q = TestViewsDatapoints()
     q.setUp()
     response = q.query_on_name_and_freq()

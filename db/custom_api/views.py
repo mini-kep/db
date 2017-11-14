@@ -6,6 +6,7 @@ from db.custom_api.decomposer import Indicator
 
 custom_api_bp = Blueprint('custom_api', __name__, url_prefix='')
 
+
 @custom_api_bp.errorhandler(CustomError400)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
@@ -14,6 +15,7 @@ def handle_invalid_usage(error):
 
 
 BASE_URL = '/<string:domain>/series/<string:varname>'
+
 
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>', strict_slashes=False)
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>/<path:inner_path>')

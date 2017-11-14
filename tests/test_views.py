@@ -13,7 +13,6 @@ import json
 from tests.test_basic import TestCaseBase
 
 
-
 class Test_API_Names(TestCaseBase):
     """Endpoint under test: /api/names/<freq>"""
 
@@ -26,7 +25,8 @@ class Test_API_Names(TestCaseBase):
             assert response.status_code == 200
             result = json.loads(response.get_data().decode('utf-8'))
             # expected result
-            names = set([d['name'] for d in self.test_data if d['freq']==freq])
+            names = set([d['name']
+                         for d in self.test_data if d['freq'] == freq])
             expected_result = sorted(list(names))
             # check
             assert result == expected_result
@@ -43,7 +43,8 @@ class Test_API_Info(TestCaseBase):
         data = self._subset_test_data('CPI_NONFOOD_rog', 'm')
         return sorted([row['date'] for row in data])
 
-    def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_response_code_200(self):
+    def test_get_start_end_date_for_CPI_NONFOOD_rog_returns_response_code_200(
+            self):
         response = self.query_get_start_and_end_date()
         assert response.status_code == 200
 
@@ -60,9 +61,9 @@ class Test_API_Info(TestCaseBase):
         assert result['m']['latest_date'] == dates[-1]
 
 
-#TODO: these test should relate to something else not covered in query.py
+# TODO: these test should relate to something else not covered in query.py
 
-#class TestGetResponseDatapoints(TestCaseBase):
+# class TestGetResponseDatapoints(TestCaseBase):
 #
 #    data_dicts = [{"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7},
 #                  {"date": "1999-01-31", "freq": "m",
@@ -91,23 +92,21 @@ class Test_API_Info(TestCaseBase):
 #            get_datapoints_response(data, 'html')
 
 
-if __name__ == '__main__': # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     pytest.main([__file__])
-    
+
     v = TestCaseBase()
     v.setUp()
     resp = v.client.get('/ru/series/CPI_rog/a')
     print(resp)
- 
+
     token = dict(API_TOKEN=v.app.config['API_TOKEN'])
     data = json.dumps(v.test_data[0:10])
     resp = v.client.post('/api/datapoints', data=data, headers=token)
     print(resp)
-    
-    _name='CPI_NONFOOD_rog'
-    _freq='m'
+
+    _name = 'CPI_NONFOOD_rog'
+    _freq = 'm'
     params = dict(name=_name, freq=_freq)
     resp = v.client.get('/api/info', query_string=params)
     print(resp)
-   
-    
