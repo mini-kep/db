@@ -4,7 +4,7 @@
 
 # Quickstart
 
-```api/datapoints``` exposes macroeconomic database, wwhich you can query by indicator name, frequency (from annual to daily) and date range. 
+```api/datapoints``` exposes macroeconomic database, which you can query by indicator name, frequency (from annual to daily) and date range. 
 
 Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
 
@@ -20,9 +20,11 @@ Link below will provide quarterly year-on-year Russian GDP growth rates as csv f
 2017-06-30,102.5
 ```
 
-R/pandas code to access this data is at <https://github.com/mini-kep/user-charts/blob/master/access.py>.
+R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
 
-```api/datapoints``` also allows administrator to upload and delete datapoints (with API token).
+```api/datapoints``` also allows to upload and delete datapoints with API token. This functionality 
+is used by scheduled [parsers](https://github.com/mini-kep/parsers) 
+and also by an administrator.
 
 Additional endpoints to navigate data are:
 
@@ -85,7 +87,7 @@ Requires API token.
 # Custom API
 
 Custom API provides a more user-friendly syntax for ```GET \api\datapoints```, 
-see brief overview [here](https://mini-kep.github.io/documentation/custom_api/). 
+as described [here](https://mini-kep.github.io/documentation/custom_api/). 
 
 For example, quickstart link for GDP growth rates can be shortened to:
 
@@ -165,6 +167,4 @@ def read_ts(source_url):
 er = read_ts('http://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2017/')
 
 assert er['2017-09-28'] == 58.01022
-
 ```
-
