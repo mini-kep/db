@@ -41,16 +41,25 @@ See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/ap
 
 
 #### GET ```freq```:
-- [api/names/a](https://minikep-db.herokuapp.com/api/freq)
+
+List avalable frequencies in the dataset. Returns ```{'a', 'q', 'm', 'd'}```.
+
+- [api/freq](https://minikep-db.herokuapp.com/api/freq)
 
 
 #### GET ```names```:
+
+List variable names for specified frequency.
+
 - [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
 - [api/names/q](https://minikep-db.herokuapp.com/api/names/q)
 - [api/names/m](https://minikep-db.herokuapp.com/api/names/m)
 - [api/names/d](https://minikep-db.herokuapp.com/api/names/d)
 
 #### GET ```datapoints```:
+
+Get subset of data as csv or json.
+
 - [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
 - [api/datapoints?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q)
 - [api/datapoints?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01)
@@ -64,12 +73,15 @@ See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/ap
 
 
 #### GET ```info```:
+
+Get a dictionary with variable description, allowed dates and latest values.
+
 - [api/info?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/info?name=CPI_rog&freq=m)
 - [api/info?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/info?name=GDP_yoy&freq=q)
 - [api/info?name=BRENT&freq=d](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d)
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
-#### new methods
+#### New methods
 
 More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
 
