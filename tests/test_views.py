@@ -13,38 +13,21 @@ import json
 from tests.test_basic import TestCaseBase
 
 
-# TODO - must separate which code is which
-ERROR_CODES = (422, 400, 403)
-
 
 class Test_API_Names(TestCaseBase):
     """Endpoint under test: /api/names/<freq>"""
 
-    def query_names_for_freq(self, freq):
+    def query_names(self, freq):
         return self.client.get('/api/names/{freq}'.format(freq=freq))
 
-    def test_get_all_names_response_code_200(self):
-        response = self.query_names_for_freq(freq='all')
-        assert response.status_code == 200
-
-    def test_get_all_names_returns_sorted_list_of_all_names(self):
-        # call
-        response = self.query_names_for_freq(freq='all')
-        result = json.loads(response.get_data().decode('utf-8'))
-        # expected result
-        names = set([x['name'] for x in self.test_data])
-        expected_result = sorted(list(names))
-        # check
-        assert result == expected_result
-
     def test_get_names_returns_sorted_list_of_names_for_given_freq(self):
-        for freq in ['a', 'q', 'm', 'w', 'd']:
-            response = self.query_names_for_freq(freq=freq)
+        for freq in ['a', 'q', 'm', 'd']:
+            response = self.query_names(freq=freq)
             assert response.status_code == 200
             result = json.loads(response.get_data().decode('utf-8'))
             # expected result
             names = set([d['name'] for d in self.test_data if d['freq']==freq])
-            expected_result = sorted(names)
+            expected_result = sorted(list(names))
             # check
             assert result == expected_result
 
@@ -108,8 +91,7 @@ class Test_API_Info(TestCaseBase):
 #            get_datapoints_response(data, 'html')
 
 
-if __name__ == '__main__':
-    import pytest
+if __name__ == '__main__': # pragma: no cover
     pytest.main([__file__])
     
     v = TestCaseBase()
@@ -117,10 +99,9 @@ if __name__ == '__main__':
     resp = v.client.get('/ru/series/CPI_rog/a')
     print(resp)
  
-    # failing tests 
-    _token_dict = dict(API_TOKEN=v.app.config['API_TOKEN'])
-    _data = json.dumps(v.test_data[0:10])
-    resp = v.client.post('/api/datapoints', data=_data, headers=_token_dict)
+    token = dict(API_TOKEN=v.app.config['API_TOKEN'])
+    data = json.dumps(v.test_data[0:10])
+    resp = v.client.post('/api/datapoints', data=data, headers=token)
     print(resp)
     
     _name='CPI_NONFOOD_rog'
@@ -128,3 +109,5 @@ if __name__ == '__main__':
     params = dict(name=_name, freq=_freq)
     resp = v.client.get('/api/info', query_string=params)
     print(resp)
+   
+    

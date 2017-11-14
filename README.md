@@ -4,10 +4,9 @@
 
 # Quickstart
 
-At ```api/datapoints``` you can query macroeconomic database by indicator name, frequency and date range. 
+```api/datapoints``` exposes macroeconomic database, which you can query by indicator name, frequency (from annual to daily) and date range. 
 
-For example, [this link](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01) 
-will provide quarterly year-on-year GDP growth rates as csv file, readable by R/pandas:
+Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
 
 <https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01>
 
@@ -21,29 +20,46 @@ will provide quarterly year-on-year GDP growth rates as csv file, readable by R/
 2017-06-30,102.5
 ```
 
-# Standard API 
+R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
 
-Standard API is REST-like interface to upload/retrieve time-series data. 
-Brief initial specification for it is [here](https://mini-kep.github.io/documentation/database/),
+```api/datapoints``` also allows to upload and delete datapoints with API token. This functionality 
+is used by administrator and scheduled [parsers](https://github.com/mini-kep/parsers).
+
+Additional endpoints to navigate this dataset are:
+
+  - ```api/freq``` - list avalable frequencies
+  - ```api/names/{freq}``` - list variable names under specified frequency 
+  - ```api/info/?name={name}``` - provide additional information about a variable
+
+
+# API description 
+
+Initial specification for database API is [here](https://mini-kep.github.io/documentation/database/),
 updates are documented below.
 
 See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/apidocs). 
 
-## POST method
 
-Upsert data from json, as described in [intial spec](https://mini-kep.github.io/documentation/database/#post).
+#### GET ```freq```:
 
-Endpoint: ```api/datapoints``` 
+List avalable frequencies in the dataset. Returns ```{'a', 'q', 'm', 'd'}```.
 
-## GET methods 
+- [api/freq](https://minikep-db.herokuapp.com/api/freq)
 
-#### ```names```:
+
+#### GET ```names```:
+
+List variable names for specified frequency.
+
 - [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
 - [api/names/q](https://minikep-db.herokuapp.com/api/names/q)
 - [api/names/m](https://minikep-db.herokuapp.com/api/names/m)
 - [api/names/d](https://minikep-db.herokuapp.com/api/names/d)
 
-#### ```datapoints```:
+#### GET ```datapoints```:
+
+Get subset of data as csv or json.
+
 - [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
 - [api/datapoints?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q)
 - [api/datapoints?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01)
@@ -56,22 +72,43 @@ Endpoint: ```api/datapoints```
 - [end date > start date](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2015-01-01&end_date=2000-01-01)
 
 
-#### ```info```:
+#### GET ```info```:
+
+Get a dictionary with variable description, allowed dates and latest values.
+
 - [api/info?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/info?name=CPI_rog&freq=m)
 - [api/info?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/info?name=GDP_yoy&freq=q)
 - [api/info?name=BRENT&freq=d](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d)
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
-#### new methods
+#### New methods
 
 More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
 
 
+#### POST ```api/datapoints``` 
+
+Upsert data from json, as described in [intial spec](https://mini-kep.github.io/documentation/database/#post).
+
+Requires API token.
+
+#### DELETE ```api/datapoints``` 
+
+Upsert data dased on 
+
+Requires API token.
+
+
 # Custom API
 
-Provides more user-friendly syntax for ```GET \api\datapoints```, 
-see brief overview [here](https://mini-kep.github.io/documentation/custom_api/). 
+Custom API provides a more user-friendly syntax for ```GET \api\datapoints```, 
+as described [here](https://mini-kep.github.io/documentation/custom_api/). 
 
+For example, quickstart link for GDP growth rates can be shortened to:
+
+<https://minikep-db.herokuapp.com/ru/series/GDP_yoy/q/2016-01-01>
+
+Custom API is experimental and not guaranteed now. 
 
 #### URL syntax
 
@@ -130,7 +167,7 @@ Tokens:
     - [/oil/series/BRENT/d/2017](https://minikep-db.herokuapp.com/oil/series/BRENT/d/2017)
     
 
-#### Sample user code
+#### User code
 
 ```python
 import pandas as pd
@@ -145,6 +182,4 @@ def read_ts(source_url):
 er = read_ts('http://minikep-db.herokuapp.com/ru/series/USDRUR_CB/d/2017/')
 
 assert er['2017-09-28'] == 58.01022
-
 ```
-

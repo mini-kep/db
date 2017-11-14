@@ -1,7 +1,17 @@
+"""Helpers:
+
+    - date functions
+    - serialisers
+
+"""
 from datetime import datetime
 from db.api.models import Datapoint
 from db.api.errors import CustomError400
 import db.api.queries as queries
+
+def date_as_str(dt):
+    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
+    return datetime.strftime(dt, "%Y-%m-%d")
 
 
 def to_date(date_str: str):
@@ -12,10 +22,10 @@ def to_date(date_str: str):
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
-
-def date_as_str(dt):
-    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
-    return datetime.strftime(dt.date, "%Y-%m-%d")
+#
+#def date_as_str(dt):
+#    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
+#    return datetime.strftime(dt.date, "%Y-%m-%d")
 
 def yield_csv_row(dicts):
     """Serialiser function to create CSV rows as strings.
@@ -47,151 +57,71 @@ def to_csv(dicts):
     else:
         return ''
 
-# FIXME: 
-#       - rename to yield_csv_dataframe_rows, because yeilding one row is only this yield '{},{}'.format(date, ','.join(values))
-#         OR split into two funcs and use them in dataframe_to_csv()
-#       - document what datatipe dataframe is? pandas dataframe? dictionary? 
-#       - provide dataframe argument example is docstring  
-def yield_csv_dataframe_row(dataframe, names):
-    yield ',{}'.format(','.join(names))
-    # FIXME: names could be used here as well to guarantee order. order is not guaranteed now, responsibility outside function 
-    for date, datapoints in dataframe.items():
-        values = [dp['value'] for dp in datapoints]
-        yield '{},{}'.format(date, ','.join(values))
-    yield ''
+
+def unique(seq):
+    return sorted(list(set(seq)))
 
 
-def dataframe_to_csv(dataframe, names):
-    if dataframe:
-        # FIXME: option: can contruct from csv header and csv body here  
-        rows = list(yield_csv_dataframe_row(dataframe, names))
-        return '\n'.join(rows)
-    else:
-        return ''
+def serialiser(datapoint_query):
+    dicts = [d.serialized for d in datapoint_query]
+    dates = unique([x['name'] for x in dicts])
+    result = dict()
+    for dt in dates:
+        this_date = {x['name']:x['value'] for x in dicts if x['date'] == dt}
+        result[dt] = this_date
+    return result              
+            
+    
 
-class DatapointParameters:
-    """Parameter handler for api\datapoints endpoint."""    
-    def __init__(self, args):
-        self.args = args
-        self.name = self.get_name() 
-        if not self.name: 
-            raise CustomError400("<name> parameter is required")
-        self.freq = self.get_freq() 
-        if not self.freq: 
-            raise CustomError400("<freq> parameter is required")
+class DictionaryRepresentation:
+    def __init__(self, datapoint_query):
+        self.source_dict = [d.serialized for d in datapoint_query]
         
-    def get_freq(self): 
-        freq = self.args.get('freq')  
-        self.validate_freq_exist(freq)
-        return freq
-       
-    def get_name(self):
-        freq = self.get_freq()
-        name = self.args.get('name')  
-        self.validate_name_exist_for_given_freq(freq, name)
-        return name
+    @property    
+    def names(self):
+        names = [x['name'] for x in self.source_dict]
+        return unique(names)
     
-    def get_start(self):
-        start_dt = self.get_dt('start_date')  
-        if start_dt:
-            self.validate_start_is_not_in_future(start_dt)
-        return start_dt     
+    @property    
+    def dates(self):
+        dates = [x['date'] for x in  self.source_dict]
+        return unique(dates)
     
-    def get_end(self):
-        end_dt = self.get_dt('end_date')
-        start_dt = self.get_start()
-        if start_dt and end_dt:
-            self.validate_end_date_after_start_date(start_dt, end_dt)
-        return end_dt     
+    @property
+    def dicts(self):
+        result = dict()
+        for dt in self.dates:
+            this_date = {x['name']:x['value'] 
+                         for x in self.source_dict if x['date'] == dt}
+            result[dt] = this_date
+        return result      
+        
+    @property
+    def header(self):
+        return ',{}'.format(','.join(self.names))           
     
-    def get_dt(self, key: str):
-        dt = None
-        date_str = self.args.get(key)  
-        if date_str:
-            dt = to_date(date_str)
-        return dt
+    def yield_data_rows(self):
+        for dt in self.dates:
+            row = [dt]
+            for name in self.names:     
+                try:
+                    x = self.dicts[dt][name]
+                except KeyError:
+                    x = ''
+                finally:
+                    row.append(x)
+            yield row
     
-    def _get_boundary(self, direction):
-        query = queries.get_boundary_date(self.freq, self.name, direction)
-        return date_as_str(query)       
-    
-    def get_min_date(self):
-        return self._get_boundary(direction='start')
-
-    def get_max_date(self):
-        return self._get_boundary(direction='end')
-    
-    def get(self):
-        """Return query parameters as dictionary."""
-        return dict(name=self.name,
-                    freq=self.freq,
-                    start_date=self.get_start(),
-                    end_date=self.get_end())
-
-    @staticmethod
-    def validate_freq_exist(freq):
-        allowed = list(queries.select_unique_frequencies())
-        if freq in allowed:
-            return True
-        else:     
-            raise CustomError400(message=f'Invalid frequency <{freq}>',
-                                 payload={'allowed': allowed})
-    
-    @staticmethod
-    def validate_name_exist_for_given_freq(freq, name):
-        possible_names = queries.possible_names_values(freq)
-        if name in possible_names:
-            return True
-        else:
-            msg = f'No such name <{name}> for <{freq}> frequency.'
-            raise CustomError400(message=msg,
-                                 payload={"allowed": possible_names})
-    
-    @staticmethod
-    def validate_start_is_not_in_future(start_date):
-        current_date = datetime.date(datetime.utcnow())
-        #TODO: test on date = today must pass
-        if start_date > current_date:
-            raise CustomError400('Start date cannot be in future')
-        else:
-            return True            
-    
-    @staticmethod
-    def validate_end_date_after_start_date(start_date, end_date):
-        if end_date < start_date:
-            raise CustomError400('End date must be after start date')          
-        else:
-            return True
-
-
-class DataframeParameters(DatapointParameters):
-    """Parameter handler for api/dataframe endpoint."""
-
-    def __init__(self, args):
-        self.args = args
-        if args.get('name'):
-            self.names = self.get_names()
-        else:
-            self.names = None
-        self.freq = self.get_freq()
-        if not self.freq:
-            raise CustomError400("<freq> parameter is required")
-
-    def get_names(self):
-        freq = self.get_freq()
-        names = self.args.get('name').split(',')
-        for name in names:
-            self.validate_name_exist_for_given_freq(freq, name)
-        return names
-
-    def get(self):
-        """Return query parameters as dictionary."""
-        return dict(names=self.names,
-                    freq=self.freq,
-                    start_date=self.get_start(),
-                    end_date=self.get_end())
-
-
+    def yield_rows(self):
+        yield self.header
+        for row in self.yield_data_rows():
+            yield ','.join(map(str, row))
+        yield ''    
+            
+    def to_csv(self):
+        return '\n'.join(self.yield_rows())        
+                
+        
 if __name__ == '__main__': # pragma: no cover
     from db import create_app
     from db.api.views import api 
@@ -204,13 +134,32 @@ if __name__ == '__main__': # pragma: no cover
     #from db import db
     #db.create_all(app=create_app('config.DevelopmentConfig'))
 
-    with app.app_context():       
-        z = [d.value for d in Datapoint.query.filter(Datapoint.freq == 'd').all()]
-        query = Datapoint.query.filter(Datapoint.freq == 'd') \
-                               .group_by(Datapoint.name) \
-                               .values(Datapoint.name)
-        k = [x.name for x in query]    
-        assert k == ['BRENT', 'USDRUR_CB']
-        assert set(['a', 'd', 'm', 'q']) == \
-               set(queries.select_unique_frequencies())
+    with app.app_context():
+        
+        # TODO: convert to test
+        names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
+        sample_query = queries.DatapointOperations.select_frame('q', names, None, None)
+        m = DictionaryRepresentation(sample_query) 
+        assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
+        rows = m.yield_data_rows()
+        next(rows) == ['2016-06-30', 101.2, 67.9]
+        next(rows) == ['2016-09-30', 100.7, 70.9]
+        next(rows) == ['2016-12-31', 101.3, 82.6]
+        
+        assert m.to_csv() == """,CPI_rog,EXPORT_GOODS_bln_usd
+2016-06-30,101.2,67.9
+2016-09-30,100.7,70.9
+2016-12-31,101.3,82.6
+"""
+            
+        assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'                
+        # TODO: test this result for daily frequency - note it has missing values, which is correct
+        """,BRENT,USDRUR_CB
+2016-06-01,48.81,65.9962
+2016-06-02,49.05,66.6156
+2016-06-03,48.5,66.7491
+2016-06-04,,66.8529
+2016-06-06,48.94,
+2016-06-07,49.76,65.7894"""
+        
         
