@@ -5,7 +5,6 @@
 
 """
 from datetime import datetime
-from db.api.models import Datapoint
 from db.api.errors import CustomError400
 import db.api.queries as queries
 
@@ -70,22 +69,13 @@ def serialiser(datapoint_query):
         this_date = {x['name']:x['value'] for x in dicts if x['date'] == dt}
         result[dt] = this_date
     return result              
-            
     
 
 class DictionaryRepresentation:
     def __init__(self, datapoint_query):
         self.source_dict = [d.serialized for d in datapoint_query]
-        
-    @property    
-    def names(self):
-        names = [x['name'] for x in self.source_dict]
-        return unique(names)
-    
-    @property    
-    def dates(self):
-        dates = [x['date'] for x in  self.source_dict]
-        return unique(dates)
+        self.names = unique([x['name'] for x in self.source_dict])
+        self.dates = unique([x['date'] for x in  self.source_dict])
     
     @property
     def dicts(self):
