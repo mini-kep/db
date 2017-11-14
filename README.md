@@ -23,10 +23,9 @@ Link below will provide quarterly year-on-year Russian GDP growth rates as csv f
 R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
 
 ```api/datapoints``` also allows to upload and delete datapoints with API token. This functionality 
-is used by scheduled [parsers](https://github.com/mini-kep/parsers) 
-and also by an administrator.
+is used by administrator and scheduled [parsers](https://github.com/mini-kep/parsers).
 
-Additional endpoints to navigate data are:
+Additional endpoints to navigate this dataset are:
 
   - ```api/freq``` - list avalable frequencies
   - ```api/names/{freq}``` - list variable names under specified frequency 
