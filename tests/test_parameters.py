@@ -1,4 +1,3 @@
-import datetime
 import pytest
 import arrow
 
@@ -6,24 +5,44 @@ from tests.test_basic import TestCaseBase
 from db.api.parameters import RequestArgs, RequestFrameArgs
 from werkzeug.exceptions import HTTPException
 
+# COMMENT 1: repo README.md also has examples of good / failing queries
 
-@pytest.fixture(scope='module')
-def malformed_args():
-    return [
-        dict(name='BRENT'),
-        dict(name='a', freq='q'),
-        dict(name='BRENT', freq='a'),
-        dict(
-            name='BRENT',
-            freq='d',
-            start_date=arrow.get(2018, 1, 1).date(),
-            end_date=arrow.get(2017, 1, 1).date()),
-        dict(
-            name='BRENT',
-            freq='d',
-            start_date=arrow.get(2017, 2, 1).date(),
-            end_date=arrow.get(2017, 1, 1).date()),
-    ]
+# COMMENT 2: part of these tests can be recycled for views?
+
+def days_ahead(k):
+    return arrow.utcnow().shift(days=k).format('YYYY-MM-DD')
+
+
+BAD_ARGS_LIST = [
+
+    # caught by argument inspection    
+    # parameters are required
+      (None, None, None, None)
+    , (None, 'BRENT', None, None)
+    , ('q', None, None, None)
+    # date type
+    , ('q', 'BRENT', 'today', 'tomorrow') # start and end date must be parsable   
+
+    # caught by parser validation functions
+    # args must be real variables 
+    , ('q', 'ZZZZ', None, None) 
+    , ('m', 'BIBA_boba', None, None) 
+    , ('z', 'BRENT', None, None) 
+    , ('holdays', 'soon', None, None) 
+    # no such var at 'm' frequency
+    , ('m', 'GDP_yoy', None, None) 
+    # !start after end 
+    , ('m', 'RETAIL_SALES_FOOD_rog', '2015-10-30', '1999-10-01')   
+    , ('d', 'BRENT', days_ahead(-1), days_ahead(-7))   
+    # !start in the future 
+    , ('d', 'BRENT', days_ahead(1), None)   
+]
+
+@pytest.fixture(scope="module",
+                params=BAD_ARGS_LIST)
+def malformed_args(request):
+    keys = ['freq', 'name', 'start_date', 'end_date']
+    return {k: v for k, v in zip(keys, request.param) if v}
 
 
 class SimRequest:
@@ -62,77 +81,11 @@ class Test_RequestArgs(TestCaseBase):
         assert args.start_date == arrow.get(2017, 1, 1).date()
         assert args.end_date == arrow.get(2017, 2, 28).date()
         assert args.query_param
-
-    @pytest.mark.parametrize('malformed_args', malformed_args)
-    def test_init_on_bad_args_fails(self):
-        malformed_args = dict(name='BRENT')
-        req = SimRequest(**malformed_args)
-        with pytest.raises(HTTPException):
-            RequestArgs(req)
-
-
-
-
-def days_ahead(k):
-    dt = datetime.date.today() + datetime.timedelta(days=k)
-    return dt.strftime('%Y-%m-%d')
-
-#
-#class TestDatapointParameters(TestCaseBase):
-#
-#    @staticmethod
-#    def _make_args(freq, name, start, end):
-#        return dict(name=name,
-#                    freq=freq,
-#                    start_date=start,
-#                    end_date=end)
-#
-#    def test_none_params_should_fail(self):
-#        args = self._make_args(None, None, None, None)
-#        with self.assertRaises(CustomError400):
-#            DatapointParameters(args)
-#
-#    def test_date_is_transformed_correctly(self):
-#        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', '2015-03-25', '2016-04-01')
-#        dp = DatapointParameters(args)
-#        assert dp.get_start() == datetime.date(year=2015, month=3, day=25)
-#        assert dp.get_end() == datetime.date(year=2016, month=4, day=1)
-#
-#    def test_on_wrong_sequence_of_dates_fails(self):
-#        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', '2015-10-30', '1999-10-01')
-#        with self.assertRaises(CustomError400):
-#            DatapointParameters(args).get_end()
-#
-#    def test_on_start_in_future_fails(self):
-#        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', days_ahead(1), days_ahead(2))
-#        with self.assertRaises(CustomError400):
-#            DatapointParameters(args).get_start()
-#
-#    def test_on_invalid_freq_should_fail(self):
-#        args = self._make_args('z', 'RETAIL_SALES_FOOD_rog', None, None)
-#        with self.assertRaises(CustomError400):
-#            DatapointParameters(args)
-#
-#    def test_on_invalid_name_should_fail(self):
-#        args = self._make_args('m', 'BIBA_boba', None, None)
-#        with self.assertRaises(CustomError400):
-#            DatapointParameters(args)
-#
-#    def test_freq_exist_on_good_param(self):
-#        freq_exist = DatapointParameters.validate_freq_exist('m')
-#        self.assertTrue(freq_exist)
-#
-#    def test_freq_exist_on_bad_params_should_produce_correct_message(self):
-#        with self.assertRaises(CustomError400) as fail:
-#            DatapointParameters.validate_freq_exist('s')
-#        self.assertEqual(fail.exception.message, 'Invalid frequency <s>')
-#
-#    def test_ending_date_is_optional(self):
-#        args = self._make_args('m', 'RETAIL_SALES_FOOD_rog', '2017-05-11', None)
-#        dp = DatapointParameters(args)
-#        assert dp.get_start() == datetime.date(year=2017, month=5, day=11)
-#        assert dp.get_end() == None
-
+        
+        def test_init_on_bad_args_fails(self, malformed_args):
+            req = SimRequest(**malformed_args)
+            with pytest.raises(HTTPException):
+                RequestArgs(req)
 
 
 class Test_RequestFrameArgs(TestCaseBase):
@@ -151,12 +104,15 @@ class Test_RequestFrameArgs(TestCaseBase):
         args = RequestFrameArgs(req)
         assert args.names is None
 
-    def test_init_on_bad_args_is_fails(self):
+    def test_init_on_bad_args_fails(self):
         malformed_args = dict(names="GDP_yoy,DING_dong", freq='a')
         req = SimRequest(**malformed_args)
         with pytest.raises(HTTPException):
             RequestArgs(req)
-
+            
+            
+# TODO: simple args class not testsed
 
 if __name__ == '__main__':
     pytest.main([__file__])
+    
