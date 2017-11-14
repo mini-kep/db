@@ -1,5 +1,7 @@
 import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
+from flask.views import MethodView
+
 
 from db import db
 from db.api.errors import CustomError400
@@ -15,15 +17,16 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 @api.errorhandler(422)
 def handle_validation_error(error):
-    
+
     # error 422 is raised by webargs, on two accasions:
     # 1. argument check on input (eg required argument missing)
     #    webarg raises some exception internally
     # 2. argument check inside parser class (eg start date must be before or equal end date)
-    #    we raise ArgError(ValidationError)    
-    
-    # when custom class ArgError is raised we will have 'kwargs.['load']' available 
-    view_dict = error.exc.kwargs.get('load', {}) 
+    #    we raise ArgError(ValidationError)
+
+    # when custom class ArgError is raised we will have 'kwargs.['load']'
+    # available
+    view_dict = error.exc.kwargs.get('load', {})
     # other validation paths for error 422 in webargs will just have .messages
     view_dict['messages'] = error.exc.messages
     # send combination of the above to user screen
@@ -41,7 +44,8 @@ def handle_invalid_usage(error):
 
 
 def authorise():
-    token_to_check = request.args.get('API_TOKEN') or request.headers.get('API_TOKEN')
+    token_to_check = request.args.get(
+        'API_TOKEN') or request.headers.get('API_TOKEN')
     if token_to_check != current_app.config['API_TOKEN']:
         return abort(403)
 
@@ -50,153 +54,99 @@ def no_download(csv_str):
     """Show document in browser, do not start a download dialog."""
     return Response(response=csv_str, mimetype='text/plain')
 
-        
+
 def publish_csv(data):
+    """Convert *data* iterator to csv string."""
     csv_str = utils.to_csv([row.serialized for row in data])
     return no_download(csv_str)
 
-        
+
 def publish_json(data):
+    """Convert *data* iterator to json."""
     return jsonify([row.serialized for row in data])
 
-    
-# FIXME: change this to class + restore swagger documentation
-# https://github.com/mini-kep/db/issues/69
-# http://flask.pocoo.org/docs/0.12/views/
-@api.route('/datapoints', methods=['POST', 'GET', 'DELETE'])
-def datapoints_endpoint():
-    if request.method == 'POST':
-       return upload_data()
-    elif request.method == 'DELETE':
-       return delete_datapoints()
-    else:    
-       return get_datapoints()
-        
-def upload_data():
-    """
-    Upload incoming data to database.
-    ---
-    tags:
-       - datapoints
-    parameters:
-       - name: API_TOKEN
-         in: query
-         type: string
-         required: true
-         description: API key
-       - name: data
-         in: query
-         type: list
-         required: true
-         description: list of dictionaries to upload, each of dicts is one datapoint obsrevation
-    responses:
-        403:
-            description: Failed to authenticate correctly.
-        200:
-            description: Returns empty dictionary on success.
-    """
-    # authorisation
-    authorise()
-    # upload data
-    try:
-        data = json.loads(request.data)
-        for datapoint in data:
-            DatapointOperations.upsert(datapoint)
-        db.session.commit()
+
+class DatapointsAPI(MethodView):
+
+    def get(self):
+        """
+        Select time series data as csv or json.
+
+        Responses:
+            422:
+                Bad arguments, eg start_date > end_date
+            200:
+                Sent json or csv.
+       """
+        args = RequestArgs()
+        data = DatapointOperations.select(**args.query_param)
+        if args.format == 'json':
+            return publish_json(data)
+        else:
+            return publish_csv(data)
+
+    def delete(self):
+        """Delete datapoints.
+
+        Responses:
+            403:
+                Failed to authenticate correctly.
+            200:
+                Returns empty dictionary on success.
+        """
+
+        authorise()
+        args = SimplifiedArgs()
+        DatapointOperations.delete(**args.query_param)
         return jsonify({})
-    except:
-        db.session.rollback()
-        return abort(400)
+
+    def post(self):
+        """Upload incoming data to database.
+
+        Responses:
+            400:
+                Something went wrong in during query.
+            403:
+                Failed to authenticate correctly.
+            200:
+                Returns empty dictionary on success.
+        """
+        authorise()
+        try:
+            data = json.loads(request.data)
+            for datapoint in data:
+                DatapointOperations.upsert(datapoint)
+            db.session.commit()
+            return jsonify({})
+        except BaseException:
+            db.session.rollback()
+            return abort(400)
 
 
-def get_datapoints():
-    """
-    Select and return time series as csv or json
-    ---
-    tags:
-      - datapoints
-    parameters:
-      - name: name
-        in: query
-        type: string
-        required: true
-      - name: freq
-        in: query
-        type: string
-        required: true
-        description: a, q, or d
-      - name: start_date
-        in: query
-        type: string
-        required: false
-      - name: end_date
-        in: query
-        type: string
-        required: false
-      - name: format
-        in: query
-        type: string
-        required: false
-        description: 'csv'(default) or 'json'
-    responses:
-        422:
-            description: bad arguments, eg start_date > end_date
-        200:
-            description: sent json or csv
-   """
-    args = RequestArgs()
-    data = DatapointOperations.select(**args.query_param)
-    if args.format == 'json':
-        return publish_json(data)
-    else:
-        return publish_csv(data)        
-
-def delete_datapoints():
-    """
-    Delete datapoints.
-    ---
-    tags:
-        -delete
-    parameters:
-      - name: name
-        in: query
-        type: string
-        required: false
-      - name: freq
-        in: query
-        type: string
-        required: false
-        description: a, q, or d
-      - name: start_date
-        in: query
-        type: string
-        required: false
-      - name: end_date
-        in: query
-        type: string
-        required: false
-    responses:
-        403:
-            description: Failed to authenticate correctly
-        400:
-            description: Returns {'exit': 0}
-            
-    """
-    authorise()
-    args = SimplifiedArgs()
-    DatapointOperations.delete(**args.query_param)
-    return jsonify({'exit': 0})
-    
-# end FIXME -------------------------------------------------------------------
+current_app.add_url_rule(
+    '/datapoints',
+    view_func=DatapointsAPI.as_view('datapoints'))
 
 
-# api/frame?freq=a&name=GDP_yoy,CPI_rog&start_date=2013-12-31
 @api.route('/frame', methods=['GET'])
 def get_dataframe():
+    """Get csv file readable as pd.DataFrame based on many of all variabel names.
+
+    URL examples:
+
+         api/frame?freq=a&names=GDP_yoy,CPI_rog&start_date=2013-12-31
+         api/frame?freq=a&start_date=2013-12-31
+         api/frame?freq=a
+
+    FIXME:
+        Application hangs on a large query like
+
+        api/frame?freq=q
+    """
     args = RequestFrameArgs()
     param = args.query_param
     if not args.names:
-         param['names'] = Allowed.names(args.freq)    
+        param['names'] = Allowed.names(args.freq)
     data = DatapointOperations.select_frame(**param)
     csv_str = utils.DictionaryRepresentation(data).to_csv()
     return no_download(csv_str)
@@ -204,73 +154,54 @@ def get_dataframe():
 
 @api.route('/freq', methods=['GET'])
 def get_freq():
+    """Get list of frequencies."""
     return jsonify(All.frequencies())
 
 
 @api.route('/names', methods=['GET'])
 def get_all_variable_names():
+    """Get all variable names in a dataset.
+
+    Responses:
+        200:  Returns a list of names
+    """
     return jsonify(All.names())
 
 
-@api.route('/names/<freq>', methods=['GET'])
+@api.route('/names/<str:freq>', methods=['GET'])
 def get_all_variable_names_for_frequency(freq):
-    """
-    Gets all possible names to a given freq
-    ---
-    tags:
-        - name
+    """Get variable names for frequency *freq*
 
-    parameters:
-      - name: freq
-        in: path
-        type: string
-        required: true
-        description: freq to get names for. Choose from [a, d, m, q]
-
-    responses:
-        200:
-            description: Returns a list of names
+    Responses:
+        200:  Returns a list of names
     """
     return jsonify(Allowed.names(freq))
 
-# experimental: variable infprmation, response dict may change
-  
+
 @api.route('/info', methods=['GET'])
 def variable_info():
     """
-    Gets a json with start_date and end_date of a give name and frequency pair
-    ---
-    tags:
-        - info
+    Get with variable infomation.
 
-    parameters:
-        - name: name
-          in: query
-          type: string
-          required: true
-          description: the datapoint name
-        - name: freq
-          in: query
-          type: string
-          required: true
-          description: frequency from [a, d, m, q]
-
-    responses:
-        400:
-            description: Request lacks either freq or name argument or start_date greater than end_date.
-        200:
-            description: Returns a start_date and end_date json.
-
+    Responses:
+        400: Either *freq* or *name* omitted.
+        200: Returns dictionary with variable infomation.
     """
-    name = request.args.get('name')  
-    freq = request.args.get('freq')  
+    # FIXME: initail information, must change data structure and omit frequency
+    name = request.args.get('name')
+    freq = request.args.get('freq')
     var, unit = label.split_label(name)
-    result = dict(name = name,
-                  var = {'id': var, 'en': 'reserved', 'ru': 'reserved'},
-                  unit = {'id': unit, 'en': 'reserved', 'ru': 'reserved'}
+    result = dict(name=name,
+                  var={'id': var, 'en': 'reserved', 'ru': 'reserved'},
+                  unit={'id': unit, 'en': 'reserved', 'ru': 'reserved'}
                   )
     dr = DateRange(freq=freq, name=name)
-    result[freq] = {'start_date': dr.min, 
+    result[freq] = {'start_date': dr.min,
                     'latest_date': dr.max,
-                    'latest_value': 'reserved'}   
-    return jsonify(result)    
+                    'latest_value': 'reserved'}
+    return jsonify(result)
+
+
+# TODO:
+    # POST varname
+    # POST unit
