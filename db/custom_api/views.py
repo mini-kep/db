@@ -4,6 +4,7 @@ from db.api.queries import DatapointOperations
 from db.api.views import publish_csv
 from db.custom_api.decomposer import Indicator
 
+# NOTE: may consider 'series/ru...' - it is more solid than {domain}/series 
 custom_api_bp = Blueprint('custom_api', __name__, url_prefix='')
 
 

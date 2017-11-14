@@ -12,10 +12,10 @@ import db.api.utils as utils
 import db.helper.label as label
 
 
-api = Blueprint('api', __name__, url_prefix='/api')
+api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
 
-@api.errorhandler(422)
+@api_bp.errorhandler(422)
 def handle_validation_error(error):
 
     # error 422 is raised by webargs, on two accasions:
@@ -35,7 +35,7 @@ def handle_validation_error(error):
     return response
 
 
-@api.errorhandler(CustomError400)
+@api_bp.errorhandler(CustomError400)
 def handle_invalid_usage(error):
     """Generate a json object of a custom error"""
     response = jsonify(error.dict)
@@ -123,12 +123,12 @@ class DatapointsAPI(MethodView):
             return abort(400)
 
 
-current_app.add_url_rule(
+api_bp.add_url_rule(
     '/datapoints',
-    view_func=DatapointsAPI.as_view('datapoints'))
+    view_func=DatapointsAPI.as_view('datapoints_view'))
 
 
-@api.route('/frame', methods=['GET'])
+@api_bp.route('/frame', methods=['GET'])
 def get_dataframe():
     """Get csv file readable as pd.DataFrame based on many of all variabel names.
 
@@ -152,13 +152,13 @@ def get_dataframe():
     return no_download(csv_str)
 
 
-@api.route('/freq', methods=['GET'])
+@api_bp.route('/freq', methods=['GET'])
 def get_freq():
     """Get list of frequencies."""
     return jsonify(All.frequencies())
 
 
-@api.route('/names', methods=['GET'])
+@api_bp.route('/names', methods=['GET'])
 def get_all_variable_names():
     """Get all variable names in a dataset.
 
@@ -168,7 +168,7 @@ def get_all_variable_names():
     return jsonify(All.names())
 
 
-@api.route('/names/<str:freq>', methods=['GET'])
+@api_bp.route('/names/<str:freq>', methods=['GET'])
 def get_all_variable_names_for_frequency(freq):
     """Get variable names for frequency *freq*
 
@@ -178,13 +178,13 @@ def get_all_variable_names_for_frequency(freq):
     return jsonify(Allowed.names(freq))
 
 
-@api.route('/info', methods=['GET'])
+@api_bp.route('/info', methods=['GET'])
 def variable_info():
     """
     Get with variable infomation.
 
     Responses:
-        400: Either *freq* or *name* omitted.
+        400: *freq* or *name* omitted.
         200: Returns dictionary with variable infomation.
     """
     # FIXME: initail information, must change data structure and omit frequency
