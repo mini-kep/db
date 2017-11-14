@@ -40,6 +40,10 @@ updates are documented below.
 See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/apidocs). 
 
 
+#### GET ```freq```:
+- [api/names/a](https://minikep-db.herokuapp.com/api/freq)
+
+
 #### GET ```names```:
 - [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
 - [api/names/q](https://minikep-db.herokuapp.com/api/names/q)
