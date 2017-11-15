@@ -168,7 +168,7 @@ def get_all_variable_names():
     return jsonify(All.names())
 
 
-@api_bp.route('/names/<str:freq>', methods=['GET'])
+@api_bp.route('/names/<freq>', methods=['GET'])
 def get_all_variable_names_for_frequency(freq):
     """Get variable names for frequency *freq*
 
