@@ -36,6 +36,7 @@
 """
 
 from datetime import date
+
 from db.api.errors import CustomError400
 
 ALLOWED_FREQUENCIES = ('d', 'w', 'm', 'q', 'a')
@@ -50,10 +51,10 @@ ALLOWED_AGGREGATORS = (
     'avg'
 )
 ALLOWED_FINALISERS = (
-    #'info',  # resereved: retrun json with variable and url description
+    # 'info',  # resereved: retrun json with variable and url description
     'csv',   # to implement: return csv (default)
     'json',  # to implement: return list of dictionaries
-    #'xlsx'   # resereved: return Excel file
+    # 'xlsx'   # resereved: return Excel file
 )
 
 
@@ -64,7 +65,7 @@ def as_date(year: int, month: int, day: int):
                 day=day).strftime('%Y-%m-%d')
 
 
-class ListElements:
+class ListElements(object):
     def __init__(self, tokens):
         self.tokens = tokens
 
@@ -108,14 +109,13 @@ class ListElements:
             return False
 
 
-class Tokens:
+class Tokens(object):
     def __init__(self, inner_path: str):
         # make list of non-empty strings
         tokens = [token.strip() for token in inner_path.split('/') if token]
         elements = ListElements(tokens)
         self.start_year, self.end_year = elements.get_years()
-        # order of assignment is important as .get_one() modifis state of
-        # 'elements'
+        # order of assignment is important as .get_one() modifis state of 'elements'
         self._fin = elements.get_one(ALLOWED_FINALISERS)
         self._rate = elements.get_one(ALLOWED_REAL_RATES)
         self._agg = elements.get_one(ALLOWED_AGGREGATORS)
@@ -138,11 +138,10 @@ class Tokens:
     @property
     def end(self):
         if self.end_year:
-            return as_date(end_year, month=12, day=31)
+            return as_date(self.end_year, month=12, day=31)
         else:
             today = date.today()
             return as_date(today.year, today.month, today.day)
-        return result
 
     # not used
     @property
@@ -169,7 +168,9 @@ def validate_rate_and_agg(rate, agg):
         raise CustomError400("Cannot combine rate and aggregation.")
 
 
-class Indicator():
+
+class Indicator(object):
+
     def __init__(self, domain, varname, freq, inner_path):
         self.varname = varname
         validate_frequency(freq)
