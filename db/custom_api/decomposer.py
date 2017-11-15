@@ -65,7 +65,7 @@ def as_date(year: int, month: int, day: int):
                 day=day).strftime('%Y-%m-%d')
 
 
-class ListElements:
+class ListElements(object):
     def __init__(self, tokens):
         self.tokens = tokens
 
@@ -109,7 +109,7 @@ class ListElements:
             return False
 
 
-class Tokens:
+class Tokens(object):
     def __init__(self, inner_path: str):
         # make list of non-empty strings
         tokens = [token.strip() for token in inner_path.split('/') if token]
@@ -168,7 +168,9 @@ def validate_rate_and_agg(rate, agg):
         raise CustomError400("Cannot combine rate and aggregation.")
 
 
-class Indicator:
+
+class Indicator(object):
+
     def __init__(self, domain, varname, freq, inner_path):
         self.varname = varname
         validate_frequency(freq)

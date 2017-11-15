@@ -4,7 +4,7 @@
 
 # Quickstart
 
-```api/datapoints``` exposes macroeconomic database, which you can query by indicator name, frequency (from annual to daily) and date range. 
+You can query macroeconomic database by indicator name, frequency (from annual to daily) and date range. 
 
 Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
 
