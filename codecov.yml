@@ -6,4 +6,4 @@ ignore:
   - run_local.py
   - db_init.py
   - config.py
-  - tsaks.py
+  - tasks.py
