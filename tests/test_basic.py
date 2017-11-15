@@ -17,7 +17,7 @@ from db import get_app
 from db.api.models import Datapoint
 from db.api import utils
 from db import db as fsa_db
-from db.api.views import api as api_module
+from db.api.views import api_bp as api_module
 from db.custom_api.views import custom_api_bp
 from flask import current_app
 
