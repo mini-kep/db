@@ -42,6 +42,23 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return response
 
+# PROPOSED ENHANCEMENT: Can use this fucntion as decorator for DatapointsAPI.post() amd .delete methods()
+#                       Currently authorise() used inside these methods. 
+#                       Decorator can help abstract database logic inside a method from access infrastructure
+#
+#                       Current problem - not sure how to add a decorator to individual class methods. 
+#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how 
+#                       to add decorators to all of class, but warns the 'traditional' decoraots wont 
+#                       work on individual methods:
+#                             
+#                                class UserAPI(MethodView):
+#                                    decorators = [user_required]
+#
+#                                > Due to the implicit self from the caller’s perspective you cannot use 
+#                                > regular view decorators on the individual methods of the view 
+#                                > <http://flask.pocoo.org/docs/0.12/views/#decorating-views>
+#
+#  Decision: for now plain call to authorise seems cleanest available solution.
 
 def authorise():
     token_to_check = request.args.get(
