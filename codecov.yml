@@ -3,5 +3,7 @@ ignore:
   - "*/test_*.py"       # wildcards accepted
   - "tests/*"         # wildcards accepted
   - run.py
+  - run_local.py
   - db_init.py
   - config.py
+  - tasks.py

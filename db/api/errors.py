@@ -1,5 +1,6 @@
-# Custom exception implemented by Flask pattern 
+# Custom exception implemented by Flask pattern
 # http://flask.pocoo.org/docs/0.12/patterns/apierrors/
+
 
 class CustomError400(Exception):
     status_code = 400
@@ -9,7 +10,7 @@ class CustomError400(Exception):
         self.message = message
         self.payload = payload
 
-    @property     
+    @property
     def dict(self):
         rv = dict(self.payload or ())
         rv['message'] = self.message

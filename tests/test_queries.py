@@ -3,19 +3,17 @@ from db.api.queries import DatapointOperations
 from datetime import date
 
 
-
 class TestSelectDataPoints(TestCaseBase):
 
     def test_data_is_fetching(self):
         params = dict(freq='m',
                       name='CPI_ALCOHOL_rog',
                       start_date=date(year=2016, month=6, day=1),
-                      end_date =date(year=2016, month=7, day=1))
+                      end_date=date(year=2016, month=7, day=1))
         datapoint = DatapointOperations.select(**params).first()
         self.assertEqual(
-            datapoint.serialized,
-            {"date": "2016-06-30", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 100.6}
-        )
+            datapoint.serialized, {
+                "date": "2016-06-30", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 100.6})
 
     def test_wrong_params_fetch_zero_results(self):
         params = dict(
@@ -32,7 +30,11 @@ class TestUpsertDatapoint(TestCaseBase):
 
     def setUp(self):
         super().setUp()
-        self.dp1_dict = dict(date="2016-04-21", freq='q', name="CPI_rog", value=123.4)
+        self.dp1_dict = dict(
+            date="2016-04-21",
+            freq='q',
+            name="CPI_rog",
+            value=123.4)
         self.dp1_search_param = dict(freq=self.dp1_dict['freq'],
                                      name=self.dp1_dict['name'],
                                      start_date=self.dp1_dict['date'],
@@ -42,7 +44,8 @@ class TestUpsertDatapoint(TestCaseBase):
         self.dp1_dict_updated['value'] = 432.1
 
     def test_before_upsert_datapoint_not_found(self):
-        datapoints_count = DatapointOperations.select(**self.dp1_search_param).count()
+        datapoints_count = DatapointOperations.select(
+            **self.dp1_search_param).count()
         assert datapoints_count == 0
 
     def test_after_upsert_datapoint_found(self):
@@ -57,7 +60,7 @@ class TestUpsertDatapoint(TestCaseBase):
         assert datapoint.serialized == self.dp1_dict_updated
 
 
-class TestDeleteDatapoint(TestCaseBase):    
+class TestDeleteDatapoint(TestCaseBase):
 
     def test_delete(self):
         param = dict(freq='q', name='GDP_yoy', start_date=None, end_date=None)
@@ -67,15 +70,16 @@ class TestDeleteDatapoint(TestCaseBase):
         count_after_delete = DatapointOperations.select(**param).count()
         assert count_after_delete == 0
 
-# WONTFIX: we are skipping a check if datapoint exist in the original function 
+# WONTFIX: we are skipping a check if datapoint exist in the original function
 #          (but the idea is good)
-#    
+#
 #    def test_no_deletion_without_match(self):
 #        db_before = fsa_db.session.query(Datapoint).all()
 #        _name="does_not_match"
 #        delete_datapoints(name=_name)
 #        db_after = fsa_db.session.query(Datapoint).all()
 #        assert db_before == db_after
+
 
 if __name__ == '__main__':
     import pytest

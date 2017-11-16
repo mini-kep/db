@@ -17,7 +17,7 @@ from db import get_app
 from db.api.models import Datapoint
 from db.api import utils
 from db import db as fsa_db
-from db.api.views import api as api_module
+from db.api.views import api_bp as api_module
 from db.custom_api.views import custom_api_bp
 from flask import current_app
 
@@ -33,7 +33,6 @@ class TestCaseBase(unittest.TestCase):
         app.config['API_TOKEN'] = 'token'
         return app
 
-
     @property
     def test_data(self):
         return self._read_test_data()
@@ -46,8 +45,10 @@ class TestCaseBase(unittest.TestCase):
 
     def _subset_test_data(self, name, freq):
         data = self._read_test_data()
-        is_var = lambda d: d['name'] == name and d['freq'] == freq
-        sorter_func = lambda item: utils.to_date(item['date'])
+
+        def is_var(d): return d['name'] == name and d['freq'] == freq
+
+        def sorter_func(item): return utils.to_date(item['date'])
         return sorted(filter(is_var, data), key=sorter_func)
 
     def _prepare_db(self):
@@ -99,7 +100,7 @@ class TestViewsDatapoints(TestCaseBase):
 
 
 if __name__ == '__main__':
-    #unittest.main(module='test_basic')
+    # unittest.main(module='test_basic')
     q = TestViewsDatapoints()
     q.setUp()
     response = q.query_on_name_and_freq()

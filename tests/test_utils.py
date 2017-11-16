@@ -4,7 +4,6 @@ from db.api import queries
 from db.api.utils import DictionaryRepresentation
 from tests.test_basic import TestCaseBase
 
-
 class Test_DictionaryRepresentation(TestCaseBase):
     def test_header_property_is_string(self):
         names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
@@ -35,6 +34,7 @@ class Test_DictionaryRepresentation(TestCaseBase):
         assert next(rows) == ['2016-06-04', '', 66.8529]
         assert next(rows) == ['2016-06-06', 48.94, '']
         assert next(rows) == ['2016-06-07', 49.76, 65.7894]
+
 
 
 if __name__ == '__main__':
