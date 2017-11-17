@@ -79,6 +79,7 @@ class ListElements:
         if n_years_found == 1:
             start = int(integers[0])
         if n_years_found == 2:
+            start = int(integers[0])
             end = int(integers[1])
         for year in integers:
             self._pop(year)
