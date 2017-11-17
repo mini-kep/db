@@ -5,12 +5,6 @@ import db.api.queries as queries
 param1 = dict(freq='q', names=['CPI_rog', 'EXPORT_GOODS_bln_usd'],
               start_date = '2016-06-30', end_date = '2016-12-31')
 
-#must extract:
-# ,CPI_rog,EXPORT_GOODS_bln_usd
-# 2016-06-30,101.2,67.9
-# 2016-09-30,100.7,70.9
-# 2016-12-31,101.3,82.6
-
 param2 = dict(freq='d', names=['BRENT', 'USDRUR_CB'],
               start_date='2016-06-01', end_date='2016-06-07')
 
