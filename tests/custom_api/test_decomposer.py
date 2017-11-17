@@ -6,12 +6,16 @@ from tests.test_basic import TestCaseBase
 
 
 class Test_as_date(TestCaseBase):
+    @staticmethod
+    def _as_date(year, month, day):
+        return decomposer.as_date(year, month, day)
+
     def test_as_date_with_valid_date_success(self):
-        assert decomposer.as_date(2010, 5, 25) == '2010-05-25'
+        assert self._as_date(2010, 5, 25) == '2010-05-25'
 
     def test_as_date_with_invalid_date_fails(self):
         with pytest.raises(ValueError):
-            decomposer.as_date(2010, 0, 0)
+            self._as_date(2010, 0, 0)
 
 
 class Test_validate_frequency(TestCaseBase):
@@ -50,7 +54,7 @@ class Test_ListElements_years_handling(TestCaseBase):
     def test_get_years_on_one_year_returns_start_year(self):
         assert decomposer.ListElements(tokens=['2000']).get_years() == (2000, None)
 
-    def test_on_two_years_returns_start_end_years(self):
+    def test_on_two_years_returns_start_and_end_years(self):
         assert decomposer.ListElements(tokens=['2005', '2007']).get_years() == \
                (2005, 2007)
 
@@ -62,9 +66,8 @@ class Test_TokensArgs(TestCaseBase):
         return decomposer.as_date(
             date.today().year, date.today().month, date.today().day)
 
-    def test_init_on_well_formed_args_is_success(self):
-        inner_path = 'oil/series/BRENT/m/eop/2015/2017/csv'
-        tokens = decomposer.Tokens(inner_path)
+    def test_init_on_well_formed_inner_path_is_success(self):
+        tokens = decomposer.Tokens(inner_path='oil/series/BRENT/m/eop/2015/2017/csv')
 
         assert tokens.unit is None
         assert tokens.start == '2015-01-01'
@@ -73,16 +76,14 @@ class Test_TokensArgs(TestCaseBase):
         assert tokens.rate is None
         assert tokens.agg is 'eop'
 
-    def test_init_on_args_with_no_years_is_success(self):
-        inner_path = 'oil/series/BRENT/m/eop/csv'
-        tokens = decomposer.Tokens(inner_path)
+    def test_init_on_inner_path_with_no_years_is_success(self):
+        tokens = decomposer.Tokens(inner_path='oil/series/BRENT/m/eop/csv')
 
         assert tokens.start is None
         assert tokens.end == self._today()
 
-    def test_init_on_no_args(self):
-        inner_path = ''
-        tokens = decomposer.Tokens(inner_path)
+    def test_init_on_empty_inner_path(self):
+        tokens = decomposer.Tokens(inner_path='')
 
         assert tokens.unit is None
         assert tokens.start is None
