@@ -11,6 +11,7 @@ import pytest
 import json
 
 from tests.test_basic import TestCaseBase
+from db.api.errors import CustomError400
 
 
 class Test_API_Names(TestCaseBase):
@@ -63,33 +64,54 @@ class Test_API_Info(TestCaseBase):
 
 # TODO: these test should relate to something else not covered in query.py
 
-# class TestGetResponseDatapoints(TestCaseBase):
-#
-#    data_dicts = [{"date": "1999-01-31", "freq": "m", "name": "CPI_ALCOHOL_rog", "value": 109.7},
-#                  {"date": "1999-01-31", "freq": "m",
-#                      "name": "CPI_FOOD_rog", "value": 110.4},
-#                  {"date": "1999-01-31", "freq": "m", "name": "CPI_NONFOOD_rog", "value": 106.2}]
-#
-#    def _make_sample_datapoints_list(self):
-#        return [Datapoint(**params) for params in self.data_dicts]
-#
-#    def test_json_serialising_is_valid(self):
-#        data = self._make_sample_datapoints_list()
-#        response = get_datapoints_response(data, 'json')
-#        parsed_json = json.loads(response.data)
-#        self.assertEqual(self.data_dicts, parsed_json)
-#
-#    def test_csv_serialising_is_valid(self):
-#        data = self._make_sample_datapoints_list()
-#        response = get_datapoints_response(data, 'csv')
-#        csv_string = str(response.data, 'utf-8')
-#        self.assertEqual(
-#            ',CPI_ALCOHOL_rog\n1999-01-31,109.7\n1999-01-31,110.4\n1999-01-31,106.2\n', csv_string)
-#
-#    def test_invalid_output_format_should_fail(self):
-#        data = self._make_sample_datapoints_list()
-#        with self.assertRaises(CustomError400):
-#            get_datapoints_response(data, 'html')
+class TestDatapointsAPI(TestCaseBase):
+
+   data_dicts = [{
+    "date": "2016-06-01",
+    "freq": "d",
+    "name": "USDRUR_CB",
+    "value": 65.9962
+  },
+  {
+    "date": "2016-06-02",
+    "freq": "d",
+    "name": "USDRUR_CB",
+    "value": 66.6156
+  },
+  {
+    "date": "2016-06-03",
+    "freq": "d",
+    "name": "USDRUR_CB",
+    "value": 66.7491
+  }]
+
+   data_csv_string = ",USDRUR_CB\n2016-06-01,65.9962\n2016-06-02,66.6156\n2016-06-03,66.7491\n"
+
+   def _send_GET_request(self, response_format):
+       params = dict(
+           name='USDRUR_CB',
+           freq='d',
+           start_date='2016-06-01',
+           end_date='2016-06-03',
+           format=response_format)
+
+       return self.client.get('api/datapoints', query_string=params)
+
+   def test_json_serialising_is_valid(self):
+       response = self._send_GET_request('json')
+       parsed_json = json.loads(response.data)
+       self.assertEqual(self.data_dicts, parsed_json)
+
+   def test_csv_serialising_is_valid(self):
+       response = self._send_GET_request('csv')
+       csv_string = str(response.data, 'utf-8')
+       self.assertEqual(
+           self.data_csv_string, csv_string)
+
+   #  TODO: this test fails because api response is csv if params contain anything else than "format=json"
+   # def test_invalid_output_format_should_fail(self):
+   #     with self.assertRaises(CustomError400):
+   #         self._send_GET_request('html')
 
 
 if __name__ == '__main__':  # pragma: no cover
