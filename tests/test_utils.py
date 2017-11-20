@@ -14,7 +14,7 @@ class Test_DictionaryRepresentation(TestCaseBase):
     def make(self, freq, names, start_date, end_date):
         query = queries.DatapointOperations \
                        .select_frame(freq, names, start_date, end_date)
-        return utils.DictionaryRepresentation(query)
+        return utils.DictionaryRepresentation(query, names)
 
     def test_names_propery_on_valid_args_returns_names_parameter(self):
         assert self.make(**param1).names == ['CPI_rog', 'EXPORT_GOODS_bln_usd']
