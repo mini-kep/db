@@ -5,8 +5,10 @@
 
 """
 from datetime import datetime
-from db.api.errors import CustomError400
+
 import db.api.queries as queries
+from db.api.errors import CustomError400
+
 
 
 def date_as_str(dt):
@@ -36,7 +38,7 @@ def yield_csv_row(dicts):
                {'date': '1992-07-01', 'freq': 'd',
                 'name': 'USDRUR_CB', 'value': 0.1253}
 
-    Yeilds:
+    Yields:
         csv header like ',USDRUR_CB'
         followed by rows like '1992-07-01,0.1253'
         followed by empty string at end
@@ -65,7 +67,7 @@ def unique(seq):
 
 def serialiser(datapoint_query):
     dicts = [d.serialized for d in datapoint_query]
-    dates = unique([x['name'] for x in dicts])
+    dates = unique([x['date'] for x in dicts])
     result = dict()
     for dt in dates:
         this_date = {x['name']: x['value'] for x in dicts if x['date'] == dt}
@@ -114,7 +116,9 @@ class DictionaryRepresentation:
         return '\n'.join(self.yield_rows())
 
 
+
 if __name__ == '__main__':  # pragma: no cover
+
     from db import create_app
     from db.api.views import api
 
@@ -122,16 +126,18 @@ if __name__ == '__main__':  # pragma: no cover
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
 
-    # EP: works without db creation after done once
+
+    #EP: works without db creation after done once
+
     #from db import db
     # db.create_all(app=create_app('config.DevelopmentConfig'))
 
     with app.app_context():
-
         # TODO: convert to test
         names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
         sample_query = queries.DatapointOperations.select_frame(
             'q', names, None, None)
+
         m = DictionaryRepresentation(sample_query)
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
         rows = m.yield_data_rows()
@@ -146,8 +152,7 @@ if __name__ == '__main__':  # pragma: no cover
 """
 
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
-        # TODO: test this result for daily frequency - note it has missing
-        # values, which is correct
+        # TODO: test this result for daily frequency - note it has missing values, which is correct
         """,BRENT,USDRUR_CB
 2016-06-01,48.81,65.9962
 2016-06-02,49.05,66.6156
