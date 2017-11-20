@@ -165,7 +165,7 @@ def get_dataframe():
     if not args.names:
         param['names'] = Allowed.names(args.freq)
     data = DatapointOperations.select_frame(**param)
-    csv_str = utils.DictionaryRepresentation(data).to_csv()
+    csv_str = utils.DictionaryRepresentation(data, param['names']).to_csv()
     return no_download(csv_str)
 
 
