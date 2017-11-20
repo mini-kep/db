@@ -10,6 +10,7 @@ import db.api.queries as queries
 from db.api.errors import CustomError400
 
 
+
 def date_as_str(dt):
     """Convert datetime.date object *dt* to YYYY-MM-DD string."""
     return datetime.strftime(dt, "%Y-%m-%d")
@@ -24,7 +25,7 @@ def to_date(date_str: str):
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
 #
-#def date_as_str(dt):
+# def date_as_str(dt):
 #    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
 #    return datetime.strftime(dt.date, "%Y-%m-%d")
 
@@ -115,7 +116,9 @@ class DictionaryRepresentation:
         return '\n'.join(self.yield_rows())
 
 
-if __name__ == '__main__': # pragma: no cover
+
+if __name__ == '__main__':  # pragma: no cover
+
     from db import create_app
     from db.api.views import api
 
@@ -123,14 +126,18 @@ if __name__ == '__main__': # pragma: no cover
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
 
+
     #EP: works without db creation after done once
+
     #from db import db
-    #db.create_all(app=create_app('config.DevelopmentConfig'))
+    # db.create_all(app=create_app('config.DevelopmentConfig'))
 
     with app.app_context():
         # TODO: convert to test
         names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
-        sample_query = queries.DatapointOperations.select_frame('q', names, None, None)
+        sample_query = queries.DatapointOperations.select_frame(
+            'q', names, None, None)
+
         m = DictionaryRepresentation(sample_query)
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
         rows = m.yield_data_rows()

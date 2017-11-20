@@ -14,16 +14,18 @@ from pathlib import Path
 # 'from db' is folder name, 'import db' is SQLAlchemy instance
 from db import db
 from db import create_app
-# we need to import models here explicitly, otherwise the tables created will be empty
+# we need to import models here explicitly, otherwise the tables created
+# will be empty
 from db.api import models
-from db.api.views import api 
+from db.api.views import api
 from db.api.utils import to_date
 
 # this creates tables specified in db.api.models
-# the tables will be created in config.DevelopmentConfig.SQLALCHEMY_DATABASE_URI
+# the tables will be created in
+# config.DevelopmentConfig.SQLALCHEMY_DATABASE_URI
 
 # create app
-app = create_app('config.DevelopmentConfig') 
+app = create_app('config.DevelopmentConfig')
 app.register_blueprint(api)
 # create tables for models
 db.create_all(app=app)
@@ -38,7 +40,7 @@ for datapoint in data:
 with app.app_context():
     # delete everything as we will be unable to insert + commit
     for item in models.Datapoint.query.all():
-        db.session.delete(item)    
+        db.session.delete(item)
     db.session.commit()
     # add from file
     db.session.bulk_insert_mappings(models.Datapoint, data)
