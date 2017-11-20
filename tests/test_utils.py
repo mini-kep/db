@@ -26,9 +26,9 @@ class Test_DictionaryRepresentation(TestCaseBase):
 
     def test_yield_data_rows_yields_lists_of_strings(self):
         rows = self.make(**param1).yield_data_rows()
-        next(rows) == ['2016-06-30', 101.2, 67.9]
-        next(rows) == ['2016-09-30', 100.7, 70.9]
-        next(rows) == ['2016-12-31', 101.3, 82.6]
+        assert next(rows) == ['2016-06-30', 101.2, 67.9]
+        assert next(rows) == ['2016-09-30', 100.7, 70.9]
+        assert next(rows) == ['2016-12-31', 101.3, 82.6]
  
     def test_to_csv_on_param1_equals_string(self):
         s = self.make(**param1).to_csv()
