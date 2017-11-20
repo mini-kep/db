@@ -89,18 +89,6 @@ class DictionaryRepresentation:
     def __init__(self, datapoint_query, names):
         self.data_dicts = self.transform_query_to_dicts(datapoint_query)
         self.names = names
-        # self.source_dict = [d.serialized for d in datapoint_query]
-        # self.names = unique([x['name'] for x in self.source_dict])
-        # self.dates = unique([x['date'] for x in self.source_dict])
-
-    # @property
-    # def dicts(self):
-    #     result = dict()
-    #     for dt in self.dates:
-    #         this_date = {x['name']: x['value']
-    #                      for x in self.source_dict if x['date'] == dt}
-    #         result[dt] = this_date
-    #     return result
 
     @property
     def header(self):
@@ -113,19 +101,6 @@ class DictionaryRepresentation:
                 value = info.get(name, '')
                 row.append(value)
             yield row
-
-
-    # def yield_data_rows(self):
-    #     for dt in self.dates:
-    #         row = [dt]
-    #         for name in self.names:
-    #             try:
-    #                 x = self.dicts[dt][name]
-    #             except KeyError:
-    #                 x = ''
-    #             finally:
-    #                 row.append(x)
-    #         yield row
 
     def yield_rows(self):
         yield self.header
