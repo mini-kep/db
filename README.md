@@ -5,9 +5,6 @@
 # Quickstart
 
 `mini-kep` API allows to query macroeconomic database by indicator name, frequency (from annual to daily) and date range. 
-R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
-
-Example:
 
 Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
 
@@ -23,6 +20,8 @@ Link below will provide quarterly year-on-year Russian GDP growth rates as csv f
 2017-06-30,102.5
 ```
 
+R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
+
 Additional endpoints to navigate this dataset are:
 
   - ```api/freq``` - list avalable frequencies
@@ -30,10 +29,12 @@ Additional endpoints to navigate this dataset are:
   - ```api/info/?name={name}``` - provide additional information about a variable
 
 
+
+
 #### Administrator 
 
-Administrato with API token can upload and delete data . This functionality 
-is used by [parsers](https://github.com/mini-kep/parsers).
+Administrator with API token can upload and delete data . This functionality 
+is also used by [parsers](https://github.com/mini-kep/parsers).
 
 
 # API description 
