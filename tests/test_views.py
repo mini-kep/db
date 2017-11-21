@@ -100,7 +100,7 @@ class TestDatapointsAPI(TestCaseBase):
         self.params['format'] = response_format
         return self.client.get('api/datapoints', query_string=self.params).data
 
-    def test_json_serialising_is_valid(self):
+    def test_get_request_with_json_format_returns_valid_json(self):
         # method under test: get
         # context or arguments: string, dict
         # expected result of behavior: returns valid json
@@ -114,7 +114,7 @@ class TestDatapointsAPI(TestCaseBase):
         # check
         assert self.data_dicts == result_dict
 
-    def test_csv_serialising_is_valid(self):
+    def test_get_request_with_csv_format_returns_valid_csv_string(self):
         # method under test: get
         # context or arguments: string, dict
         # expected result of behavior: returns valid csv string
@@ -128,7 +128,7 @@ class TestDatapointsAPI(TestCaseBase):
         # check
         assert self.data_csv_string == result_string
 
-    # def test_fails_on_invalid_format(self):
+    # def test_get_request_fails_on_invalid_format(self):
     #     # method under test: get
     #     # context or arguments: string, dict
     #     # expected result of behavior: raise HTTP exception
