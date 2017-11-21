@@ -62,13 +62,13 @@ List variable names for specified frequency.
 
 Get subset of data as csv or json.
 
-Required parameters:
+Args:
 - `freq` - one of `a`, `q`, `m`, or `d` 
-- `name` - variable name 
+- `name` - variable name, ex: `GDP_yoy` 
+- `start_date` (optional) - start date, ex: `2017-10-25`
+- `end_date` (optional) - end date, ex: `2018-03-20`
 
-Optional parameter:
-- `start_date` - start date, like `2017-10-25`.
-- `end_date` - end date, like `2018-03-20`.
+Examples:
 
 - [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
 - [api/datapoints?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q)
@@ -84,7 +84,14 @@ Optional parameter:
 #### GET ```frame```
 Returns a csv dataframe.
 
-Example call:
+Args:
+- `freq` - one of `a`, `q`, `m`, or `d` 
+- `names` - one variable name or several variable names separated by comma. Lists all variables, if omitted.
+- `start_date` (optional) - start date, ex: `2017-10-25`
+- `end_date` (optional) - end date, ex: `2018-03-20`
+
+
+Example:
 
 [api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10](http://minikep-db.herokuapp.com/api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10)
 
@@ -98,15 +105,9 @@ Example call:
 2017-10-09,55.29,
 2017-10-10,56.62,58.3151
 ```
-If there's no data for specified name and date, value will be skipped (eg see line `2017-10-07,,57.7612` in example above).
 
-Required parameters:
-- `freq` - one of `a`, `q`, `m`, or `d` 
+Note: as standard csv composition, value will be skipped if there's no data for specified name and date (eg see line `2017-10-07,,57.7612` in example above).
 
-Optional parameters:
-- `names` - one variable name or several variable names separated by comma. Will list all variables if omitted.
-- `start_date` - start date, like `2017-10-25`
-- `end_date` - end date, like `2018-03-20`
 
 Examples:
 - [api/frame?freq=a](http://minikep-db.herokuapp.com/api/frame?freq=a)
