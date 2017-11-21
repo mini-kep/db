@@ -84,7 +84,8 @@ Returns a csv dataframe.
 
 Example call:
 
-<http://minikep-db.herokuapp.com/api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10>
+[api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10](http://minikep-db.herokuapp.com/api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10)
+
 ```,BRENT,USDRUR_CB
 2017-10-02,55.67,
 2017-10-03,56.12,57.8134
@@ -95,8 +96,7 @@ Example call:
 2017-10-09,55.29,
 2017-10-10,56.62,58.3151
 ```
-If there's no data for specified name and date, value will be skipped. 
-See line `2017-10-07,,57.7612` in example above.
+If there's no data for specified name and date, value will be skipped (eg see line `2017-10-07,,57.7612` in example above).
 
 Required parameters:
 - `freq` - one of `a`, `q`, `m`, or `d` 
