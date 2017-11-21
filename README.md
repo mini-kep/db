@@ -40,6 +40,35 @@ updates are documented below.
 See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/apidocs). 
 
 
+#### GET ```frame```
+Returns a csv dataframe.
+Example call:
+<http://minikep-db.herokuapp.com/api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10>
+```,BRENT,USDRUR_CB
+2017-10-02,55.67,
+2017-10-03,56.12,57.8134
+2017-10-04,56.0,57.9375
+2017-10-05,57.09,57.7832
+2017-10-06,55.5,57.5811
+2017-10-07,,57.7612
+2017-10-09,55.29,
+2017-10-10,56.62,58.3151
+```
+If there's no data for specified name and date, value will be skipped. You can see it in example above - `2017-10-07,,57.7612`
+
+Required params:
+- `freq` - one of ```{'a', 'q', 'm', 'd'}```
+Optional params:
+- `names` - one or multiplie names (separated by comma). If not specified, then a dataframe with all avaibalive names will be returned. Available names could be listed via `GET names`.
+- `start_date` - starting date for data, like `2017-10-25`.
+- `end_date` - ending date for data, like `2018-03-20`.
+
+Examples:
+- [api/frame?freq=a](http://minikep-db.herokuapp.com/api/frame?freq=a)
+- [api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog](http://minikep-db.herokuapp.com/api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog)
+- [api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01](http://minikep-db.herokuapp.com/api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01)
+
+
 #### GET ```freq```:
 
 List avalable frequencies in the dataset. Returns ```{'a', 'q', 'm', 'd'}```.
