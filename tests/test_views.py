@@ -100,47 +100,48 @@ class TestDatapointsAPI(TestCaseBase):
         self.params['format'] = response_format
         return self.client.get('api/datapoints', query_string=self.params).data
 
-    def test_get_request_with_json_format_returns_valid_json(self):
+    def test_get_on_json_format_arg_returns_expected_json(self):
         # method under test: get
         # context or arguments: string, dict
-        # expected result of behavior: returns valid json
+        # expected result of behavior: returns expected json
 
         # test setup
-        response_format = 'json'
+        format_arg = 'json'
 
         # call
-        result_dict = json.loads(self._get_response(response_format))
+        result_dict = json.loads(self._get_response(format_arg))
 
         # check
         assert self.data_dicts == result_dict
 
-    def test_get_request_with_csv_format_returns_valid_csv_string(self):
+    def test_get_on_csv_format_arg_returns_expected_csv_string(self):
         # method under test: get
         # context or arguments: string, dict
-        # expected result of behavior: returns valid csv string
+        # expected result of behavior: returns expected csv string
 
         # test setup
-        response_format = 'csv'
+        format_arg = 'csv'
 
         # call
-        result_string = str(self._get_response(response_format), 'utf-8')
+        result_string = self._get_response(format_arg).decode()
 
         # check
         assert self.data_csv_string == result_string
 
-    # def test_get_request_fails_on_invalid_format(self):
-    #     # method under test: get
-    #     # context or arguments: string, dict
-    #     # expected result of behavior: raise HTTP exception
-    #
-    #     # test setup
-    #     response_format = 'html'
-    #
-    #     # check
-    #     with self.assertRaises(CustomError400):
-    #
-    #         # call
-    #         self._get_response(response_format), 'utf-8'
+    @pytest.mark.xfail
+    def test_get_raise_http_exception_on_invalid_format(self):
+        # method under test: get
+        # context or arguments: string, dict
+        # expected result of behavior: raise HTTP exception
+
+        # test setup
+        response_format = 'html'
+
+        # check
+        with self.assertRaises(CustomError400):
+
+            # call
+            self._get_response(response_format), 'utf-8'
 
 
 if __name__ == '__main__':  # pragma: no cover
