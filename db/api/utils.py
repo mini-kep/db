@@ -24,10 +24,6 @@ def to_date(date_str: str):
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
-#
-# def date_as_str(dt):
-#    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
-#    return datetime.strftime(dt.date, "%Y-%m-%d")
 
 
 def yield_csv_row(dicts):
@@ -76,15 +72,26 @@ def serialiser(datapoint_query):
 
 
 class DictionaryRepresentation:
+    
+    
+    # FIXME: how is the order of dates guaranteed in this method?
+    #        just by the fact they have been ordered elsewhere?
+    #        this seems vulberable 
+    #
+    #        note: adding order to datapoint_query in __init__.py
+    #              works on slqite, but need to be tested on posgres             
+    
     @staticmethod
     def transform_query_to_dicts(datapoints):
+        # FIXME: add docstring and indicate what type is datapoints  
         result = collections.OrderedDict()
         for point in datapoints:
             date = date_as_str(point.date)
+            # NEED COMMENT - why use setdefault? 
             result.setdefault(date, {})
             result[date][point.name] = point.value
         return result
-
+     
 
     def __init__(self, datapoint_query, names):
         self.data_dicts = self.transform_query_to_dicts(datapoint_query)
@@ -121,7 +128,6 @@ if __name__ == '__main__':  # pragma: no cover
     # create test app
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
-
 
     #EP: works without db creation after done once
 
