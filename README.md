@@ -5,6 +5,9 @@
 # Quickstart
 
 `mini-kep` API allows to query macroeconomic database by indicator name, frequency (from annual to daily) and date range. 
+R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
+
+Example:
 
 Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
 
@@ -19,8 +22,6 @@ Link below will provide quarterly year-on-year Russian GDP growth rates as csv f
 2017-03-31,100.5
 2017-06-30,102.5
 ```
-
-R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
 
 Additional endpoints to navigate this dataset are:
 
