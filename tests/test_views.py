@@ -135,13 +135,13 @@ class TestDatapointsAPI(TestCaseBase):
         # expected result of behavior: raise HTTP exception
 
         # test setup
-        response_format = 'html'
+        format_arg = 'html'
 
         # check
         with self.assertRaises(CustomError400):
 
             # call
-            self._get_response(response_format), 'utf-8'
+            self._get_response(format_arg), 'utf-8'
 
 
 if __name__ == '__main__':  # pragma: no cover
