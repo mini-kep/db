@@ -33,8 +33,8 @@ Additional endpoints to navigate this dataset are:
 
 #### Administrator 
 
-Administrator with API token can upload and delete data . This functionality 
-is also used by [parsers](https://github.com/mini-kep/parsers).
+Administrator with API token can upload and delete data. 
+This functionality is also used by [parsers](https://github.com/mini-kep/parsers).
 
 
 # API description 
