@@ -107,9 +107,11 @@ class TestDatapointsAPI(TestCaseBase):
 
         # test setup
         response_format = 'json'
-        result_dict = json.loads(self._get_response(response_format))
 
         # call
+        result_dict = json.loads(self._get_response(response_format))
+
+        # check
         assert self.data_dicts == result_dict
 
     def test_csv_serialising_is_valid(self):
@@ -119,9 +121,11 @@ class TestDatapointsAPI(TestCaseBase):
 
         # test setup
         response_format = 'csv'
-        result_string = str(self._get_response(response_format), 'utf-8')
 
         # call
+        result_string = str(self._get_response(response_format), 'utf-8')
+
+        # check
         assert self.data_csv_string == result_string
 
     # def test_fails_on_invalid_format(self):
@@ -132,8 +136,10 @@ class TestDatapointsAPI(TestCaseBase):
     #     # test setup
     #     response_format = 'html'
     #
-    #     # call
+    #     # check
     #     with self.assertRaises(CustomError400):
+    #
+    #         # call
     #         self._get_response(response_format), 'utf-8'
 
 
