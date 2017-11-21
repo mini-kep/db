@@ -61,6 +61,29 @@ class Test_API_Info(TestCaseBase):
         assert result['m']['latest_date'] == dates[-1]
 
 
+class Test_API_Frame(TestCaseBase):
+    API_FRAME_URL = 'api/frame'
+    HTTP_ERROR_CODE = 422
+    HTTP_OK_CODE = 200
+    params_only_freq_is_given = dict(freq='m')
+    sample_valid_params = dict(freq='d', names='BRENT,USDRUR_CB',
+                               start_date='2015-01-01', end_date='2017-06-07')
+
+    def test_api_call_with_no_params_fails(self):
+        request = self.client.get(self.API_FRAME_URL)
+        self.assertEqual(request.status_code, self.HTTP_ERROR_CODE)
+
+    def test_call_with_only_freq_parameter_is_ok(self):
+        request = self.client.get(self.API_FRAME_URL,
+                                  query_string=self.params_only_freq_is_given)
+        self.assertEqual(request.status_code, self.HTTP_OK_CODE)
+
+    def test_call_with_valid_params_is_ok(self):
+        request = self.client.get(self.API_FRAME_URL,
+                                  query_string=self.sample_valid_params)
+        self.assertEqual(request.status_code, self.HTTP_OK_CODE)
+
+
 # TODO: these test should relate to something else not covered in query.py
 
 # class TestGetResponseDatapoints(TestCaseBase):
