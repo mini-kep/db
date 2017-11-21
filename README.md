@@ -4,7 +4,7 @@
 
 # Quickstart
 
-You can query macroeconomic database by indicator name, frequency (from annual to daily) and date range. 
+`mini-kep` API allows to query macroeconomic database by indicator name, frequency (from annual to daily) and date range. 
 
 Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
 
@@ -22,9 +22,6 @@ Link below will provide quarterly year-on-year Russian GDP growth rates as csv f
 
 R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
 
-```api/datapoints``` also allows to upload and delete datapoints with API token. This functionality 
-is used by administrator and scheduled [parsers](https://github.com/mini-kep/parsers).
-
 Additional endpoints to navigate this dataset are:
 
   - ```api/freq``` - list avalable frequencies
@@ -32,13 +29,16 @@ Additional endpoints to navigate this dataset are:
   - ```api/info/?name={name}``` - provide additional information about a variable
 
 
+#### Administrator 
+
+Administrato with API token can upload and delete data . This functionality 
+is used by [parsers](https://github.com/mini-kep/parsers).
+
+
 # API description 
 
 Initial specification for database API is [here](https://mini-kep.github.io/documentation/database/),
 updates are documented below.
-
-See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/apidocs). 
-
 
 #### GET ```freq```:
 
@@ -60,11 +60,24 @@ List variable names for specified frequency.
 
 Get subset of data as csv or json.
 
+Required parameters:
+- `freq` - one of `a`, `q`, `m`, or `d` 
+- `name` - variable name 
+
+Optional parameter:
+- `start_date` - start date, like `2017-10-25`.
+- `end_date` - end date, like `2018-03-20`.
+
 - [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
 - [api/datapoints?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q)
 - [api/datapoints?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01)
 - [api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
 
+##### Parameter errors:
+- [wrong freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=z&format=json)
+- [wrong name for good freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=q&format=json)
+- [start date in future](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2025-01-01)
+- [end date > start date](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2015-01-01&end_date=2000-01-01)
 
 #### GET ```frame```
 Returns a csv dataframe.
@@ -82,28 +95,21 @@ Example call:
 2017-10-09,55.29,
 2017-10-10,56.62,58.3151
 ```
-If there's no data for specified name and date, value will be skipped. You can see it in example above - `2017-10-07,,57.7612`
+If there's no data for specified name and date, value will be skipped. 
+See line `2017-10-07,,57.7612` in example above.
 
-Required params:
-- `freq` - one of ```{'a', 'q', 'm', 'd'}```
+Required parameters:
+- `freq` - one of `a`, `q`, `m`, or `d` 
 
-Optional params:
-- `names` - one or multiplie names (separated by comma). If not specified, then a dataframe with all avaibalive names will be returned. Available names could be listed via `GET names`.
-- `start_date` - starting date for data, like `2017-10-25`.
-- `end_date` - ending date for data, like `2018-03-20`.
+Optional parameters:
+- `names` - one variable name or several variable names separated by comma. Will list all variables if omitted.
+- `start_date` - start date, like `2017-10-25`
+- `end_date` - end date, like `2018-03-20`
 
 Examples:
 - [api/frame?freq=a](http://minikep-db.herokuapp.com/api/frame?freq=a)
 - [api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog](http://minikep-db.herokuapp.com/api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog)
 - [api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01](http://minikep-db.herokuapp.com/api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01)
-
-
-##### Parameter errors:
-- [wrong freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=z&format=json)
-- [wrong name for good freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=q&format=json)
-- [start date in future](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2025-01-01)
-- [end date > start date](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2015-01-01&end_date=2000-01-01)
-
 
 #### GET ```info```:
 
