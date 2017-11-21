@@ -40,6 +40,32 @@ updates are documented below.
 See also experimental [Swagger documentation](http://minikep-db.herokuapp.com/apidocs). 
 
 
+#### GET ```freq```:
+
+List avalable frequencies in the dataset. Returns ```{'a', 'q', 'm', 'd'}```.
+
+- [api/freq](https://minikep-db.herokuapp.com/api/freq)
+
+
+#### GET ```names```:
+
+List variable names for specified frequency.
+
+- [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
+- [api/names/q](https://minikep-db.herokuapp.com/api/names/q)
+- [api/names/m](https://minikep-db.herokuapp.com/api/names/m)
+- [api/names/d](https://minikep-db.herokuapp.com/api/names/d)
+
+#### GET ```datapoints```:
+
+Get subset of data as csv or json.
+
+- [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
+- [api/datapoints?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q)
+- [api/datapoints?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01)
+- [api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
+
+
 #### GET ```frame```
 Returns a csv dataframe.
 
@@ -71,31 +97,6 @@ Examples:
 - [api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog](http://minikep-db.herokuapp.com/api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog)
 - [api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01](http://minikep-db.herokuapp.com/api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01)
 
-
-#### GET ```freq```:
-
-List avalable frequencies in the dataset. Returns ```{'a', 'q', 'm', 'd'}```.
-
-- [api/freq](https://minikep-db.herokuapp.com/api/freq)
-
-
-#### GET ```names```:
-
-List variable names for specified frequency.
-
-- [api/names/a](https://minikep-db.herokuapp.com/api/names/a)
-- [api/names/q](https://minikep-db.herokuapp.com/api/names/q)
-- [api/names/m](https://minikep-db.herokuapp.com/api/names/m)
-- [api/names/d](https://minikep-db.herokuapp.com/api/names/d)
-
-#### GET ```datapoints```:
-
-Get subset of data as csv or json.
-
-- [api/datapoints?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m)
-- [api/datapoints?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q)
-- [api/datapoints?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01)
-- [api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
 
 ##### Parameter errors:
 - [wrong freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=z&format=json)
