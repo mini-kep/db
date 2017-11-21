@@ -58,6 +58,7 @@ If there's no data for specified name and date, value will be skipped. You can s
 
 Required params:
 - `freq` - one of ```{'a', 'q', 'm', 'd'}```
+
 Optional params:
 - `names` - one or multiplie names (separated by comma). If not specified, then a dataframe with all avaibalive names will be returned. Available names could be listed via `GET names`.
 - `start_date` - starting date for data, like `2017-10-25`.
