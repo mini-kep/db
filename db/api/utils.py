@@ -89,7 +89,7 @@ class DictionaryRepresentation:
             #     result[date] = {}
             result.setdefault(date, {})
             result[date][point.name] = point.value
-        return collections.OrderedDict(result.items()) # would be sorted by result keys
+        return collections.OrderedDict(sorted(result.items())) # would be sorted by result keys
      
 
     def __init__(self, datapoint_query, names):
