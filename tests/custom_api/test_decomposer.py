@@ -175,7 +175,7 @@ class Test_CustomEndPoint_Integration_Test(TestCaseBase):
         response = self.client.get('/ru/series/CPI_rog/m')
         assert response.status_code == 200
 
-    @pytest.mark.skip
+    @pytest.mark.webtest
     def test_CPI_rog_m_is_found_with_code_200_on_outer_server(self):
         import requests
         r = requests.get('http://minikep-db.herokuapp.com/ru/series/CPI_rog/m')
