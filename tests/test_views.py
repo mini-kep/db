@@ -11,7 +11,6 @@ import pytest
 import json
 
 from tests.test_basic import TestCaseBase
-from db.api.errors import CustomError400
 
 
 class Test_API_Names(TestCaseBase):
@@ -112,6 +111,13 @@ class TestDatapointsAPI(TestCaseBase):
 
     data_csv_string = ",USDRUR_CB\n2016-06-01,65.9962\n2016-06-02,66.6156\n2016-06-03,66.7491\n"
 
+    error_code = 422
+
+    error_dict = {
+        "allowed": ["json","csv"],
+        "messages": ["Invalid format parameter"]
+    }
+
     params = dict(
         name='USDRUR_CB',
         freq='d',
@@ -121,7 +127,7 @@ class TestDatapointsAPI(TestCaseBase):
 
     def _get_response(self, response_format):
         self.params['format'] = response_format
-        return self.client.get('api/datapoints', query_string=self.params).data
+        return self.client.get('api/datapoints', query_string=self.params)
 
     def test_get_on_json_format_arg_returns_expected_json(self):
         # method under test: get
@@ -132,7 +138,7 @@ class TestDatapointsAPI(TestCaseBase):
         format_arg = 'json'
 
         # call
-        result_dict = json.loads(self._get_response(format_arg))
+        result_dict = json.loads(self._get_response(format_arg).data)
 
         # check
         assert self.data_dicts == result_dict
@@ -146,25 +152,38 @@ class TestDatapointsAPI(TestCaseBase):
         format_arg = 'csv'
 
         # call
-        result_string = self._get_response(format_arg).decode()
+        result_string = self._get_response(format_arg).data.decode()
 
         # check
         assert self.data_csv_string == result_string
 
-    @pytest.mark.xfail
-    def test_get_raise_http_exception_on_invalid_format(self):
+    def test_get_on_invalid_format_returns_expected_status_code(self):
         # method under test: get
-        # context or arguments: string, dict
-        # expected result of behavior: raise HTTP exception
+        # context or arguments: string, dict, positive integer
+        # expected result of behavior: returns expected status code
 
         # test setup
         format_arg = 'html'
 
-        # check
-        with self.assertRaises(CustomError400):
+        # call
+        result = self._get_response(format_arg)
 
-            # call
-            self._get_response(format_arg), 'utf-8'
+        # check
+        assert self.error_code == result.status_code
+
+    def est_get_on_invalid_format_returns_expected_status_json(self):
+        # method under test: get
+        # context or arguments: string, dict, dict
+        # expected result of behavior: returns expected json
+
+        # test setup
+        format_arg = 'html'
+
+        # call
+        result_dict = json.loads(self._get_response(format_arg).data)
+
+        # check
+        assert self.error_dict == result_dict
 
 
 if __name__ == '__main__':  # pragma: no cover
