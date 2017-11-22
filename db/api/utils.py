@@ -73,24 +73,23 @@ def serialiser(datapoint_query):
 
 class DictionaryRepresentation:
     
-    
-    # FIXME: how is the order of dates guaranteed in this method?
-    #        just by the fact they have been ordered elsewhere?
-    #        this seems vulberable 
-    #
-    #        note: adding order to datapoint_query in __init__.py
-    #              works on slqite, but need to be tested on posgres             
-    
     @staticmethod
     def transform_query_to_dicts(datapoints):
-        # FIXME: add docstring and indicate what type is datapoints  
-        result = collections.OrderedDict()
+        """
+        datapoints is an iterable (could be query object) which contains models.Datapoint objects
+        Returns an OrderedDict which has stringified dates as keys and
+        dicts with names and datapoint values (like {'CPI_ALCOHOL_rog': 143.2}) as values
+        """
+        result = {}
         for point in datapoints:
             date = date_as_str(point.date)
-            # NEED COMMENT - why use setdefault? 
+            # NEED COMMENT - why use setdefault?
+            # to avoid using code like this:
+            # if result.get(date) is None:
+            #     result[date] = {}
             result.setdefault(date, {})
             result[date][point.name] = point.value
-        return result
+        return collections.OrderedDict(result.items()) # would be sorted by result keys
      
 
     def __init__(self, datapoint_query, names):
