@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from db.api.errors import CustomError400
 from db.api.queries import DatapointOperations
 from db.api.views import publish_csv
