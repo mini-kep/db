@@ -1,6 +1,8 @@
 import db.api.utils as utils
 from tests.test_basic import TestCaseBase
 import db.api.queries as queries
+from db.api.models import Datapoint
+from collections import OrderedDict
 
 param1 = dict(freq='q', names=['CPI_rog', 'EXPORT_GOODS_bln_usd'],
               start_date = '2016-06-30', end_date = '2016-12-31')
@@ -50,6 +52,22 @@ class Test_DictionaryRepresentation(TestCaseBase):
 2016-06-06,48.94,
 2016-06-07,49.76,65.7894
 """
+
+    unsorted_datapoints = [
+        Datapoint('BRENT', 'd', '2017-01-01', 1),
+        Datapoint('BRENT', 'd', '2017-07-02', 3),
+        Datapoint('BRENT', 'd', '2017-03-15', 2)
+    ]
+    sorted_datapoints_result = OrderedDict([
+        ('2017-01-01', {'BRENT': 1}),
+        ('2017-03-15', {'BRENT': 2}),
+        ('2017-07-02', {'BRENT': 3})
+    ])
+
+    def test_transform_query_to_dicts_is_sorting_datapoints(self):
+        transformed = utils.DictionaryRepresentation.transform_query_to_dicts(self.unsorted_datapoints)
+        self.assertEqual(transformed, self.sorted_datapoints_result)
+
 
 if __name__ == '__main__':
     import pytest
