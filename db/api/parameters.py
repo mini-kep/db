@@ -39,6 +39,7 @@ class Check:
         self.names = args.get('names')
         self.start_date = args.get('start_date')
         self.end_date = args.get('end_date')
+        self.format = args.get('format')
 
     def start_is_not_in_future(self):
         if self.start_date:
@@ -87,6 +88,12 @@ class Check:
                 self.end_date]]
         return not all(is_none)
 
+    def format_is_valid(self):
+        allowed_format_args = ['json', 'csv']
+        if self.format not in allowed_format_args:
+            load = dict(allowed=allowed_format_args)
+            raise ArgError('Invalid format parameter', load)
+
 
 def get_func(func_name):
     return lambda args: getattr(Check(args), func_name)()
@@ -109,7 +116,8 @@ class RequestArgs:
         ['start_is_not_in_future',
          'end_date_after_start_date',
          'freq_exist',
-         'name_is_valid'])
+         'name_is_valid',
+         'format_is_valid'])
 
     query_keys = ['name', 'freq', 'start_date', 'end_date']
 
