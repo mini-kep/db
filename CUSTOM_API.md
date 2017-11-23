@@ -14,8 +14,6 @@ Custom API is a simplified interface for end-user database queries like:
 - [oil/series/BRENT/m/eop/2015/2017/csv](http://mini-kep.herokuapp.com/oil/series/BRENT/m/eop/2015/2017/csv)
 - [ru/series/EXPORT_GOODS/m/bln_rub](http://mini-kep.herokuapp.com/ru/series/EXPORT_GOODS/m/bln_rub)
 
-Its design originally discussed at [this issue](https://github.com/mini-kep/frontend-app/issues/8).
-
 Сustom API is intended for:
 
 1. intuitive construction of URL by user
@@ -23,18 +21,17 @@ Its design originally discussed at [this issue](https://github.com/mini-kep/fron
 3. addressing several database API endpoints in one place
 4. uniform call to same indicator for different countries or regions
 
+Its design originally discussed at [this issue](https://github.com/mini-kep/frontend-app/issues/8).
+
 # Custom API translates to standard API  
 
 Custom API is essentially a thin syntax layer on top of database API. 
 All calls to custom API are redirected to standard API. 
 
-For example, this call to custom API: 
+For example, these calls to custom and standard APIs will return same data:  
 
-<http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2015/2017>
-
-will return same data as:
-
-<https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m&start_date=2015-01-01&end_date=2017-12-31>
+- <http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2015/2017>
+- <https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m&start_date=2015-01-01&end_date=2017-12-31>
 
    
 URL syntax
