@@ -1,9 +1,8 @@
-<hr>
 <table>   
 <tr>
     <td><b>Repository:</b></td>
     <td><a href="https://github.com/mini-kep/db/tree/master/db/custom_api">https://github.com/mini-kep/db/tree/master/db/custom_api</a>
-	</td>
+    </td>
 </tr>
 </table>
 
@@ -43,44 +42,6 @@ URL syntax
 
 Custom API URL syntax is as follows (`?` - optional):
 
-```
-
-{domain}/series/{varname}/{freq}/{?suffix}/{?start}/{?end}/{?finaliser}
- 
-```
-
-Refer to the docstring in 
-[custom_api.py](https://github.com/mini-kep/helper-custom-api/blob/master/src/custom_api.py) 
-for details 
-
-
-
-Expected usage of ```{domain}``` is to get similar data 
-for different countries or regions by changing a little part of custom URL:
-
-```
-   ru/series/CPI/m/2017  # country-level inflation for Russia 
-ru:77/series/CPI/m/2017  # inflation for Moscow region                         
-   kz/series/CPI/m/2017  # country-level inflation for Kazakhstan
-```
-
-
-#### Output format
-
-By default custom API returns CSV file. This file is:
-
-- viewable in browser (download does not start)
-- readable by R/pandas
-
-Optional  ```{finaliser}``` may alter output format.
-
-
-
-
-
-#### URL syntax
-
-From [custom_api.py docstring](https://github.com/mini-kep/db/blob/master/db/custom_api/custom_api.py#L1-L36):
 
 ```
 URL format (? marks optional parameter):
@@ -121,7 +82,29 @@ Args:
         xlsx - Excel (xlsx) file  
         info - show variable info, not data 		
 		
-```		
+```
+
+Refer to the docstring in 
+[custom_api.py](https://github.com/mini-kep/helper-custom-api/blob/master/src/custom_api.py) 
+for details 
+
+Expected usage of ```{domain}``` is to get similar data 
+for different countries or regions by changing a little part of custom URL:
+
+```
+   ru/series/CPI/m/2017  # country-level inflation for Russia 
+ru:77/series/CPI/m/2017  # inflation for Moscow region                         
+   kz/series/CPI/m/2017  # country-level inflation for Kazakhstan
+```
+
+#### Output format
+
+By default custom API returns CSV file. This file is:
+
+- viewable in browser (download does not start)
+- readable by R/pandas
+
+Optional  ```{finaliser}``` may alter output format.
 
 
 # More examples
