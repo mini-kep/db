@@ -24,9 +24,7 @@ Custom API is a simplified interface for end-user database queries like:
 Its design originally discussed at [this issue](https://github.com/mini-kep/frontend-app/issues/8).
 
 Custom API is essentially a thin syntax layer on top of database API. 
-All calls to custom API are redirected to standard API. 
-
-For example, these calls to custom and standard APIs will return same data:  
+All calls to custom API are redirected to standard API. For example, these calls to custom and standard APIs will return same data:  
 
 - <http://mini-kep.herokuapp.com/ru/series/CPI/m/rog/2015/2017>
 - <https://minikep-db.herokuapp.com/api/datapoints?name=CPI_rog&freq=m&start_date=2015-01-01&end_date=2017-12-31>
