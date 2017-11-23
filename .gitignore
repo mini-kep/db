@@ -6,3 +6,6 @@ staticfiles
 run.py
 db_init.py
 database_test.db
+database_dev.db
+.idea/
+.python-version
