@@ -7,8 +7,8 @@
 </table>
 
 
-Overview
-========
+# Overview
+
 Custom API is a simplified interface for end-user database queries like:
 
 - [oil/series/BRENT/m/eop/2015/2017/csv](http://mini-kep.herokuapp.com/oil/series/BRENT/m/eop/2015/2017/csv)
@@ -23,7 +23,7 @@ Its design originally discussed at [this issue](https://github.com/mini-kep/fron
 3. addressing several database API endpoints in one place
 4. uniform call to same indicator for different countries or regions
 
-#### Custom API translates to standard API  
+# Custom API translates to standard API  
 
 Custom API is essentially a thin syntax layer on top of database API. 
 All calls to custom API are redirected to standard API. 
@@ -39,9 +39,6 @@ will return same data as:
    
 URL syntax
 ==========
-
-Custom API URL syntax is as follows (`?` - optional):
-
 
 ```
 URL format (? marks optional parameter):
@@ -97,7 +94,7 @@ ru:77/series/CPI/m/2017  # inflation for Moscow region
    kz/series/CPI/m/2017  # country-level inflation for Kazakhstan
 ```
 
-#### Output format
+# Output format
 
 By default custom API returns CSV file. This file is:
 
