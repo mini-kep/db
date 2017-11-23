@@ -23,8 +23,6 @@ Custom API is a simplified interface for end-user database queries like:
 
 Its design originally discussed at [this issue](https://github.com/mini-kep/frontend-app/issues/8).
 
-# Custom API translates to standard API  
-
 Custom API is essentially a thin syntax layer on top of database API. 
 All calls to custom API are redirected to standard API. 
 
@@ -101,7 +99,7 @@ By default custom API returns CSV file. This file is:
 Optional  ```{finaliser}``` may alter output format.
 
 
-# More examples
+# Examples
 
 - basic calls:
     - [/ru/series/GDP/a/yoy/1998/2017](http://minikep-db.herokuapp.com/ru/series/GDP/a/yoy/1998/2017)
