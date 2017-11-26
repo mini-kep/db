@@ -4,11 +4,10 @@
 
 # Quickstart
 
-`mini-kep` API allows to query macroeconomic database by indicator name, frequency (from annual to daily) and date range. 
+`mini-kep` API allows to update and query a database of macroeconomic indicators.
 
-Link below will provide quarterly year-on-year Russian GDP growth rates as csv file, readable by R/pandas:
-
-<https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01>
+Example: [this link](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01)
+returns quarterly year-on-year Russian GDP growth rate as csv file, readable by R/pandas.
 
 ```
 ,GDP_yoy
@@ -20,27 +19,23 @@ Link below will provide quarterly year-on-year Russian GDP growth rates as csv f
 2017-06-30,102.5
 ```
 
-R/pandas code to access this data is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
+R/pandas code for data access is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
 
-Additional endpoints to navigate this dataset are:
-
-  - ```api/freq``` - list avalable frequencies
-  - ```api/names/{freq}``` - list variable names under specified frequency 
-  - ```api/info/?name={name}``` - provide additional information about a variable
-
-
-
-
-#### Administrator 
-
-Administrator with API token can upload and delete data. 
-This functionality is also used by [parsers](https://github.com/mini-kep/parsers).
+Administrator with API token can can also upload and delete data. This functionality 
+is used by [parsers](https://github.com/mini-kep/parsers) to update dataset.
 
 
 # API description 
 
-Initial specification for database API is [here](https://mini-kep.github.io/documentation/database/),
+Initial specification for database API is published [here](https://mini-kep.github.io/documentation/database/),
 updates are documented below.
+
+Endpoints:
+
+  - `api/freq` - list avalable frequencies
+  - `api/names/{freq}` - list variable names under specified frequency 
+  - `api/info/?name={name}` - provide additional information about a variable
+  - `api/datapoints` and `api/frame`- provide data 
 
 #### GET ```freq```:
 
@@ -123,11 +118,6 @@ Get a dictionary with variable description, allowed dates and latest values.
 - [api/info?name=BRENT&freq=d](https://minikep-db.herokuapp.com/api/info?name=BRENT&freq=d)
 - [api/info?name=USDRUR_CB&freq=d](https://minikep-db.herokuapp.com/api/info?name=USDRUR_CB&freq=d)
 
-#### New methods
-
-More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
-
-
 #### POST ```api/datapoints``` 
 
 Upsert data from json, as described in [intial spec](https://mini-kep.github.io/documentation/database/#post).
@@ -139,3 +129,9 @@ Requires API token.
 Upsert data dased on 
 
 Requires API token.
+
+#### New methods
+
+More methods [discussed here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
+
+
