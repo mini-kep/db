@@ -2,11 +2,15 @@
 [![Assertible status](https://assertible.com/apis/56e34b07-ae3a-4248-937e-fef69d8ec2f2/status?api_token=VkiQoHOdjWU3vGv2)](https://assertible.com/dashboard#/services/56e34b07-ae3a-4248-937e-fef69d8ec2f2/results)
 [![Coverage badge](https://codecov.io/gh/mini-kep/db/branch/master/graphs/badge.svg)](https://codecov.io/gh/mini-kep/db)
 
-# Quickstart
+# Concept
 
 `mini-kep` API allows to update and query a database of macroeconomic indicators.
 
-Example: [this link](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01)
+# Quickstart
+
+#### Query example
+
+[This link](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01)
 returns quarterly year-on-year Russian GDP growth rate as csv file, readable by R/pandas.
 
 ```
@@ -19,7 +23,11 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 2017-06-30,102.5
 ```
 
-R/pandas code for data access is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
+#### Access code
+
+`pandas` code for data access is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
+
+#### Updating database
 
 Administrator with API token can can also upload and delete data. This functionality 
 is used by [parsers](https://github.com/mini-kep/parsers) to update dataset.
