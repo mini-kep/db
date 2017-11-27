@@ -3,6 +3,7 @@ TODO:
 
 Presentation:
 - make this listing clickable + add frequencies
+- generalise by country 
 
 Transformations:
 - rog/yoy
