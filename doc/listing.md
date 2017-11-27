@@ -51,12 +51,11 @@ Labour
   	- "WAGE_NOMINAL_rub"
   	- "WAGE_REAL_yoy"
   
-Exchnage rate 
+Exchange rate 
 =============
   	- "USDRUR_CB" (daily)
   
 Global
 ======
 	- "BRENT" 
-  	- "UST*"
-  
+  	- "UST*" 
