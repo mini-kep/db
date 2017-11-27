@@ -1,3 +1,14 @@
+TODO:
+====
+
+Presentation:
+- make this listing clickable + add frequencies
+
+Transformations:
+- rog/yoy
+- diff gov
+- concat `INDPRO`
+
 
 GDP
 ===
@@ -57,5 +68,5 @@ Exchange rate
   
 Global
 ======
-	- "BRENT" 
-  	- "UST*" 
+	- "BRENT" (daily)
+  	- "UST*" (daily)
