@@ -12,7 +12,7 @@
 Custom API is a simplified interface for end-user database queries like:
 
 - [oil/series/BRENT/m/eop/2015/2017/csv](http://mini-kep.herokuapp.com/oil/series/BRENT/m/eop/2015/2017/csv)
-- [ru/series/EXPORT_GOODS/m/bln_rub](http://mini-kep.herokuapp.com/ru/series/EXPORT_GOODS/m/bln_rub)
+- [ru/series/EXPORT_GOODS/m/bln_usd](http://mini-kep.herokuapp.com/ru/series/EXPORT_GOODS/m/bln_usd)
 
 Сustom API is intended for:
 
