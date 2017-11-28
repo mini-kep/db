@@ -58,6 +58,7 @@ def join_df(df_list):
         df = df.join(right_df, how='outer')
     return df
 
+
 def get_df_by_names(freq, names):
     df_list = [get_ts(freq, name).to_frame() for name in names]
     return join_df(df_list)
@@ -67,8 +68,14 @@ def get_df(freq):
     names = get_names(freq)
     return get_df_by_names(freq, names)
 
+
 def get_custom_series(freq, name, suffix, start, end):
-    url = f'http://mini-kep.herokuapp.com/ru/series/{name}/{freq}/{suffix}/{start}/{end}'
+    url = f'http://minikep-db.herokuapp.com/ru/series/{name}/{freq}/{suffix}/{start}/{end}'
+    return read_from_url(url)
+
+
+def get_frame(freq):
+    url = f'http://minikep-db.herokuapp.com/api/frame?freq={freq}'
     return read_from_url(url)
 
 
