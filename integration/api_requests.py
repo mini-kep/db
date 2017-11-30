@@ -1,3 +1,28 @@
+"""Scripts below make use of GET methods of API that delivers macroeconomic time series.
+
+Testing is done on an actial URL: <https://minikep-db.herokuapp.com/>
+
+Call examples:
+- https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01
+- https://minikep-db.herokuapp.com/api/names/d
+- https://minikep-db.herokuapp.com/api/info?name=GDP_yoy&freq=q
+
+API documentation:
+- <https://github.com/mini-kep/db/blob/master/README.md>
+
+<access.py> and <access2.py> provide wrappers for the API, 
+one file uses functions and another one is based on classes.
+<access2.py> has slightly larger fucntionality, but <access.py>
+is good to embed in ipython notebooks. 
+
+This file needs fixes/engancements in FIXME and TODO parts + 
+can be converted to randomised test or integration test, 
+querieng all of the database.
+
+Note here we test GET methods only, not POST or DELETE.
+
+"""
+
 import access
 import random 
 
