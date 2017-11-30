@@ -1,16 +1,14 @@
 import json
+
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 from flask.views import MethodView
 
-
-from db import db
-from db.api.errors import CustomError400
-from db.api.queries import All, Allowed, DatapointOperations, DateRange
-from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
-
 import db.api.utils as utils
 import db.helper.label as label
-
+from db import db
+from db.api.errors import CustomError400
+from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
+from db.api.queries import All, Allowed, DatapointOperations, DateRange
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -43,19 +41,19 @@ def handle_invalid_usage(error):
     return response
 
 # PROPOSED ENHANCEMENT: Can use this fucntion as decorator for DatapointsAPI.post() amd .delete methods()
-#                       Currently authorise() used inside these methods. 
+#                       Currently authorise() used inside these methods.
 #                       Decorator can help abstract database logic inside a method from access infrastructure
 #
-#                       Current problem - not sure how to add a decorator to individual class methods. 
-#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how 
-#                       to add decorators to all of class, but warns the 'traditional' decoraots wont 
+#                       Current problem - not sure how to add a decorator to individual class methods.
+#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how
+#                       to add decorators to all of class, but warns the 'traditional' decoraots wont
 #                       work on individual methods:
-#                             
+#
 #                                class UserAPI(MethodView):
 #                                    decorators = [user_required]
 #
-#                                > Due to the implicit self from the caller’s perspective you cannot use 
-#                                > regular view decorators on the individual methods of the view 
+#                                > Due to the implicit self from the caller’s perspective you cannot use
+#                                > regular view decorators on the individual methods of the view
 #                                > <http://flask.pocoo.org/docs/0.12/views/#decorating-views>
 #
 #  Decision: for now plain call to authorise seems cleanest available solution.
@@ -196,7 +194,7 @@ def get_all_variable_names_for_frequency(freq):
 
 
 @api_bp.route('/info', methods=['GET'])
-def variable_info():
+def variable_info(varname=None, freq=None):
     """
     Get with variable infomation.
 
@@ -204,9 +202,9 @@ def variable_info():
         400: *freq* or *name* omitted.
         200: Returns dictionary with variable infomation.
     """
-    # FIXME: initail information, must change data structure and omit frequency
-    name = request.args.get('name')
-    freq = request.args.get('freq')
+    # FIXME: initial information, must change data structure and omit frequency
+    name = request.args.get('name', varname)
+    freq = request.args.get('freq', freq)
     var, unit = label.split_label(name)
     result = dict(name=name,
                   var={'id': var, 'en': 'reserved', 'ru': 'reserved'},
