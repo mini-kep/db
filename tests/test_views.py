@@ -171,7 +171,7 @@ class TestDatapointsAPI(TestCaseBase):
         # check
         assert self.error_code == result.status_code
 
-    def est_get_on_invalid_format_returns_expected_status_json(self):
+    def test_get_on_invalid_format_returns_expected_status_json(self):
         # method under test: get
         # context or arguments: string, dict, dict
         # expected result of behavior: returns expected json
