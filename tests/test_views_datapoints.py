@@ -146,7 +146,7 @@ class Test_DELETE(TestDatapoints):
         assert response.status_code == 200
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma no cover
     pytest.main([__file__, '--maxfail=1'])
 
     v = TestDatapoints()

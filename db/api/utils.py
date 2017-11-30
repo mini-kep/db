@@ -5,7 +5,7 @@
 
 """
 from datetime import datetime
-
+import collections
 import db.api.queries as queries
 from db.api.errors import CustomError400
 
@@ -24,10 +24,6 @@ def to_date(date_str: str):
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
-#
-# def date_as_str(dt):
-#    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
-#    return datetime.strftime(dt.date, "%Y-%m-%d")
 
 
 def yield_csv_row(dicts):
@@ -76,34 +72,40 @@ def serialiser(datapoint_query):
 
 
 class DictionaryRepresentation:
-    def __init__(self, datapoint_query):
-        self.source_dict = [d.serialized for d in datapoint_query]
-        self.names = unique([x['name'] for x in self.source_dict])
-        self.dates = unique([x['date'] for x in self.source_dict])
+    
+    @staticmethod
+    def transform_query_to_dicts(datapoints):
+        """
+        datapoints is an iterable (could be query object) which contains models.Datapoint objects
+        Returns an OrderedDict which has stringified dates as keys and
+        dicts with names and datapoint values (like {'CPI_ALCOHOL_rog': 143.2}) as values
+        """
+        result = {}
+        for point in datapoints:
+            date = date_as_str(point.date)
+            # NEED COMMENT - why use setdefault?
+            # to avoid using code like this:
+            # if result.get(date) is None:
+            #     result[date] = {}
+            result.setdefault(date, {})
+            result[date][point.name] = point.value
+        return collections.OrderedDict(sorted(result.items())) # would be sorted by result keys
+     
 
-    @property
-    def dicts(self):
-        result = dict()
-        for dt in self.dates:
-            this_date = {x['name']: x['value']
-                         for x in self.source_dict if x['date'] == dt}
-            result[dt] = this_date
-        return result
+    def __init__(self, datapoint_query, names):
+        self.data_dicts = self.transform_query_to_dicts(datapoint_query)
+        self.names = names
 
     @property
     def header(self):
         return ',{}'.format(','.join(self.names))
 
     def yield_data_rows(self):
-        for dt in self.dates:
-            row = [dt]
+        for date, info in self.data_dicts.items():
+            row = [date]
             for name in self.names:
-                try:
-                    x = self.dicts[dt][name]
-                except KeyError:
-                    x = ''
-                finally:
-                    row.append(x)
+                value = info.get(name, '')
+                row.append(value)
             yield row
 
     def yield_rows(self):
@@ -125,7 +127,6 @@ if __name__ == '__main__':  # pragma: no cover
     # create test app
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
-
 
     #EP: works without db creation after done once
 
