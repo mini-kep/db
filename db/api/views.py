@@ -2,15 +2,11 @@ import json
 from flask import Blueprint, request, abort, jsonify, current_app, Response
 from flask.views import MethodView
 
-
+import db.api.utils as utils
 from db import db
 from db.api.errors import CustomError400
-from db.api.queries import All, Allowed, DatapointOperations, DateRange
 from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
-
-import db.api.utils as utils
-import db.helper.label as label
-
+from db.api.queries import All, Allowed, DatapointOperations
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -196,27 +192,10 @@ def get_all_variable_names_for_frequency(freq):
 
 
 @api_bp.route('/info', methods=['GET'])
-def variable_info():
-    """
-    Get with variable infomation.
-
-    Responses:
-        400: *freq* or *name* omitted.
-        200: Returns dictionary with variable infomation.
-    """
-    # FIXME: initail information, must change data structure and omit frequency
-    name = request.args.get('name')
+def info():
+    varname = request.args.get('name')
     freq = request.args.get('freq')
-    var, unit = label.split_label(name)
-    result = dict(name=name,
-                  var={'id': var, 'en': 'reserved', 'ru': 'reserved'},
-                  unit={'id': unit, 'en': 'reserved', 'ru': 'reserved'}
-                  )
-    dr = DateRange(freq=freq, name=name)
-    result[freq] = {'start_date': dr.min,
-                    'latest_date': dr.max,
-                    'latest_value': 'reserved'}
-    return jsonify(result)
+    return utils.variable_info(varname, freq)
 
 
 # TODO:
