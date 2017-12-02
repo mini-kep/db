@@ -70,7 +70,6 @@ def serialiser(datapoint_query):
         result[dt] = this_date
     return result
 
-
 def variable_info(varname, freq):
     """
     Returns dictionary with variable information. E.g.:
