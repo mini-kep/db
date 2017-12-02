@@ -5,8 +5,13 @@
 
 """
 from datetime import datetime
-from db.api.errors import CustomError400
+import collections
+
+from flask import jsonify
+
 import db.api.queries as queries
+from db.api.errors import CustomError400
+from db.helper import label
 
 
 def date_as_str(dt):
@@ -22,10 +27,6 @@ def to_date(date_str: str):
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         raise CustomError400(f'Invalid date parameter {date_str}')
-#
-# def date_as_str(dt):
-#    """Convert datetime.date object *dt* to YYYY-MM-DD string."""
-#    return datetime.strftime(dt.date, "%Y-%m-%d")
 
 
 def yield_csv_row(dicts):
@@ -36,7 +37,7 @@ def yield_csv_row(dicts):
                {'date': '1992-07-01', 'freq': 'd',
                 'name': 'USDRUR_CB', 'value': 0.1253}
 
-    Yeilds:
+    Yields:
         csv header like ',USDRUR_CB'
         followed by rows like '1992-07-01,0.1253'
         followed by empty string at end
@@ -65,7 +66,7 @@ def unique(seq):
 
 def serialiser(datapoint_query):
     dicts = [d.serialized for d in datapoint_query]
-    dates = unique([x['name'] for x in dicts])
+    dates = unique([x['date'] for x in dicts])
     result = dict()
     for dt in dates:
         this_date = {x['name']: x['value'] for x in dicts if x['date'] == dt}
@@ -73,35 +74,62 @@ def serialiser(datapoint_query):
     return result
 
 
-class DictionaryRepresentation:
-    def __init__(self, datapoint_query):
-        self.source_dict = [d.serialized for d in datapoint_query]
-        self.names = unique([x['name'] for x in self.source_dict])
-        self.dates = unique([x['date'] for x in self.source_dict])
+def variable_info(varname, freq):
+    """
+    Get with variable infomation.
 
-    @property
-    def dicts(self):
-        result = dict()
-        for dt in self.dates:
-            this_date = {x['name']: x['value']
-                         for x in self.source_dict if x['date'] == dt}
-            result[dt] = this_date
-        return result
+    Responses:
+        400: *freq* or *name* omitted.
+        200: Returns dictionary with variable infomation.
+    """
+    # FIXME: initial information, must change data structure and omit frequency
+    var, unit = label.split_label(varname)
+    result = dict(name=varname,
+                  var={'id': var, 'en': 'reserved', 'ru': 'reserved'},
+                  unit={'id': unit, 'en': 'reserved', 'ru': 'reserved'}
+                  )
+    dr = queries.DateRange(freq=freq, name=varname)
+    result[freq] = {'start_date': dr.min,
+                    'latest_date': dr.max,
+                    'latest_value': 'reserved'}
+    return jsonify(result)
+
+
+class DictionaryRepresentation:
+    
+    @staticmethod
+    def transform_query_to_dicts(datapoints):
+        """
+        datapoints is an iterable (could be query object) which contains models.Datapoint objects
+        Returns an OrderedDict which has stringified dates as keys and
+        dicts with names and datapoint values (like {'CPI_ALCOHOL_rog': 143.2}) as values
+        """
+        result = {}
+        for point in datapoints:
+            date = date_as_str(point.date)
+            # NEED COMMENT - why use setdefault?
+            # to avoid using code like this:
+            # if result.get(date) is None:
+            #     result[date] = {}
+            result.setdefault(date, {})
+            result[date][point.name] = point.value
+        return collections.OrderedDict(sorted(result.items())) # would be sorted by result keys
+     
+
+    def __init__(self, datapoint_query, names):
+        self.data_dicts = self.transform_query_to_dicts(datapoint_query)
+        self.names = names
 
     @property
     def header(self):
         return ',{}'.format(','.join(self.names))
 
     def yield_data_rows(self):
-        for dt in self.dates:
-            row = [dt]
+        for date, info in self.data_dicts.items():
+            row = [date]
             for name in self.names:
-                try:
-                    x = self.dicts[dt][name]
-                except KeyError:
-                    x = ''
-                finally:
-                    row.append(x)
+                value = info.get(name, '')
+                row.append(value)
             yield row
 
     def yield_rows(self):
@@ -114,7 +142,9 @@ class DictionaryRepresentation:
         return '\n'.join(self.yield_rows())
 
 
+
 if __name__ == '__main__':  # pragma: no cover
+
     from db import create_app
     from db.api.views import api
 
@@ -122,16 +152,17 @@ if __name__ == '__main__':  # pragma: no cover
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
 
-    # EP: works without db creation after done once
+    #EP: works without db creation after done once
+
     #from db import db
     # db.create_all(app=create_app('config.DevelopmentConfig'))
 
     with app.app_context():
-
         # TODO: convert to test
         names = ['CPI_rog', 'EXPORT_GOODS_bln_usd']
         sample_query = queries.DatapointOperations.select_frame(
             'q', names, None, None)
+
         m = DictionaryRepresentation(sample_query)
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
         rows = m.yield_data_rows()
@@ -146,8 +177,7 @@ if __name__ == '__main__':  # pragma: no cover
 """
 
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
-        # TODO: test this result for daily frequency - note it has missing
-        # values, which is correct
+        # TODO: test this result for daily frequency - note it has missing values, which is correct
         """,BRENT,USDRUR_CB
 2016-06-01,48.81,65.9962
 2016-06-02,49.05,66.6156
