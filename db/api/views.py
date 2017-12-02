@@ -193,6 +193,7 @@ def get_all_variable_names_for_frequency(freq):
 
 @api_bp.route('/info', methods=['GET'])
 def info():
+    # WONTFIX: can this method work without frequency? just by name? 
     varname = request.args.get('name')
     freq = request.args.get('freq')
     return utils.variable_info(varname, freq)
