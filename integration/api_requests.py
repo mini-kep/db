@@ -13,10 +13,9 @@ API documentation:
 Checklist with some ideas: 
 - <http://python.apichecklist.com/>
 
-<access.py> and <access2.py> provide wrappers for the API, 
+<access.py> and <minikep.py> provide wrappers for the API, 
 one file uses functions and another one is based on classes.
-<access2.py> has slightly larger fucntionality, but <access.py>
-is good to embed in ipython notebooks. 
+<access.py> is good to embed in ipython notebooks. 
 
 This file needs fixes/engancements in FIXME and TODO parts + 
 can be converted to randomised test or integration test, 
@@ -26,8 +25,11 @@ Note here we test GET methods only, not POST or DELETE.
 
 """
 
-import access
 import random 
+
+import access
+import minikep
+
 
 #  'api/freq' returns {'a', 'q', 'm', 'd'} frequencies 
 frequencies = ['a', 'q', 'm', 'd']
@@ -74,12 +76,9 @@ assert all(df1 == df2)
     
 
 # custom api 
-# WONTFIX: will also need domain 
-param1 = dict(freq='m', name='CPI_rog', 
-              start_date='2015-01-01', end_date='2017-12-31', 
-              format='csv')
-# WONTFIX: may need to check responses 
-standard_api_ts = access.get_datapoints(**param1)
+param = dict(freq='m', name='CPI_rog', 
+             start_date='2015-01-01', end_date='2017-12-31')
+standard_api_ts = access.get_ts(**param)
 param2 = dict(freq='m', name='CPI', suffix='rog', 
               start='2015', end='2017')
 custom_api_ts = access.get_custom_series(**param2)

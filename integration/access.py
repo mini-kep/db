@@ -1,56 +1,80 @@
 import requests
 import pandas as pd
 
+"""
+- api/freq
+- api/names
+- api/info
+- api/datapoints
+- api/frame
+- custom api
+"""
+
+BASE_URL = 'http://minikep-db.herokuapp.com/'
+
 
 def fetch_json(url):
     return requests.get(url).json()
 
+
 def get_freq():
-    url = 'http://minikep-db.herokuapp.com/api/freq'
+    url = BASE_URL + 'api/freq'
     return fetch_json(url)
 
 
 def get_names(freq):
-    url = 'http://minikep-db.herokuapp.com/api/names/{}'.format(freq)
+    url =  BASE_URL + 'api/names/{}'.format(freq)
     return fetch_json(url)
 
+# TODO: must simplify this callto 'api/info?name={}', make freq optional
 
 def get_info(freq, name):
-    url = 'http://minikep-db.herokuapp.com/api/info?freq={}&name={}'.format(freq, name)
+    url =  BASE_URL + 'api/info?freq={}&name={}'.format(freq, name)
     return fetch_json(url)
 
 
 def make_url(freq, name, format, start_date=None, end_date=None):
+    url = BASE_URL + 'api/datapoints'
+    url += '?name={}&freq={}&format={}'.format(name, freq, format)
+    if start_date:
+        url += '&start_date={}'.format(start_date)
+    if end_date:
+        url += '&end_date={}'.format(end_date)
+    return url
 
-    base_url = ('https://minikep-db.herokuapp.com/api/datapoints'
-            '?name={}&freq={}&format={}'.format(name, freq, format))
 
-    if start_date or end_date:
-        return base_url + '&start_date={}&end_date={}'.format(start_date, end_date)
-    return base_url
-
-
-def get_datapoints(freq, name, format='json', start_date=None, end_date=None):
-    url = make_url(freq, name, format, start_date, end_date)
-    if format == 'csv':
-        return read_from_url(url)
+def get_datapoints_json(freq, name, start_date=None, end_date=None):
+    url = make_url(freq, name, 'json', start_date, end_date)
     return fetch_json(url)
-
-
-def get_datapoints_full_response(freq, name, start_date=None, end_date=None):
-    url = make_url(freq, name, 'csv', start_date=start_date, end_date=end_date)
-    return requests.get(url)
-
-
-def read_from_url(url):
-    """Read pandas time series from *source_url*."""
-    return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0, squeeze=True)
 
 
 def get_ts(freq, name, start_date=None, end_date=None):
     url = make_url(freq, name, 'csv', start_date=start_date, end_date=end_date)
-    return read_from_url(url)
+    return read_ts_from_url(url)
 
+
+def get_frame(freq):
+    url = BASE_URL + f'api/frame?freq={freq}'
+    return read_df_from_url(url)
+
+
+# TODO: add finaliser
+def get_custom_series(freq, name, suffix, start, end, domain='ru'):
+    url = BASE_URL + f'{domain}/series/{name}/{freq}/{suffix}/{start}/{end}'
+    return read_ts_from_url(url)
+
+# pandas series and dataframes 
+
+def read_ts_from_url(url):
+    """Read pandas time series from *source_url*."""
+    return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0, 
+                       squeeze=True)
+
+def read_df_from_url(url):
+    """Read pandas dataframe from *source_url*."""
+    return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0)
+
+# supplements for checks
 
 def join_df(df_list):
     df = df_list[0]
@@ -64,19 +88,10 @@ def get_df_by_names(freq, names):
     return join_df(df_list)
 
 
+# TODO: this should be equal to get_frame()
 def get_df(freq):
     names = get_names(freq)
     return get_df_by_names(freq, names)
-
-
-def get_custom_series(freq, name, suffix, start, end):
-    url = f'http://minikep-db.herokuapp.com/ru/series/{name}/{freq}/{suffix}/{start}/{end}'
-    return read_from_url(url)
-
-
-def get_frame(freq):
-    url = f'http://minikep-db.herokuapp.com/api/frame?freq={freq}'
-    return read_from_url(url)
 
 
 if __name__ == '__main__':
