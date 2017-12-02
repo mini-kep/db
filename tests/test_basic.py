@@ -4,7 +4,9 @@ Based on tests reviewed at
     <https://github.com/mini-kep/db/issues/10>
 
 and testing guidelines at
-    <https://github.com/mini-kep/intro/blob/master/testing_guidelines/README.md>.
+    <https://github.com/mini-kep/guidelines/blob/master/testing.md>
+    
+Flask setup is at TestCaseBase.setUp()   
 
 """
 
