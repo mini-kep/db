@@ -10,6 +10,9 @@ Call examples:
 API documentation:
 - <https://github.com/mini-kep/db/blob/master/README.md>
 
+Checklist with some ideas: 
+- <http://python.apichecklist.com/>
+
 <access.py> and <access2.py> provide wrappers for the API, 
 one file uses functions and another one is based on classes.
 <access2.py> has slightly larger fucntionality, but <access.py>
