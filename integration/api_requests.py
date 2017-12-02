@@ -1,6 +1,6 @@
 """Scripts below make use of GET methods of API that delivers macroeconomic time series.
 
-Testing is done on an actial URL: <https://minikep-db.herokuapp.com/>
+Testing is done on an actual URL: <https://minikep-db.herokuapp.com/>
 
 Call examples:
 - https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01
