@@ -1,6 +1,4 @@
 from flask import Blueprint, jsonify
-from flask import abort
-
 from db.api.errors import CustomError400
 from db.api.queries import DatapointOperations
 from db.api.utils import variable_info
