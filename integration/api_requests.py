@@ -28,7 +28,6 @@ Note here we test GET methods only, not POST or DELETE.
 import random 
 
 import access
-import minikep
 
 
 #  'api/freq' returns {'a', 'q', 'm', 'd'} frequencies 
