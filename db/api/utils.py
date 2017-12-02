@@ -6,9 +6,6 @@
 """
 from datetime import datetime
 import collections
-
-from flask import jsonify
-
 import db.api.queries as queries
 from db.api.errors import CustomError400
 from db.helper import label
@@ -76,11 +73,23 @@ def serialiser(datapoint_query):
 
 def variable_info(varname, freq):
     """
-    Get with variable infomation.
-
-    Responses:
-        400: *freq* or *name* omitted.
-        200: Returns dictionary with variable infomation.
+    Returns dictionary with variable information. E.g.:
+        "m": {
+            "latest_date": "2016-12-31",
+            "latest_value": "reserved",
+            "start_date": "2016-06-30"
+            },
+        "name": "CPI_NONFOOD_rog",
+        "unit": {
+            "en": "reserved",
+            "id": "rog",
+            "ru": "reserved"
+            },
+        "var": {
+            "en": " reserved",
+            "id": "CPI_NONFOOD",
+            "ru": "reserved"
+            }
     """
     # FIXME: initial information, must change data structure and omit frequency
     var, unit = label.split_label(varname)
@@ -92,7 +101,7 @@ def variable_info(varname, freq):
     result[freq] = {'start_date': dr.min,
                     'latest_date': dr.max,
                     'latest_value': 'reserved'}
-    return jsonify(result)
+    return result
 
 
 class DictionaryRepresentation:

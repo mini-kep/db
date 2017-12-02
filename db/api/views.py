@@ -195,7 +195,8 @@ def get_all_variable_names_for_frequency(freq):
 def info():
     varname = request.args.get('name')
     freq = request.args.get('freq')
-    return utils.variable_info(varname, freq)
+    data = utils.variable_info(varname, freq)
+    return jsonify(data)
 
 
 # TODO:

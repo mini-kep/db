@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify
+from flask import abort
+
 from db.api.errors import CustomError400
 from db.api.queries import DatapointOperations
 from db.api.utils import variable_info
@@ -29,4 +31,5 @@ def time_series_api_interface(domain, varname, freq, inner_path=''):
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>/info')
 @custom_api_bp.route(f'{BASE_URL}/<string:freq>/<path:inner_path>/info')
 def info(varname, freq, **kwargs):
-    return variable_info(varname, freq)
+    data = variable_info(varname, freq)
+    return jsonify(data)
