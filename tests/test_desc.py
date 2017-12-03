@@ -51,7 +51,7 @@ class Test_ApiDesc():
         data = response.json().decode('utf-8')
 
         assert response.status_code == 200
-        assert data == {'abbr': 'GDP', 'ru': 'Цена нефти Brent'}
+        assert data == {'abbr': 'GDP', 'ru': 'Цена нефти Brent', 'en': 'Brent oil price'}
 
     @pytest.mark.xfail
     def test_get_rog_en_successful_returns_valid_data(self):
@@ -60,7 +60,8 @@ class Test_ApiDesc():
         data = response.json().decode('utf-8')
 
         assert response.status_code == 200
-        assert data == {'abbr': 'rog', 'en': 'rate of growth to previous period'}
+        assert data == {'unit': 'rog', 'en': 'rate of growth to previous period',
+                        'ru': 'темп роста к пред. периоду'}
 
     def test_post_without_params_fails(self):
         response = requests.post(DESC_URL)
