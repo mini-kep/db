@@ -5,12 +5,12 @@ from db.api.models import Datapoint
 from collections import OrderedDict
 
 param1 = dict(freq='q', names=['CPI_rog', 'EXPORT_GOODS_bln_usd'],
-              start_date = '2016-06-30', end_date = '2016-12-31')
+              start_date='2016-06-30', end_date='2016-12-31')
 
 param2 = dict(freq='d', names=['BRENT', 'USDRUR_CB'],
               start_date='2016-06-01', end_date='2016-06-07')
 
-           
+
 class Test_DictionaryRepresentation(TestCaseBase):
 
     def make(self, freq, names, start_date, end_date):
@@ -21,25 +21,25 @@ class Test_DictionaryRepresentation(TestCaseBase):
     def test_names_propery_on_valid_args_returns_names_parameter(self):
         assert self.make(**param1).names == ['CPI_rog', 'EXPORT_GOODS_bln_usd']
         assert self.make(**param2).names == ['BRENT', 'USDRUR_CB']
- 
+
     def test_headers_property_on_valid_args_returns_string(self):
         assert self.make(**param1).header == ',CPI_rog,EXPORT_GOODS_bln_usd'
-        assert self.make(**param2).header == ',BRENT,USDRUR_CB'        
+        assert self.make(**param2).header == ',BRENT,USDRUR_CB'
 
     def test_yield_data_rows_yields_lists_of_strings(self):
         rows = self.make(**param1).yield_data_rows()
         assert next(rows) == ['2016-06-30', 101.2, 67.9]
         assert next(rows) == ['2016-09-30', 100.7, 70.9]
         assert next(rows) == ['2016-12-31', 101.3, 82.6]
- 
+
     def test_to_csv_on_param1_equals_string(self):
         s = self.make(**param1).to_csv()
         assert ',CPI_rog,EXPORT_GOODS_bln_usd' in s
         assert '2016-06-30,101.2,67.9' in s
         assert '2016-09-30,100.7,70.9' in s
         assert '2016-12-31,101.3,82.6' in s
-        # NOT TODO: can also pop from string        
-        
+        # NOT TODO: can also pop from string
+
     def test_to_csv_on_param2_equals_string(self):
         _x = self.make(**param2)
         # EP: testing like below is risky as strign constant is unstable

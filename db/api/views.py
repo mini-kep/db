@@ -196,7 +196,8 @@ def info():
     # WONTFIX: can this method work without frequency? just by name? 
     varname = request.args.get('name')
     freq = request.args.get('freq')
-    return utils.variable_info(varname, freq)
+    data = utils.variable_info(varname, freq)
+    return jsonify(data)
 
 
 # TODO:
