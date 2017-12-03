@@ -9,9 +9,9 @@
 """
 
 # TODO: Refactoring, involving API change
-# 1. Datapoints should have to format, just json both for input and output
-# 2. csv for one variable should be read with 'api/series?freq=a&name=GDP_yoy'
-# 3. changes should be reflected in 'db' repo tests + 
+# 1. Datapoints should have no format, just json both for input and output
+# 2. csv for one variable should be read at new endpoint 'api/series?freq=a&name=GDP_yoy'
+# 3. changes should be reflected in 'db' repo tests + in readme.md + at api_requests.py
 
 #NOT TODO:
 #  1. google-style <https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments>
