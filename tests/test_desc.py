@@ -38,7 +38,7 @@ sample_post_payload = [
 ]
 
 
-class Test_ApiDesc():
+class Test_api_desc_GET_method():
 
     def test_get_without_params_fails(self):
         response = requests.get(DESC_URL)
@@ -63,15 +63,21 @@ class Test_ApiDesc():
         assert data == {'unit': 'rog', 'en': 'rate of growth to previous period',
                         'ru': 'темп роста к пред. периоду'}
 
+class Test_api_desc_POST_method():        
+        
     def test_post_without_params_fails(self):
         response = requests.post(DESC_URL)
         assert response.status_code != 200
 
     @pytest.mark.xfail
     def test_post_with_sample_payload_successful_with_code_200(self):
+        # FIXME: not sure this is a valid json
         response = requests.post(DESC_URL, json=sample_post_payload)
         assert response.status_code == 200
 
+        
+class Test_api_desc_DELETE_method():                
+        
     def test_delete_with_empty_abbr_field_fails(self):
         params = {'abbr': ''}
         response = requests.delete(DESC_URL, params=params)
@@ -82,7 +88,6 @@ class Test_ApiDesc():
         params = {'abbr': 'rog'}
         response = requests.delete(DESC_URL, params=params)
         assert response.status_code == 200
-
 
 if __name__ == '__main__': # pragma no cover
     pytest.main([__file__])
