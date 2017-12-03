@@ -31,6 +31,8 @@ class Test_API_Info(TestCaseBase):
         assert result['m']['start_date'] == dates[0]
         assert result['m']['latest_date'] == dates[-1]
 
+    # Tests for other variables may be added,
+    # eg: 'oil/series/CPI_NONFOOD_rog/m/bln_rub/2016/info'
 
 if __name__ == '__main__':  # pragma: no cover
     pytest.main([__file__])
