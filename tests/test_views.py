@@ -122,11 +122,9 @@ class TestDatapointsAPI(TestCaseBase):
         name='USDRUR_CB',
         freq='d',
         start_date='2016-06-01',
-        end_date='2016-06-03',
-        format='')
+        end_date='2016-06-03')
 
-    def _get_response(self, response_format):
-        self.params['format'] = response_format
+    def _get_response(self):
         return self.client.get('api/datapoints', query_string=self.params)
 
     def test_get_on_json_format_arg_returns_expected_json(self):
@@ -138,7 +136,7 @@ class TestDatapointsAPI(TestCaseBase):
         format_arg = 'json'
 
         # call
-        result_dict = json.loads(self._get_response(format_arg).data)
+        result_dict = json.loads(self._get_response().data)
 
         # check
         assert self.data_dicts == result_dict
@@ -152,7 +150,7 @@ class TestDatapointsAPI(TestCaseBase):
         format_arg = 'csv'
 
         # call
-        result_string = self._get_response(format_arg).data.decode()
+        result_string = self._get_response().data.decode()
 
         # check
         assert self.data_csv_string == result_string
@@ -166,7 +164,7 @@ class TestDatapointsAPI(TestCaseBase):
         format_arg = 'html'
 
         # call
-        result = self._get_response(format_arg)
+        result = self._get_response()
 
         # check
         assert self.error_code == result.status_code
@@ -180,7 +178,7 @@ class TestDatapointsAPI(TestCaseBase):
         format_arg = 'html'
 
         # call
-        result_dict = json.loads(self._get_response(format_arg).data)
+        result_dict = json.loads(self._get_response().data)
 
         # check
         assert self.error_dict == result_dict
