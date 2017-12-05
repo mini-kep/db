@@ -33,9 +33,19 @@ def get_info(freq, name):
     return fetch_json(url)
 
 
-def make_url(freq, name, format, start_date=None, end_date=None):
+def make_datapoints_url(freq, name, start_date=None, end_date=None):
     url = BASE_URL + 'api/datapoints'
-    url += '?name={}&freq={}&format={}'.format(name, freq, format)
+    url += '?name={}&freq={}'.format(name, freq)
+    if start_date:
+        url += '&start_date={}'.format(start_date)
+    if end_date:
+        url += '&end_date={}'.format(end_date)
+    return url
+
+
+def make_series_url(freq, name, start_date=None, end_date=None):
+    url = BASE_URL + 'api/series'
+    url += '?name={}&freq={}'.format(name, freq)
     if start_date:
         url += '&start_date={}'.format(start_date)
     if end_date:
@@ -44,12 +54,12 @@ def make_url(freq, name, format, start_date=None, end_date=None):
 
 
 def get_datapoints_json(freq, name, start_date=None, end_date=None):
-    url = make_url(freq, name, 'json', start_date, end_date)
+    url = make_datapoints_url(freq, name, start_date, end_date)
     return fetch_json(url)
 
 
 def get_ts(freq, name, start_date=None, end_date=None):
-    url = make_url(freq, name, 'csv', start_date=start_date, end_date=end_date)
+    url = make_series_url(freq, name, start_date=start_date, end_date=end_date)
     return read_ts_from_url(url)
 
 
