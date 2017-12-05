@@ -1,5 +1,5 @@
 """
-# TODO: need tests for 'api/desc' post, get, delete methods using `requests` lib and base url for web endpoint
+Tests for 'api/desc' post, get, delete methods 
 
 
 #GET api/desc?abbr=GDP
@@ -25,25 +25,35 @@
 #DELETE api/desc?abbr=BRENT
 
 """
+
+# TODO: 
+# - change to test_clinet(): use base test class
+# - rename tests: exclude variabnle names
+
+# NOT TODO:
+# - parametrise tests
+
 import pytest
 import requests
 
 DESC_URL = 'http://minikep-db.herokuapp.com/api/desc'
 
 sample_post_payload = [
-    dict(abbr='test_BRENT', ru='Цена нефти Brent', en='Brent oil price'),
-    dict(abbr='test_GDP', ru='Валовый внутренний продукт', en='Gross domestic product'),
-    dict(abbr='test_rog', ru='темп роста к пред. периоду', en='rate of growth to previous period'),
-    dict(abbr='test_yoy', ru='темп роста за 12 месяцев', en='year-on-year rate of growth')
+    dict(abbr='BRENT', ru='Цена нефти Brent', en='Brent oil price'),
+    dict(abbr='GDP', ru='Валовый внутренний продукт', en='Gross domestic product'),
+    dict(abbr='rog', ru='темп роста к пред. периоду', en='rate of growth to previous period'),
+    dict(abbr='yoy', ru='темп роста за 12 месяцев', en='year-on-year rate of growth')
 ]
 
 
 class Test_api_desc_GET_method():
 
-    def test_get_without_params_fails(self):
+    def test_get_method_without_params_fails(self):
         response = requests.get(DESC_URL)
         assert response.status_code != 200
 
+        
+    # FIXME: split to two tests + rename without variable name   
     @pytest.mark.xfail
     def test_get_GDP_ru_successful_returns_valid_data(self):
         params = dict(abbr='GDP')
@@ -53,6 +63,7 @@ class Test_api_desc_GET_method():
         assert response.status_code == 200
         assert data == {'abbr': 'GDP', 'ru': 'Цена нефти Brent', 'en': 'Brent oil price'}
 
+    # FIXME: split to two tests + rename without variable name  
     @pytest.mark.xfail
     def test_get_rog_en_successful_returns_valid_data(self):
         params = dict(abbr='GDP')
@@ -65,24 +76,25 @@ class Test_api_desc_GET_method():
 
 class Test_api_desc_POST_method():        
         
-    def test_post_without_params_fails(self):
+    def test_post_method_without_params_fails(self):
         response = requests.post(DESC_URL)
         assert response.status_code != 200
 
     @pytest.mark.xfail
-    def test_post_with_sample_payload_successful_with_code_200(self):
-        # FIXME: not sure this is a valid json
+    def test_post_method_on_sample_payload_successful_with_code_200(self):
         response = requests.post(DESC_URL, json=sample_post_payload)
         assert response.status_code == 200
 
         
 class Test_api_desc_DELETE_method():                
         
-    def test_delete_with_empty_abbr_field_fails(self):
+    def test_delete_method_on_empty_abbr_field_fails(self):
         params = {'abbr': ''}
         response = requests.delete(DESC_URL, params=params)
         assert response.status_code != 200
 
+        
+    # FIXME: see commented code below, it has more scenario + must rename without variable
     @pytest.mark.xfail
     def test_delete_rog_successful_with_code_200(self):
         params = {'abbr': 'rog'}
