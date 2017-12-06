@@ -16,7 +16,7 @@ sample_valid_params_with_dates = dict(
     end_date='2017-01-01')
 expected_output_with_dates = """,CPI_FOOD_rog
 2016-11-30,100.8
-2016-12-31,100.6'
+2016-12-31,100.6
 """
 
 sample_invalid_params_start_date_gt_end_date = dict(
