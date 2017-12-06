@@ -51,7 +51,7 @@ def get_var_id(name):
 # TODO: must simplify this callto 'api/info?name={}', make freq optional
 def get_info(freq, name):
     url =  BASE_URL + 'api/info?freq={}&name={}'.format(freq, name)
-    freq_info = fetch_json(url)[freq]
+    freq_info = fetch_json(url)
     flat_info = {
         'name': freq_info['name'],
         'latest_date': freq_info[freq]['latest_date'],

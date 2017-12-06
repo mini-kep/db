@@ -28,6 +28,7 @@ Note here we test GET methods only, not POST or DELETE.
 import access
 import random
 from dateutil.parser import parse
+from minikep import MiniKEP
 
 import access
 
@@ -74,9 +75,19 @@ series_list = [access.get_ts(freq=freq, name=name) for name in names]
 df2 = access.join_df([ts.to_frame() for ts in series_list])
 assert all(df1 == df2)
 
-# TODO: pick 3 random names from names, get result from api/frame, 
-#       get result from api/datapoints, concat ts, compare.
-#       can use access2.py for this 
+# pick 3 random names
+random_names = [random.choice(names) for i in range(1, 3)]
+
+#  get result from api/datapoints, concat ts
+series_list = [MiniKEP.datapoints_csv(freq=freq, name=name).to_frame() for name in random_names]
+
+df1 = access.join_df([ts.to_frame() for ts in series_list])
+
+# get frame
+df2 = MiniKEP.frame(freq=freq, names=random_names)
+
+# compare
+assert all(df1 == df2)
     
 
 # custom api 
