@@ -23,7 +23,7 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 
 # User access code
 
-The data can be imported to your python code as following:
+The data can be imported following:
 
 ```python 
 import pandas as pd
