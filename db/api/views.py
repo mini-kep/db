@@ -1,5 +1,7 @@
-import json
-from flask import Blueprint, request, abort, jsonify, current_app, Response
+import json, datetime
+from io import BytesIO
+
+from flask import Blueprint, request, abort, jsonify, current_app, Response, make_response
 from flask.views import MethodView
 
 import db.api.utils as utils
@@ -7,6 +9,10 @@ from db import db
 from db.api.errors import CustomError400
 from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
 from db.api.queries import All, Allowed, DatapointOperations
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.dates import DateFormatter
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -83,17 +89,20 @@ class DatapointsAPI(MethodView):
 
     def get(self):
         """
-        Select time series data as json.
+        Select time series data as csv or json.
 
         Responses:
             422:
                 Bad arguments, eg start_date > end_date
             200:
-                Sent json.
+                Sent json or csv.
        """
         args = RequestArgs()
         data = DatapointOperations.select(**args.query_param)
-        return publish_json(data)
+        if args.format == 'json':
+            return publish_json(data)
+        else:
+            return publish_csv(data)
 
     def delete(self):
         """Delete datapoints.
@@ -136,22 +145,6 @@ class DatapointsAPI(MethodView):
 api_bp.add_url_rule(
     '/datapoints',
     view_func=DatapointsAPI.as_view('datapoints_view'))
-
-
-@api_bp.route('/series', methods=['GET'])
-def get_series():
-    """
-    Select time series data as csv.
-
-    Responses:
-        422:
-            Bad arguments, eg start_date > end_date
-        200:
-            Sent json.
-   """
-    args = RequestArgs()
-    data = DatapointOperations.select(**args.query_param)
-    return publish_csv(data)
 
 
 @api_bp.route('/frame', methods=['GET'])
@@ -209,10 +202,32 @@ def info():
     # WONTFIX: can this method work without frequency? just by name? 
     varname = request.args.get('name')
     freq = request.args.get('freq')
-    data = utils.variable_info(varname, freq)
-    return jsonify(data)
+    return utils.variable_info(varname, freq)
 
 
-# TODO:
-    # POST varname
-    # POST unit
+@api_bp.route('/spline', methods=['GET'])
+def splines():
+
+    fig = Figure()
+    ax = fig.add_subplot(111)
+    x = []
+    y = []
+
+    args = RequestArgs()
+    data = DatapointOperations.select(**args.query_param)
+    json_data = publish_json(data)
+    data_array = json.loads(json_data.response[0])
+
+    for item in data_array:
+        x.append(datetime.datetime.strptime(item["date"], "%Y-%m-%d"))
+        y.append(item["value"])
+
+    ax.plot_date(x, y, '-')
+    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    fig.autofmt_xdate()
+    canvas = FigureCanvas(fig)
+    png_output = BytesIO()
+    canvas.print_png(png_output)
+    response=make_response(png_output.getvalue())
+    response.headers['Content-Type'] = 'image/png'
+    return response
