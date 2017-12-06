@@ -32,41 +32,31 @@ def get_info(freq, name):
     url =  BASE_URL + 'api/info?freq={}&name={}'.format(freq, name)
     return fetch_json(url)
 
+def make_params(freq, name, start_date=None, end_date=None):
+    s = '?name={}&freq={}'.format(name, freq)
+    if start_date:
+        s += '&start_date={}'.format(start_date)
+    if end_date:
+        s += '&end_date={}'.format(end_date)
+    return s    
 
 def make_datapoints_url(freq, name, start_date=None, end_date=None):
-    url = BASE_URL + 'api/datapoints'
-    url += '?name={}&freq={}'.format(name, freq)
-    if start_date:
-        url += '&start_date={}'.format(start_date)
-    if end_date:
-        url += '&end_date={}'.format(end_date)
-    return url
-
+    return BASE_URL + 'api/datapoints' + make_params(freq, name, start_date, end_date)
 
 def make_series_url(freq, name, start_date=None, end_date=None):
-    url = BASE_URL + 'api/series'
-    url += '?name={}&freq={}'.format(name, freq)
-    if start_date:
-        url += '&start_date={}'.format(start_date)
-    if end_date:
-        url += '&end_date={}'.format(end_date)
-    return url
-
+    url = BASE_URL + 'api/series'+ make_params(freq, name, start_date, end_date)
 
 def get_datapoints_json(freq, name, start_date=None, end_date=None):
     url = make_datapoints_url(freq, name, start_date, end_date)
     return fetch_json(url)
 
-
 def get_ts(freq, name, start_date=None, end_date=None):
     url = make_series_url(freq, name, start_date=start_date, end_date=end_date)
     return read_ts_from_url(url)
 
-
 def get_frame(freq):
     url = BASE_URL + f'api/frame?freq={freq}'
     return read_df_from_url(url)
-
 
 # TODO: add finaliser
 def get_custom_series(freq, name, suffix, start, end, domain='ru'):
@@ -98,7 +88,7 @@ def get_df_by_names(freq, names):
     return join_df(df_list)
 
 
-# TODO: this should be equal to get_frame()
+# TODO: check this is equal to get_frame()
 def get_df(freq):
     names = get_names(freq)
     return get_df_by_names(freq, names)
@@ -113,27 +103,4 @@ if __name__ == '__main__':
     # runs about 20-40 sec
     dfq = get_df('q')    
     # check dataframe columns are exaactly the ones we retrieved earlier
-    assert variable_names_quarterly == dfq.columns.tolist()    
-    
-#        Index(['CPI_ALCOHOL_rog', 'CPI_FOOD_rog', 'CPI_NONFOOD_rog', 'CPI_rog',
-#               'CPI_SERVICES_rog', 'EXPORT_GOODS_bln_usd', 'GDP_bln_rub', 'GDP_yoy',
-#               'GOV_EXPENSE_ACCUM_CONSOLIDATED_bln_rub',
-#               'GOV_EXPENSE_ACCUM_FEDERAL_bln_rub',
-#               'GOV_EXPENSE_ACCUM_SUBFEDERAL_bln_rub',
-#               'GOV_REVENUE_ACCUM_CONSOLIDATED_bln_rub',
-#               'GOV_REVENUE_ACCUM_FEDERAL_bln_rub',
-#               'GOV_REVENUE_ACCUM_SUBFEDERAL_bln_rub',
-#               'GOV_SURPLUS_ACCUM_FEDERAL_bln_rub',
-#               'GOV_SURPLUS_ACCUM_SUBFEDERAL_bln_rub', 'IMPORT_GOODS_bln_usd',
-#               'INDPRO_rog', 'INDPRO_yoy', 'INVESTMENT_bln_rub', 'INVESTMENT_rog',
-#               'INVESTMENT_yoy', 'RETAIL_SALES_bln_rub', 'RETAIL_SALES_FOOD_bln_rub',
-#               'RETAIL_SALES_FOOD_rog', 'RETAIL_SALES_FOOD_yoy',
-#               'RETAIL_SALES_NONFOOD_bln_rub', 'RETAIL_SALES_NONFOOD_rog',
-#               'RETAIL_SALES_NONFOOD_yoy', 'RETAIL_SALES_rog', 'RETAIL_SALES_yoy',
-#               'TRANSPORT_FREIGHT_bln_tkm', 'UNEMPL_pct', 'WAGE_NOMINAL_rub',
-#               'WAGE_REAL_rog', 'WAGE_REAL_yoy'],
-#              dtype='object')
-
-    # can also get monthly data
-    # commented because it slows down code, uncomment if you need monthly data
-    # dfm = get_df('m')    
+    assert variable_names_quarterly == dfq.columns.tolist()  
