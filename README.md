@@ -4,7 +4,7 @@
 
 # Concept
 
-`mini-kep` API allows to update and query a database of macroeconomic indicators.
+This API allows to update and query a database of macroeconomic indicators. 
 
 # Quickstart
 
@@ -23,10 +23,14 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 2017-06-30,102.5
 ```
 
-#### Access code
+#### User access code
 
-`pandas` code for data access is [here](https://github.com/mini-kep/user-charts/blob/master/access.py).
+The data can be accessed by following code: 
 
+- [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplier, function-based code, good for ipython notebooks
+- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options 
+  
+  
 #### Updating database
 
 Administrator with API token can can also upload and delete data. This functionality 
