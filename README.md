@@ -8,8 +8,6 @@ This API allows to update and query a database of macroeconomic indicators.
 
 # Quickstart
 
-#### Query example
-
 [This link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
 returns quarterly year-on-year Russian GDP growth rate as csv file, readable by R/pandas.
 
@@ -23,12 +21,34 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 2017-06-30,102.5
 ```
 
-#### User access code
+# User access code
 
-The data can be accessed by following code: 
+The data can be imported to your python code as following:
 
+```python 
+import pandas as pd
+
+BASE_URL = 'http://minikep-db.herokuapp.com/'
+
+def read_df_from_url(url):
+    """Read pandas dataframe from *source_url*."""
+    return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0)
+
+def get_frame(freq):
+    """Return pandas dataframe with annual, quarterly, monthly or daily data.
+       
+       Arg:
+         freq - 'a', 'q', 'm', 'd'
+    """
+    url = BASE_URL + 'api/frame?freq={}'.format(freq)
+    return read_df_from_url(url)
+    
+dfa = get_frame('a')  
+```
+
+More access code:
 - [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplier, function-based code, good for ipython notebooks
-- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options 
+- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options, to be used in other programs 
   
   
 #### Updating database
