@@ -83,20 +83,17 @@ class DatapointsAPI(MethodView):
 
     def get(self):
         """
-        Select time series data as csv or json.
+        Select time series data as json.
 
         Responses:
             422:
                 Bad arguments, eg start_date > end_date
             200:
-                Sent json or csv.
+                Sent json.
        """
         args = RequestArgs()
         data = DatapointOperations.select(**args.query_param)
-        if args.format == 'json':
-            return publish_json(data)
-        else:
-            return publish_csv(data)
+        return publish_json(data)
 
     def delete(self):
         """Delete datapoints.
@@ -139,6 +136,22 @@ class DatapointsAPI(MethodView):
 api_bp.add_url_rule(
     '/datapoints',
     view_func=DatapointsAPI.as_view('datapoints_view'))
+
+
+@api_bp.route('/series', methods=['GET'])
+def get_series():
+    """
+    Select time series data as csv.
+
+    Responses:
+        422:
+            Bad arguments, eg start_date > end_date
+        200:
+            Sent json.
+   """
+    args = RequestArgs()
+    data = DatapointOperations.select(**args.query_param)
+    return publish_csv(data)
 
 
 @api_bp.route('/frame', methods=['GET'])

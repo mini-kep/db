@@ -141,48 +141,6 @@ class TestDatapointsAPI(TestCaseBase):
         # check
         assert self.data_dicts == result_dict
 
-    def test_get_on_csv_format_arg_returns_expected_csv_string(self):
-        # method under test: get
-        # context or arguments: string, dict
-        # expected result of behavior: returns expected csv string
-
-        # test setup
-        format_arg = 'csv'
-
-        # call
-        result_string = self._get_response().data.decode()
-
-        # check
-        assert self.data_csv_string == result_string
-
-    def test_get_on_invalid_format_returns_expected_status_code(self):
-        # method under test: get
-        # context or arguments: string, dict, positive integer
-        # expected result of behavior: returns expected status code
-
-        # test setup
-        format_arg = 'html'
-
-        # call
-        result = self._get_response()
-
-        # check
-        assert self.error_code == result.status_code
-
-    def test_get_on_invalid_format_returns_expected_status_json(self):
-        # method under test: get
-        # context or arguments: string, dict, dict
-        # expected result of behavior: returns expected json
-
-        # test setup
-        format_arg = 'html'
-
-        # call
-        result_dict = json.loads(self._get_response().data)
-
-        # check
-        assert self.error_dict == result_dict
-
 
 if __name__ == '__main__':  # pragma: no cover
     pytest.main([__file__])
