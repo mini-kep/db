@@ -107,14 +107,12 @@ class MiniKEP:
     #TODO: with api shange this should be datapoints()
     def datapoints_json(freq, name, start_date=None, end_date=None):
         param_dict = make_dict(freq, name, start_date, end_date)
-        param_dict['format'] = 'json'
-        return Caller('api/datapoints', param_dict).json()        
+        return Caller('api/datapoints', param_dict).json()
 
     #TODO: with api shange this should be series()
     def datapoints_csv(freq, name, start_date=None, end_date=None):
         param_dict = make_dict(freq, name, start_date, end_date)
-        param_dict['format'] = 'csv'
-        return Caller('api/datapoints', param_dict).text()
+        return Caller('api/series', param_dict).text()
 
     def frame(freq, names, start_date=None, end_date=None):
         param = Parameters(freq)
