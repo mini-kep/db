@@ -30,7 +30,15 @@ def get_names(freq):
 
 def get_info(freq, name):
     url =  BASE_URL + 'api/info?freq={}&name={}'.format(freq, name)
-    return fetch_json(url)
+    freq_info = fetch_json(url)[freq]
+    flat_info = {
+        'name': name,
+        'freq': freq,
+        'latest_date': freq_info['latest_date'],
+        'start_date': freq_info['start_date'],
+        # TODO: add fields if needed
+    }
+    return flat_info
 
 
 def make_url(freq, name, format, start_date=None, end_date=None):

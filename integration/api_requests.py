@@ -25,7 +25,9 @@ Note here we test GET methods only, not POST or DELETE.
 
 """
 
-import random 
+import access
+import random
+from dateutil.parser import parse
 
 import access
 
@@ -39,14 +41,14 @@ freq = random.choice(frequencies)
 names = access.get_names(freq)
 name = random.choice(names)  
 assert isinstance(name, str)
-# TODO: 'name' starts with a capital letter
+assert name[0].isupper()
 
 # 'api/info'
 info = access.get_info(freq, name)
-start_date = info[freq]['start_date']
-latest_date = info[freq]['latest_date']
-# WONTFIX: access.get_info(freq, name) should retrun a more flat data structure
-# TODO: check start_date and latest_date are ISO dates
+start_date = info['start_date']
+latest_date = info['latest_date']
+assert parse(start_date).date().isoformat() == start_date
+assert parse(latest_date).date().isoformat() == latest_date
 # TODO: more checks for info 
 
 # 'api/datapoints'
