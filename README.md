@@ -10,7 +10,7 @@
 
 #### Query example
 
-[This link](https://minikep-db.herokuapp.com/api/datapoints?name=GDP_yoy&freq=q&start_date=2016-01-01)
+[This link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
 returns quarterly year-on-year Russian GDP growth rate as csv file, readable by R/pandas.
 
 ```
@@ -63,7 +63,7 @@ List variable names for specified frequency.
 
 #### GET ```datapoints```:
 
-Get subset of data as csv or json.
+Get subset of data as json.
 
 Args:
 - `freq` - one of `a`, `q`, `m`, or `d` 
@@ -83,6 +83,20 @@ Examples:
 - [wrong name for good freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=q&format=json)
 - [start date in future](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2025-01-01)
 - [end date > start date](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2015-01-01&end_date=2000-01-01)
+
+#### GET ```series```:
+
+Get subset of data as csv.
+Acts like GET ```datapoints```, but returns a csv.
+Args and parameter errors are same as in GET ```datapoints```.
+
+Examples:
+
+- [api/series?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/series?name=CPI_rog&freq=m)
+- [api/series?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q)
+- [api/series?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/series?name=BRENT&freq=d&start_date=2017-01-01)
+- [api/series?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/series?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
+
 
 #### GET ```frame```
 Returns a csv dataframe.
