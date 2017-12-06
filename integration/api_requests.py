@@ -47,9 +47,12 @@ assert name[0].isupper()
 info = access.get_info(freq, name)
 start_date = info['start_date']
 latest_date = info['latest_date']
+
 assert parse(start_date).date().isoformat() == start_date
 assert parse(latest_date).date().isoformat() == latest_date
-# TODO: more checks for info 
+
+assert access.get_unit_id(name) == info['unit_id']
+assert access.get_var_id(name) == info['var_id']
 
 # 'api/datapoints'
 params = dict(freq=freq, name=name, start_date=start_date, end_date=latest_date) 
