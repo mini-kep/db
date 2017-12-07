@@ -159,25 +159,21 @@ class DictionaryRepresentation:
 def get_data_for_spline(args):
     x = []
     y = []
-
     data = queries.DatapointOperations.select(**args.query_param)
-
     for item in data:
         x.append(item.date)
         y.append(item.value)
-
-    return {
-        "x": x,
-        "y": y
-    }
+    return dict(x=x,
+                y=y)
 
 
-# input values - {'x':[],'y':[]} for build graphic
 def make_png(data):
-
+    """
+    Input values for build graphic:
+        {"x":[], "y":[]}
+    """
     fig = Figure()
-    ax = fig.add_subplot(111)
-
+    ax = fig.add_subplot(1, 1, 1, facecolor="white")
     ax.plot_date(data["x"], data["y"], '-')
     ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
     fig.autofmt_xdate()
