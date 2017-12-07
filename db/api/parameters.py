@@ -135,6 +135,13 @@ class RequestFrameArgs(RequestArgs):
         'end_date': fields.Date(required=False)
         }
 
+    validate_with = make_func_list([
+        'start_is_not_in_future',
+        'end_date_after_start_date',
+        'freq_exist',
+        'names_validated'
+    ])
+
     query_keys = ['names', 'freq', 'start_date', 'end_date']
 
 
@@ -143,7 +150,7 @@ class RequestFrameArgs(RequestArgs):
         # convert names 
         names = convert_name_string_to_list(self.arg_dict.get('name'))
         if not names:
-            names = Allowed.names(self.freq) 
+            names = Allowed.names(self.freq)
         self.arg_dict['names'] = names
 
 

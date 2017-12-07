@@ -90,8 +90,8 @@ class Test_RequestFrameArgs(TestCaseBase):
         args = RequestFrameArgs(req)
         assert isinstance(args.names, list)
 
-    def test_init_on_bad_args_fails_2(self):
-        malformed_args = dict(names="GDP_yoy,DING_dong", freq='a')
+    def test_init_on_bad_args_fails(self):
+        malformed_args = dict(name="GDP_yoy,DING_dong", freq='a')
         req = SimRequest(**malformed_args)
         with pytest.raises(HTTPException):
             RequestFrameArgs(req)
