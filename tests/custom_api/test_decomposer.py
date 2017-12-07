@@ -5,7 +5,6 @@ from db.api.errors import CustomError400
 from tests.test_basic import TestCaseBase
 
 
-
 class Test_as_date(TestCaseBase):
     @staticmethod
     def _as_date(year, month, day):
@@ -18,6 +17,7 @@ class Test_as_date(TestCaseBase):
         with pytest.raises(ValueError):
             self._as_date(2010, 0, 0)
 
+
 class Test_validate_frequency(TestCaseBase):
     @staticmethod
     def _validate_frequency(freq):
@@ -29,7 +29,6 @@ class Test_validate_frequency(TestCaseBase):
     def test_validate_frequency_with_invalid_param_should_fail(self):
         with pytest.raises(CustomError400):
             self._validate_frequency('z')
-
 
     def test_validate_frequency_with_empty_string_param_should_fail(self):
         with pytest.raises(CustomError400):
@@ -68,7 +67,8 @@ class Test_TokensArgs(TestCaseBase):
             date.today().year, date.today().month, date.today().day)
 
     def test_init_on_well_formed_inner_path_is_success(self):
-        tokens = decomposer.Tokens(inner_path='oil/series/BRENT/m/eop/2015/2017/csv')
+        tokens = decomposer.Tokens(
+            inner_path='oil/series/BRENT/m/eop/2015/2017/csv')
 
         assert tokens.unit is None
         assert tokens.start == '2015-01-01'
@@ -108,14 +108,14 @@ class Test_Indicator(TestCaseBase):
 
 
 @pytest.mark.parametrize('test_input, expected_dates', [
-        ('eop/2015/2018/csv', {'start': '2015-01-01', 'end': '2018-12-31'}),
-        ('eop/2014/2017/csv', {'start': '2014-01-01', 'end': '2017-12-31'}),
-        ('eop/2010/1970/csv', {'start': '2010-01-01', 'end': '1970-12-31'}),
+    ('eop/2015/2018/csv', {'start': '2015-01-01', 'end': '2018-12-31'}),
+    ('eop/2014/2017/csv', {'start': '2014-01-01', 'end': '2017-12-31'}),
+    ('eop/2010/1970/csv', {'start': '2010-01-01', 'end': '1970-12-31'}),
 ])
 def test_tokens_dates_on_valid_inner_path(test_input, expected_dates):
-        tokens = decomposer.Tokens(test_input)
-        assert tokens.start == expected_dates['start']
-        assert tokens.end == expected_dates['end']
+    tokens = decomposer.Tokens(test_input)
+    assert tokens.start == expected_dates['start']
+    assert tokens.end == expected_dates['end']
 
 
 class Test_CustomEndPoint_Integration_Test(TestCaseBase):
@@ -136,4 +136,3 @@ if __name__ == '__main__':
     t.setUp()
     r = t.client.get('/ru/series/CPI_rog/m')
     print(r.data)
-

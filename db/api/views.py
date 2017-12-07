@@ -1,5 +1,8 @@
 import json
-from flask import Blueprint, request, abort, jsonify, current_app, Response
+import datetime
+from io import BytesIO
+
+from flask import Blueprint, request, abort, jsonify, current_app, Response, make_response
 from flask.views import MethodView
 
 import db.api.utils as utils
@@ -8,6 +11,10 @@ from db.api.errors import CustomError400
 from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs, \
     DescriptionArgs
 from db.api.queries import All, Allowed, DatapointOperations, DescriptionOperations
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.dates import DateFormatter
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -40,22 +47,23 @@ def handle_invalid_usage(error):
     return response
 
 # PROPOSED ENHANCEMENT: Can use this fucntion as decorator for DatapointsAPI.post() amd .delete methods()
-#                       Currently authorise() used inside these methods. 
+#                       Currently authorise() used inside these methods.
 #                       Decorator can help abstract database logic inside a method from access infrastructure
 #
-#                       Current problem - not sure how to add a decorator to individual class methods. 
-#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how 
-#                       to add decorators to all of class, but warns the 'traditional' decoraots wont 
+#                       Current problem - not sure how to add a decorator to individual class methods.
+#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how
+#                       to add decorators to all of class, but warns the 'traditional' decoraots wont
 #                       work on individual methods:
-#                             
+#
 #                                class UserAPI(MethodView):
 #                                    decorators = [user_required]
 #
-#                                > Due to the implicit self from the caller’s perspective you cannot use 
-#                                > regular view decorators on the individual methods of the view 
+#                                > Due to the implicit self from the caller’s perspective you cannot use
+#                                > regular view decorators on the individual methods of the view
 #                                > <http://flask.pocoo.org/docs/0.12/views/#decorating-views>
 #
 #  Decision: for now plain call to authorise seems cleanest available solution.
+
 
 def authorise():
     token_to_check = request.args.get(
@@ -84,20 +92,17 @@ class DatapointsAPI(MethodView):
 
     def get(self):
         """
-        Select time series data as csv or json.
+        Select time series data as json.
 
         Responses:
             422:
                 Bad arguments, eg start_date > end_date
             200:
-                Sent json or csv.
+                Sent json.
        """
         args = RequestArgs()
         data = DatapointOperations.select(**args.query_param)
-        if args.format == 'json':
-            return publish_json(data)
-        else:
-            return publish_csv(data)
+        return publish_json(data)
 
     def delete(self):
         """Delete datapoints.
@@ -166,6 +171,22 @@ api_bp.add_url_rule(
     view_func=DescriptionAPI.as_view('description_view'))
 
 
+@api_bp.route('/series', methods=['GET'])
+def get_series():
+    """
+    Select time series data as csv.
+
+    Responses:
+        422:
+            Bad arguments, eg start_date > end_date
+        200:
+            Sent json.
+   """
+    args = RequestArgs()
+    data = DatapointOperations.select(**args.query_param)
+    return publish_csv(data)
+
+
 @api_bp.route('/frame', methods=['GET'])
 def get_dataframe():
     """Get csv file readable as pd.DataFrame based on many of all variabel names.
@@ -218,13 +239,44 @@ def get_all_variable_names_for_frequency(freq):
 
 @api_bp.route('/info', methods=['GET'])
 def info():
-    # WONTFIX: can this method work without frequency? just by name? 
+    # WONTFIX: can this method work without frequency? just by name?
     varname = request.args.get('name')
     freq = request.args.get('freq')
     data = utils.variable_info(varname, freq)
     return jsonify(data)
 
 
+@api_bp.route('/spline', methods=['GET'])
+# FIXME: rename to spline()
+# FIXME: split this fucntion to arg-data handling and utility function make_png(data)
+# DISCUSS: maybe make_png(data) need to be split too
+def splines():
+
+    fig = Figure()
+    ax = fig.add_subplot(111)
+    x = []
+    y = []
+
+    args = RequestArgs()
+    data = DatapointOperations.select(**args.query_param)
+
+    # FIXME: this is double work, not clean
+    json_data = publish_json(data)
+    data_array = json.loads(json_data.response[0])
+
+    for item in data_array:
+        x.append(datetime.datetime.strptime(item["date"], "%Y-%m-%d"))
+        y.append(item["value"])
+
+    ax.plot_date(x, y, '-')
+    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    fig.autofmt_xdate()
+    canvas = FigureCanvas(fig)
+    png_output = BytesIO()
+    canvas.print_png(png_output)
+    response = make_response(png_output.getvalue())
+    response.headers['Content-Type'] = 'image/png'
+    return response
+
+
 # TODO:
-    # POST varname
-    # POST unit

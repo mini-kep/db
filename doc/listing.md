@@ -5,12 +5,6 @@ Presentation:
 - make this listing clickable + add frequencies
 - generalise by country 
 
-Transformations:
-- rog/yoy
-- diff gov
-- concat `INDPRO`
-
-
 GDP
 ===
 	- "GDP_bln_rub"

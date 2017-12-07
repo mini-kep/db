@@ -60,7 +60,7 @@ class Test_POST(TestDatapoints):
 class Test_GET(TestDatapoints):
 
     def query_on_name_and_freq(self):
-        params = dict(name='CPI_NONFOOD_rog', freq='m', format='json')
+        params = dict(name='CPI_NONFOOD_rog', freq='m')
         return self.client.get('/api/datapoints', query_string=params)
 
     def test_get_on_name_and_freq_is_found_with_code_200(self):
@@ -146,7 +146,7 @@ class Test_DELETE(TestDatapoints):
         assert response.status_code == 200
 
 
-if __name__ == '__main__': # pragma no cover
+if __name__ == '__main__':  # pragma no cover
     pytest.main([__file__, '--maxfail=1'])
 
     v = TestDatapoints()
