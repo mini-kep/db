@@ -90,8 +90,8 @@ class Test_api_desc_GET_method(TestCaseBase):
 
         assert data == {
             'abbr': 'GDP',
-            'ru': 'Цена нефти Brent',
-            'en': 'Brent oil price'}
+            'ru': 'Валовый внутренний продукт',
+            'en': 'Gross domestic product'}
 
     def test_get_on_valid_variable_successful_with_code_200_repeated(self):
         params = dict(abbr='rog')
