@@ -1,57 +1,31 @@
-# FIXME: msut use https://github.com/mini-kep/guidelines/blob/master/testing.md
+#FIXME: msut use https://github.com/mini-kep/guidelines/blob/master/testing.md
 
 import pytest
 import json
 
-# FIXME - why import this?
-import tests
-
 from tests.test_basic import TestCaseBase
 
-# FIXME - why import this?
-from io import BytesIO
 
-ENDPOINT = "api/spline"
-
-# FIXME: why do we need this? ------------------------------------
-
-
-class TestImages(TestCaseBase):
-
-    @property
-    def token(self):
-        return self.app.config['API_TOKEN']
-
-    @property
-    def token_dict(self):
-        return dict(API_TOKEN=self.token)
-
-    def get(self, param):
-        return self.client.get(ENDPOINT, query_string=param)
-
-# -------------------------------------------------------------
-
-# FIXME: by Test_GET you cannot understand what is being tested
-
-
-class Test_GET(TestImages):
-
+# FIXME: by Test_GET you cannot understand what is being tested  
+class Test_API_Spline(TestCaseBase):
+ 
     # EP: so bad - params should bot be inside method
-    def query_on_name_and_freq(self):
-        params = dict(name='CPI_NONFOOD_rog', freq='m')
+    def query_on_name_and_freq(self, params):
         return self.client.get('/api/spline', query_string=params)
 
     def test_get_on_name_and_freq_is_found_with_code_200(self):
-        response = self.query_on_name_and_freq()
+        params = dict(name='CPI_NONFOOD_rog', freq='m')
+        response = self.query_on_name_and_freq(params)
         assert response.status_code == 200
 
-    # EP: same anout params
+    #EP: same anout params   
     def test_get_on_name_and_freq_returns_img_spline_CPI_rog(self):
-        response = self.query_on_name_and_freq()
+        params = dict(name='CPI_NONFOOD_rog', freq='m', start_date="2016-10-29", end_date="2016-12-31")
+        response = self.query_on_name_and_freq(params)
         assert response.headers["Content-Type"] == "image/png"
 
 
-class Test_GET_Errors(TestImages):
+class Test_API_Spline_Errors(TestCaseBase):
 
     def test_images_empty_params_returns_error(self):
         response = self.client.get('/api/spline')
@@ -83,25 +57,5 @@ class Test_GET_Errors(TestImages):
         assert response.status_code == 422
 
 
-if __name__ == '__main__':  # pragma no cover
+if __name__ == '__main__': # pragma no cover
     pytest.main([__file__, '--maxfail=1'])
-
-    v = TestImages()
-    v.setUp()
-
-    _name = 'CPI_NONFOOD_rog'
-    _freq = 'a'
-    params = dict(name=_name, freq=_freq)
-    resp = v.client.get('/api/spline', query_string=params)
-    print(resp)
-
-    sample = json.dumps(v.test_data[0:10])
-    resp = v.client.get('/api/spline', data=sample, headers=v.token_dict)
-    print(resp)
-
-    _name = 'CPI_NONFOOD_rog'
-    _freq = 'a'
-    _start_date = '2099-01-01'
-    params = dict(name=_name, freq=_freq, start_date=_start_date)
-    resp = v.client.get('/api/spline', query_string=params)
-    print(resp)

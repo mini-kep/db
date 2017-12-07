@@ -5,10 +5,15 @@
 
 """
 from datetime import datetime
+from io import BytesIO
 import collections
 import db.api.queries as queries
 from db.api.errors import CustomError400
 from db.helper import label
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.dates import DateFormatter
 
 
 def date_as_str(dt):
@@ -149,6 +154,37 @@ class DictionaryRepresentation:
 
     def to_csv(self):
         return '\n'.join(self.yield_rows())
+
+
+def get_data_for_spline(args):
+    x = []
+    y = []
+
+    data = queries.DatapointOperations.select(**args.query_param)
+
+    for item in data:
+        x.append(item.date)
+        y.append(item.value)
+
+    return {
+        "x": x,
+        "y": y
+    }
+
+
+# input values - {'x':[],'y':[]} for build graphic
+def make_png(data):
+
+    fig = Figure()
+    ax = fig.add_subplot(111)
+
+    ax.plot_date(data["x"], data["y"], '-')
+    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    fig.autofmt_xdate()
+    canvas = FigureCanvas(fig)
+    png_output = BytesIO()
+    canvas.print_png(png_output)
+    return png_output.getvalue()
 
 
 if __name__ == '__main__':  # pragma: no cover
