@@ -1,3 +1,5 @@
+# TODO: bring list from README.md
+
 """Access functions/classes for: 
     - api/freq: get_freq() 
     - api/names/{freq}: get_names(freq) 
@@ -98,19 +100,19 @@ def frame(freq, names, start_date=None, end_date=None):
                       start_date=start_date, end_date=end_date)
     return Caller('api/frame', param).text()        
 
+
 class CustomAPI:
-    def __init__(self, inner_str):
-        self.endpoint = inner_str
+    def __init__(self, freq, name):
+        # FIXME: this is not always 'ru'
+        self.endpoint = 'ru/series/{}/{}'.format(name, freq)
 
     @property
     def url(self):
         return Caller(self.endpoint).url
 
-    def text(self):
-        return Caller(self.endpoint).text()
 
 def get_frame_url(freq, names, start_date=None, end_date=None):
-    param = make_dict(freq=freq, names=names, 
+    param = make_dict(freq=freq, names=','.join(names), 
                       start_date=start_date, end_date=end_date)
     return Caller('api/frame', param).url
 
