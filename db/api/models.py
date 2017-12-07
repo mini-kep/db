@@ -37,7 +37,7 @@ class Description(db.Model):
     ru = db.Column(db.String, nullable=True)
     en = db.Column(db.String, nullable=True)
 
-    def __init__(self, abbr=None, ru=None, en=None):
+    def __init__(self, abbr, ru, en):
         self.abbr = abbr
         self.ru = ru
         self.en = en
