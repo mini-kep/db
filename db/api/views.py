@@ -241,17 +241,11 @@ def info():
 
 
 @api_bp.route('/spline', methods=['GET'])
-# FIXME: rename to spline()
-# FIXME: split this fucntion to arg-data handling and utility function make_png(data)
-# DISCUSS: maybe make_png(data) need to be split too
 def spline():
     args = RequestArgs()
     data = utils.get_data_for_spline(args)
     png_output = utils.make_png(data)
-
-    response=make_response(png_output)
+    response = make_response(png_output)
     response.headers['Content-Type'] = 'image/png'
     return response
 
-
-# TODO:
