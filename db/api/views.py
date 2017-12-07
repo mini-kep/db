@@ -220,6 +220,9 @@ def info():
 
 
 @api_bp.route('/spline', methods=['GET'])
+# FIXME: rename to spline() 
+# FIXME: split this fucntion to arg-data handling and utility function make_png(data)
+# DISCUSS: maybe make_png(data) need to be split too
 def splines():
 
     fig = Figure()
@@ -229,6 +232,8 @@ def splines():
 
     args = RequestArgs()
     data = DatapointOperations.select(**args.query_param)
+    
+    # FIXME: this is double work, not clean 
     json_data = publish_json(data)
     data_array = json.loads(json_data.response[0])
 
@@ -248,5 +253,3 @@ def splines():
 
 
 # TODO:
-    # POST varname
-    # POST unit
