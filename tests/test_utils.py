@@ -65,7 +65,8 @@ class Test_DictionaryRepresentation(TestCaseBase):
     ])
 
     def test_transform_query_to_dicts_is_sorting_datapoints(self):
-        transformed = utils.DictionaryRepresentation.transform_query_to_dicts(self.unsorted_datapoints)
+        transformed = utils.DictionaryRepresentation.transform_query_to_dicts(
+            self.unsorted_datapoints)
         self.assertEqual(transformed, self.sorted_datapoints_result)
 
 
