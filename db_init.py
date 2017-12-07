@@ -17,7 +17,7 @@ from db import create_app
 # we need to import models here explicitly, otherwise the tables created
 # will be empty
 from db.api import models
-from db.api.views import api
+from db.api.views import api_bp
 from db.api.utils import to_date
 
 # this creates tables specified in db.api.models
@@ -26,7 +26,7 @@ from db.api.utils import to_date
 
 # create app
 app = create_app('config.DevelopmentConfig')
-app.register_blueprint(api)
+app.register_blueprint(api_bp)
 # create tables for models
 db.create_all(app=app)
 

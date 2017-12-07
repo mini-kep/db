@@ -1,27 +1,28 @@
 import json
-from flask import Blueprint, request, abort, jsonify, current_app, Response
+
+from flask import Blueprint, request, abort, jsonify, current_app, Response, make_response
 from flask.views import MethodView
 
 import db.api.utils as utils
 from db import db
 from db.api.errors import CustomError400
-from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
-from db.api.queries import All, Allowed, DatapointOperations
+from db.api.parameters import (RequestArgs, RequestFrameArgs, 
+                               SimplifiedArgs, DescriptionArgs)
+from db.api.queries import (All, Allowed, DatapointOperations, 
+                            DescriptionOperations)
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
 
 @api_bp.errorhandler(422)
 def handle_validation_error(error):
-
     # error 422 is raised by webargs, on two accasions:
     # 1. argument check on input (eg required argument missing)
     #    webarg raises some exception internally
     # 2. argument check inside parser class (eg start date must be before or equal end date)
     #    we raise ArgError(ValidationError)
 
-    # when custom class ArgError is raised we will have 'kwargs.['load']'
-    # available
+    # when custom class ArgError is raised we will have 'kwargs.['load']' available
     view_dict = error.exc.kwargs.get('load', {})
     # other validation paths for error 422 in webargs will just have .messages
     view_dict['messages'] = error.exc.messages
@@ -38,23 +39,6 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return response
 
-# PROPOSED ENHANCEMENT: Can use this fucntion as decorator for DatapointsAPI.post() amd .delete methods()
-#                       Currently authorise() used inside these methods. 
-#                       Decorator can help abstract database logic inside a method from access infrastructure
-#
-#                       Current problem - not sure how to add a decorator to individual class methods. 
-#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how 
-#                       to add decorators to all of class, but warns the 'traditional' decoraots wont 
-#                       work on individual methods:
-#                             
-#                                class UserAPI(MethodView):
-#                                    decorators = [user_required]
-#
-#                                > Due to the implicit self from the caller’s perspective you cannot use 
-#                                > regular view decorators on the individual methods of the view 
-#                                > <http://flask.pocoo.org/docs/0.12/views/#decorating-views>
-#
-#  Decision: for now plain call to authorise seems cleanest available solution.
 
 def authorise():
     token_to_check = request.args.get(
@@ -83,20 +67,17 @@ class DatapointsAPI(MethodView):
 
     def get(self):
         """
-        Select time series data as csv or json.
+        Select time series data as json.
 
         Responses:
             422:
                 Bad arguments, eg start_date > end_date
             200:
-                Sent json or csv.
+                Sent json.
        """
         args = RequestArgs()
-        data = DatapointOperations.select(**args.query_param)
-        if args.format == 'json':
-            return publish_json(data)
-        else:
-            return publish_csv(data)
+        data = DatapointOperations.select(**args.get_query_parameters())
+        return publish_json(data)
 
     def delete(self):
         """Delete datapoints.
@@ -110,7 +91,7 @@ class DatapointsAPI(MethodView):
 
         authorise()
         args = SimplifiedArgs()
-        DatapointOperations.delete(**args.query_param)
+        DatapointOperations.delete(**args.get_query_parameters())
         return jsonify({})
 
     def post(self):
@@ -141,9 +122,49 @@ api_bp.add_url_rule(
     view_func=DatapointsAPI.as_view('datapoints_view'))
 
 
+class DescriptionAPI(MethodView):
+    def get(self):
+        args = DescriptionArgs.get_and_delete_params()
+        data = DescriptionOperations.get_one(**args)
+        if data:
+            return jsonify(data.serialized)
+        else:
+            return abort(400)
+
+    def post(self):
+        descriptions = DescriptionArgs.post_params()
+        DescriptionOperations.add_descriptions(descriptions)
+        return jsonify('Descriptions successfully added.')
+
+    def delete(self):
+        args = DescriptionArgs.get_and_delete_params()
+        DescriptionOperations.remove_one(**args)
+        return jsonify('Description successfully deleted.')
+
+api_bp.add_url_rule(
+    '/desc',
+    view_func=DescriptionAPI.as_view('description_view'))
+
+
+@api_bp.route('/series', methods=['GET'])
+def get_series():
+    """
+    Select time series data as csv.
+
+    Responses:
+        422:
+            Bad arguments, eg start_date > end_date
+        200:
+            Sent csv.
+   """
+    args = RequestArgs()
+    data = DatapointOperations.select(**args.get_query_parameters())
+    return publish_csv(data)
+
+
 @api_bp.route('/frame', methods=['GET'])
 def get_dataframe():
-    """Get csv file readable as pd.DataFrame based on many of all variabel names.
+    """Get csv file readable as pd.DataFrame based on variable names.
 
     URL examples:
 
@@ -151,17 +172,10 @@ def get_dataframe():
          api/frame?freq=a&start_date=2013-12-31
          api/frame?freq=a
 
-    FIXME:
-        Application hangs on a large query like
-
-        api/frame?freq=q
     """
     args = RequestFrameArgs()
-    param = args.query_param
-    if not args.names:
-        param['names'] = Allowed.names(args.freq)
-    data = DatapointOperations.select_frame(**param)
-    csv_str = utils.DictionaryRepresentation(data, param['names']).to_csv()
+    data = DatapointOperations.select_frame(**args.get_query_parameters())
+    csv_str = utils.DictionaryRepresentation(data, args.names).to_csv()
     return no_download(csv_str)
 
 
@@ -193,13 +207,19 @@ def get_all_variable_names_for_frequency(freq):
 
 @api_bp.route('/info', methods=['GET'])
 def info():
-    # WONTFIX: can this method work without frequency? just by name? 
+    # WONTFIX: can this method work without frequency? just by name?
     varname = request.args.get('name')
     freq = request.args.get('freq')
     data = utils.variable_info(varname, freq)
     return jsonify(data)
 
 
-# TODO:
-    # POST varname
-    # POST unit
+@api_bp.route('/spline', methods=['GET'])
+def spline():
+    args = RequestArgs()
+    data = DatapointOperations.select(**args.get_query_parameters())
+    png_output = utils.make_png(data)
+    response = make_response(png_output)
+    response.headers['Content-Type'] = 'image/png'
+    return response
+

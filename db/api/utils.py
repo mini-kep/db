@@ -5,10 +5,15 @@
 
 """
 from datetime import datetime
+from io import BytesIO
 import collections
 import db.api.queries as queries
 from db.api.errors import CustomError400
 from db.helper import label
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.dates import DateFormatter
 
 
 def date_as_str(dt):
@@ -70,6 +75,7 @@ def serialiser(datapoint_query):
         result[dt] = this_date
     return result
 
+
 def variable_info(varname, freq):
     """
     Returns dictionary with variable information. E.g.:
@@ -104,7 +110,7 @@ def variable_info(varname, freq):
 
 
 class DictionaryRepresentation:
-    
+
     @staticmethod
     def transform_query_to_dicts(datapoints):
         """
@@ -121,8 +127,8 @@ class DictionaryRepresentation:
             #     result[date] = {}
             result.setdefault(date, {})
             result[date][point.name] = point.value
-        return collections.OrderedDict(sorted(result.items())) # would be sorted by result keys
-     
+        # would be sorted by result keys
+        return collections.OrderedDict(sorted(result.items()))
 
     def __init__(self, datapoint_query, names):
         self.data_dicts = self.transform_query_to_dicts(datapoint_query)
@@ -150,6 +156,27 @@ class DictionaryRepresentation:
         return '\n'.join(self.yield_rows())
 
 
+def get_data_for_spline(query_data):
+    return dict(x=[item.date for item in query_data],
+                y=[item.value for item in query_data])
+
+
+def make_png(query_data):
+    """
+    Input values for build graphic:
+        {"x":[], "y":[]}
+    """
+    data = get_data_for_spline(query_data)
+    fig = Figure()
+    ax = fig.add_subplot(1, 1, 1, facecolor="white")
+    ax.plot_date(data["x"], data["y"], '-')
+    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    fig.autofmt_xdate()
+    canvas = FigureCanvas(fig)
+    png_output = BytesIO()
+    canvas.print_png(png_output)
+    return png_output.getvalue()
+
 
 if __name__ == '__main__':  # pragma: no cover
 
@@ -160,7 +187,7 @@ if __name__ == '__main__':  # pragma: no cover
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
 
-    #EP: works without db creation after done once
+    # EP: works without db creation after done once
 
     #from db import db
     # db.create_all(app=create_app('config.DevelopmentConfig'))
@@ -185,7 +212,8 @@ if __name__ == '__main__':  # pragma: no cover
 """
 
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
-        # TODO: test this result for daily frequency - note it has missing values, which is correct
+        # TODO: test this result for daily frequency - note it has missing
+        # values, which is correct
         """,BRENT,USDRUR_CB
 2016-06-01,48.81,65.9962
 2016-06-02,49.05,66.6156

@@ -60,7 +60,7 @@ class Test_POST(TestDatapoints):
 class Test_GET(TestDatapoints):
 
     def query_on_name_and_freq(self):
-        params = dict(name='CPI_NONFOOD_rog', freq='m', format='json')
+        params = dict(name='CPI_NONFOOD_rog', freq='m')
         return self.client.get('/api/datapoints', query_string=params)
 
     def test_get_on_name_and_freq_is_found_with_code_200(self):
@@ -128,16 +128,16 @@ class Test_GET_Errors(TestDatapoints):
 
 
 class Test_DELETE(TestDatapoints):
-    """Testing /api/delete"""
+    """Testing DELETE api/datapoints"""
 
     def test_on_no_auth_token_returns_forbidden_status_code_403(self):
         response = self.client.delete(ENDPOINT,
                                       headers=dict(API_TOKEN='000'))
         assert response.status_code == 403
 
-    def test_on_no_data_returns_invalid_entry_error_422(self):
+    def test_on_no_data_successfull_200(self):
         response = self.delete({})
-        assert response.status_code == 422
+        assert response.status_code == 200
 
     # FIXME: may parametrise
     def test_on_name_delete_successfull_200(self):
@@ -146,7 +146,7 @@ class Test_DELETE(TestDatapoints):
         assert response.status_code == 200
 
 
-if __name__ == '__main__': # pragma no cover
+if __name__ == '__main__':  # pragma no cover
     pytest.main([__file__, '--maxfail=1'])
 
     v = TestDatapoints()

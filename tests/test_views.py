@@ -1,12 +1,3 @@
-# coding: utf-8
-"""Testing flask app
-
-
-Testing guidelines at
-    <https://github.com/mini-kep/testing_guidelines/blob/master/README.md>.
-
-"""
-
 import pytest
 import json
 
@@ -84,7 +75,6 @@ class Test_API_Frame(TestCaseBase):
         self.assertEqual(request.status_code, self.HTTP_OK_CODE)
 
 
-# TODO: these test should relate to something else not covered in query.py
 
 class TestDatapointsAPI(TestCaseBase):
 
@@ -113,77 +103,21 @@ class TestDatapointsAPI(TestCaseBase):
 
     error_code = 422
 
-    error_dict = {
-        "allowed": ["json","csv"],
-        "messages": ["Invalid format parameter"]
-    }
-
     params = dict(
         name='USDRUR_CB',
         freq='d',
         start_date='2016-06-01',
-        end_date='2016-06-03',
-        format='')
+        end_date='2016-06-03')
 
-    def _get_response(self, response_format):
-        self.params['format'] = response_format
+    def _get_response(self):
         return self.client.get('api/datapoints', query_string=self.params)
 
-    def test_get_on_json_format_arg_returns_expected_json(self):
-        # method under test: get
-        # context or arguments: string, dict
-        # expected result of behavior: returns expected json
-
-        # test setup
-        format_arg = 'json'
-
+    def test_get_on_valid_arg_returns_expected_json(self):
         # call
-        result_dict = json.loads(self._get_response(format_arg).data)
-
+        resp = self.client.get('api/datapoints', query_string=self.params)
+        result_dict = json.loads(resp.data)
         # check
         assert self.data_dicts == result_dict
-
-    def test_get_on_csv_format_arg_returns_expected_csv_string(self):
-        # method under test: get
-        # context or arguments: string, dict
-        # expected result of behavior: returns expected csv string
-
-        # test setup
-        format_arg = 'csv'
-
-        # call
-        result_string = self._get_response(format_arg).data.decode()
-
-        # check
-        assert self.data_csv_string == result_string
-
-    def test_get_on_invalid_format_returns_expected_status_code(self):
-        # method under test: get
-        # context or arguments: string, dict, positive integer
-        # expected result of behavior: returns expected status code
-
-        # test setup
-        format_arg = 'html'
-
-        # call
-        result = self._get_response(format_arg)
-
-        # check
-        assert self.error_code == result.status_code
-
-    def test_get_on_invalid_format_returns_expected_status_json(self):
-        # method under test: get
-        # context or arguments: string, dict, dict
-        # expected result of behavior: returns expected json
-
-        # test setup
-        format_arg = 'html'
-
-        # call
-        result_dict = json.loads(self._get_response(format_arg).data)
-
-        # check
-        assert self.error_dict == result_dict
 
 
 if __name__ == '__main__':  # pragma: no cover

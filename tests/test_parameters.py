@@ -5,21 +5,15 @@ from tests.test_basic import TestCaseBase
 from db.api.parameters import RequestArgs, RequestFrameArgs
 from werkzeug.exceptions import HTTPException
 
-# COMMENT 1: repo README.md also has examples of good / failing queries
-
-# COMMENT 2: part of these tests can be recycled for views?
-
 
 def days_ahead(k):
     return arrow.utcnow().shift(days=k).format('YYYY-MM-DD')
 
 
 BAD_ARGS_LIST = [
-
     # caught by argument inspection
     # parameters are required
-    (None, None, None, None), (None, 'BRENT', None,
-                               None), ('q', None, None, None)    # date type
+    (None, None, None, None), (None, 'BRENT', None, None), ('q', None, None, None)    # date type
     # start and end date must be parsable
     # caught by parser validation functions
     , ('q', 'BRENT', 'today', 'tomorrow')    # args must be real variables
@@ -30,11 +24,10 @@ BAD_ARGS_LIST = [
 ]
 
 
-@pytest.fixture(scope="module",
-                params=BAD_ARGS_LIST)
-def malformed_args(request):
+def generate_malformed_args():
     keys = ['freq', 'name', 'start_date', 'end_date']
-    return {k: v for k, v in zip(keys, request.param) if v}
+    for request in BAD_ARGS_LIST:
+        yield {k: v for k, v in zip(keys, request) if v}
 
 
 class SimRequest:
@@ -59,7 +52,6 @@ class Test_RequestArgs(TestCaseBase):
         assert args.freq == 'a'
         assert args.start_date is None
         assert args.end_date is None
-        assert args.format == 'csv'
 
     def test_init_on_well_formed_args_with_valid_dates_is_success(self):
         incoming_args = dict(name='BRENT',
@@ -72,17 +64,20 @@ class Test_RequestArgs(TestCaseBase):
         assert args.name == 'BRENT'
         assert args.start_date == arrow.get(2017, 1, 1).date()
         assert args.end_date == arrow.get(2017, 2, 28).date()
-        assert args.query_param
-
-        def test_init_on_bad_args_fails(self, malformed_args):
+        
+        
+    def test_init_on_bad_args_fails(self):
+        # may be bad style of testing, but pytest.fixtures wont work in this class
+        # because this is an unittest class
+        for malformed_args in generate_malformed_args():
             req = SimRequest(**malformed_args)
             with pytest.raises(HTTPException):
                 RequestArgs(req)
 
 
 class Test_RequestFrameArgs(TestCaseBase):
-    def test_init_on_well_formed_args_is_success(self):
-        incoming_args = dict(names="GDP_yoy,CPI_rog", freq='a')
+    def test_init_on_name_with_comma_is_success(self):
+        incoming_args = dict(name="GDP_yoy,CPI_rog", freq='a')
         req = SimRequest(**incoming_args)
         args = RequestFrameArgs(req)
         assert args.names == ['GDP_yoy', 'CPI_rog']
@@ -94,16 +89,16 @@ class Test_RequestFrameArgs(TestCaseBase):
         incoming_args = dict(freq='a')
         req = SimRequest(**incoming_args)
         args = RequestFrameArgs(req)
-        assert args.names is None
+        assert isinstance(args.names, list)
 
     def test_init_on_bad_args_fails(self):
-        malformed_args = dict(names="GDP_yoy,DING_dong", freq='a')
+        malformed_args = dict(name="GDP_yoy,DING_dong", freq='a')
         req = SimRequest(**malformed_args)
         with pytest.raises(HTTPException):
-            RequestArgs(req)
+            RequestFrameArgs(req)
 
 
 # TODO: simple args class not testsed
 
 if __name__ == '__main__':
-    pytest.main([__file__])
+    pytest.main([__file__, '--maxfail=1'])

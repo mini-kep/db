@@ -5,8 +5,8 @@ Based on tests reviewed at
 
 and testing guidelines at
     <https://github.com/mini-kep/guidelines/blob/master/testing.md>
-    
-Flask setup is at TestCaseBase.setUp()   
+
+Flask setup is at TestCaseBase.setUp()
 
 """
 
