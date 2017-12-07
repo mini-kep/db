@@ -124,7 +124,7 @@ Examples:
 - [api/datapoints?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2017-01-01)
 - [api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/datapoints?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
 
-##### Parameter errors:
+Parameter errors:
 - [wrong freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=z&format=json)
 - [wrong name for good freq](https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=q&format=json)
 - [start date in future](https://minikep-db.herokuapp.com/api/datapoints?name=BRENT&freq=d&start_date=2025-01-01)
@@ -176,6 +176,13 @@ Note: the value is be skipped if there's no data for specified name and date (eg
 #### GET ```spline```
 
 Method description goes here.
+
+Examples:
+
+- [api/spline?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/spline?name=CPI_rog&freq=m)
+- [api/spline?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/spline?name=GDP_yoy&freq=q)
+- [api/spline?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/spline?name=BRENT&freq=d&start_date=2017-01-01)
+- [api/spline?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/spline?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
 
 
 # Updating database
