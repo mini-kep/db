@@ -1,10 +1,19 @@
-import pytest, json
+#FIXME: msut use https://github.com/mini-kep/guidelines/blob/master/testing.md
+
+import pytest
+import json
+
+# FIXME - why import this?
 import tests
+
 from tests.test_basic import TestCaseBase
+
+# FIXME - why import this?
 from io import BytesIO
 
 ENDPOINT = "api/spline"
 
+# FIXME: why do we need this? ------------------------------------
 
 class TestImages(TestCaseBase):
 
@@ -18,10 +27,13 @@ class TestImages(TestCaseBase):
 
     def get(self, param):
         return self.client.get(ENDPOINT, query_string=param)
+    
+# -------------------------------------------------------------
 
-
+# FIXME: by Test_GET you cannot understand what is being tested  
 class Test_GET(TestImages):
-
+ 
+    # EP: so bad - params should bot be inside method
     def query_on_name_and_freq(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m')
         return self.client.get('/api/spline', query_string=params)
@@ -30,6 +42,7 @@ class Test_GET(TestImages):
         response = self.query_on_name_and_freq()
         assert response.status_code == 200
 
+    #EP: same anout params   
     def test_get_on_name_and_freq_returns_img_spline_CPI_rog(self):
         response = self.query_on_name_and_freq()
         assert response.headers["Content-Type"] == "image/png"
