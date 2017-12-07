@@ -58,17 +58,17 @@ the rest is documented below.
 
 #### Endpoints:
 
-  - [`api/freq`](#api-freq) - list available frequencies
-  - `api/names/{freq}` - variable names for specified frequency 
-  - `api/info/?name={name}` - additional information about a variable
-  - `api/datapoints` - data for one variable as json    
-  - `api/series` - data for one variable as csv 
-  - `api/frame` - data for several variables as csv
+  - [`api/freq`](#get-freq) - list available frequencies
+  - [`api/names/{freq}`](#get-names) - variable names for specified frequency 
+  - [`api/info/?name={name}`](#get-info) - additional information about a variable
+  - [`api/datapoints`](#get-datapoints) - data for one variable as json    
+  - [`api/series`](#get-series) - data for one variable as csv 
+  - [`api/frame`](#get-frame) - data for several variables as csv
 
 #### Experimental:
   
-  - `api/spline`
-  - `api/desc`
+  - `api/spline`(#get-spline) - return png image for one variable  
+  - `api/desc`(#get-desc) - descriptions for variable names, units of measurement and concepts in Russian and English  
 
 #### Under development:
 
