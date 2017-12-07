@@ -24,10 +24,10 @@ BAD_ARGS_LIST = [
 ]
 
 
-@pytest.fixture(scope="module", params=BAD_ARGS_LIST)
-def malformed_args(request):
+def generate_malformed_args():
     keys = ['freq', 'name', 'start_date', 'end_date']
-    return {k: v for k, v in zip(keys, request.param) if v}
+    for request in BAD_ARGS_LIST:
+        yield {k: v for k, v in zip(keys, request) if v}
 
 
 class SimRequest:
@@ -66,13 +66,14 @@ class Test_RequestArgs(TestCaseBase):
         assert args.end_date == arrow.get(2017, 2, 28).date()
         
         
-    # TypeError: test_init_on_bad_args_fails() missing 1 required 
-    # positional argument: 'malformed_args'    
-    
-    def test_init_on_bad_args_fails(self, malformed_args):
-        req = SimRequest(**malformed_args)
-        with pytest.raises(HTTPException):
-            RequestArgs(req)
+    def test_init_on_bad_args_fails(self):
+        # may be bad style of testing, but pytest.fixtures wont work in this class
+        # because this is an unittest class
+        for malformed_args in generate_malformed_args():
+            req = SimRequest(**malformed_args)
+            with pytest.raises(HTTPException):
+                RequestArgs(req)
+
 
 class Test_RequestFrameArgs(TestCaseBase):
     def test_init_on_name_with_comma_is_success(self):
