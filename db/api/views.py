@@ -217,7 +217,7 @@ def info():
 @api_bp.route('/spline', methods=['GET'])
 def spline():
     args = RequestArgs()
-    data = utils.get_data_for_spline(args)
+    data = DatapointOperations.select(**args.get_query_parameters())
     png_output = utils.make_png(data)
     response = make_response(png_output)
     response.headers['Content-Type'] = 'image/png'

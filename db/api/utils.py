@@ -156,22 +156,17 @@ class DictionaryRepresentation:
         return '\n'.join(self.yield_rows())
 
 
-def get_data_for_spline(args):
-    x = []
-    y = []
-    data = queries.DatapointOperations.select(**args.query_param)
-    for item in data:
-        x.append(item.date)
-        y.append(item.value)
-    return dict(x=x,
-                y=y)
+def get_data_for_spline(query_data):
+    return dict(x=[item.date for item in query_data],
+                y=[item.value for item in query_data])
 
 
-def make_png(data):
+def make_png(query_data):
     """
     Input values for build graphic:
         {"x":[], "y":[]}
     """
+    data = get_data_for_spline(query_data)
     fig = Figure()
     ax = fig.add_subplot(1, 1, 1, facecolor="white")
     ax.plot_date(data["x"], data["y"], '-')
