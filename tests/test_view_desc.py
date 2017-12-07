@@ -32,6 +32,7 @@ Tests for 'api/desc' post, get, delete methods
 import pytest
 from flask import json
 
+from db.api.parameters import ArgError
 from tests.test_basic import TestCaseBase
 
 DESC_URL = 'api/desc'
@@ -107,15 +108,15 @@ class Test_api_desc_GET_method(TestCaseBase):
 
 
 class Test_api_desc_POST_method(TestCaseBase):
-    @pytest.mark.xfail
-    def test_post_method_without_params_fails(self):
-        response = self.client.post(DESC_URL)
-        assert response.status_code != 200
 
-    @pytest.mark.xfail
+    def test_post_method_without_params_fails(self):
+        with pytest.raises(ArgError):
+            response = self.client.post(DESC_URL)
+
     def test_post_method_on_broken_data_returns_error_code(self):
-        response = self.client.post(DESC_URL, data="broken_data")
-        assert response.status_code != 200
+        broken_data = json.dumps([{'key': 'broken'}])
+        with pytest.raises(ArgError):
+            self.client.post(DESC_URL, data=broken_data)
 
     def test_post_method_on_duplicate_data_fails(self):
         upload_json = json.dumps(sample_post_payload)
