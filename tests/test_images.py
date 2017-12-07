@@ -6,10 +6,8 @@ import json
 from tests.test_basic import TestCaseBase
 
 
-# FIXME: by Test_GET you cannot understand what is being tested  
 class Test_API_Spline(TestCaseBase):
  
-    # EP: so bad - params should bot be inside method
     def query_on_name_and_freq(self, params):
         return self.client.get('/api/spline', query_string=params)
 
@@ -18,13 +16,12 @@ class Test_API_Spline(TestCaseBase):
         response = self.query_on_name_and_freq(params)
         assert response.status_code == 200
 
-    #EP: same anout params   
-    def test_get_on_name_and_freq_returns_img_spline_CPI_rog(self):
+    def test_get_on_name_and_freq_returns_img_png_content_type(self):
         params = dict(name='CPI_NONFOOD_rog', freq='m', start_date="2016-10-29", end_date="2016-12-31")
         response = self.query_on_name_and_freq(params)
         assert response.headers["Content-Type"] == "image/png"
 
-
+# WONTFIX: this test actaully tests arguments only
 class Test_API_Spline_Errors(TestCaseBase):
 
     def test_images_empty_params_returns_error(self):
