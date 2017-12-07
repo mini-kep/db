@@ -31,16 +31,23 @@ class ArgError(ValidationError):
         super().__init__(message, status_code=422, load=load)
 
 
+def convert_name_string_to_list(name_str):
+    if not name_str:
+        return []
+    elif ',' in name_str:
+        return name_str.split(',')
+    else:    
+        return [name_str]
+    
+
 class Check:
     """Collectin of argument validation functions."""
 
     def __init__(self, args):
-        self.freq = args.get('freq')
-        self.name = args.get('name')
-        self.names = args.get('names')
+        self.names = convert_name_string_to_list(args.get('name'))
+        self.freq = args.get('freq')        
         self.start_date = args.get('start_date')
         self.end_date = args.get('end_date')
-        self.format = args.get('format')
 
     def start_is_not_in_future(self):
         if self.start_date:
@@ -62,38 +69,25 @@ class Check:
             load = dict(freq=self.freq, allowed=all_freq)
             raise ArgError('Invalid frequency', load)
 
-    def _name_exists(self, name):
-        possible_names = Allowed.names(self.freq)
+    def _name_exists(self, name, possible_names):
         if name not in possible_names:
             load = dict(name=name, freq=self.freq, allowed=possible_names)
-            raise ArgError('Name does not exist for this frequency)',
+            raise ArgError('Variable name does not exist in this frequency)',
                            load)
-
-    # NOTE: this will reveal errors one at a time,
-    #       not all list of wrong names
-    def names_are_valid(self):
-        if self.names:
-            names = self.names.split(',')
-            for name in names:
-                self._name_exists(name)
-
-    def name_is_valid(self):
-        self._name_exists(self.name)
+                    
+    def names_validated(self):                
+        possible_names = Allowed.names(self.freq)
+        for name in self.names:
+            self._name_exists(name, possible_names)
 
     def not_all_are_none(self):
         is_none = [
-            x is None for x in [
+            (x is None) for x in [
                 self.freq,
                 self.name,
                 self.start_date,
                 self.end_date]]
         return not all(is_none)
-
-    def format_is_valid(self):
-        allowed_format_args = ['json', 'csv']
-        if self.format not in allowed_format_args:
-            load = dict(allowed=allowed_format_args)
-            raise ArgError('Invalid format parameter', load)
 
 
 def get_func(func_name):
@@ -101,63 +95,56 @@ def get_func(func_name):
 
 
 def make_func_list(func_names):
-    return [get_func(func_name) for func_name in func_names]
+    return [get_func(foo) for foo in func_names]
 
 
 class RequestArgs:
-
     schema = {
         'freq': fields.Str(required=True),
         'name': fields.Str(required=True),
         'start_date': fields.Date(required=False),
-        'end_date': fields.Date(required=False),
-        'format': fields.Str(missing='csv')}
+        'end_date': fields.Date(required=False)
+        }
 
     validate_with = make_func_list(
         ['start_is_not_in_future',
          'end_date_after_start_date',
          'freq_exist',
-         'name_is_valid',
-         'format_is_valid'])
+         'names_validated'])
 
     query_keys = ['name', 'freq', 'start_date', 'end_date']
 
     def __init__(self, request=flask.request):
-        self._args = parser.parse(self.schema,
-                                  req=request,
-                                  validate=self.validate_with)
+        self.arg_dict = parser.parse(self.schema, req=request,
+                                     validate=self.validate_with)
+            
+    def _make_dict(self, varnames):
+        return {key: self.arg_dict.get(key) for key in varnames}           
 
-    @property
-    def query_param(self):
-        return {key: self._args.get(key) for key in self.query_keys}
-
+    def get_query_parameters(self):
+        return self._make_dict(self.query_keys)
+   
     def __getattr__(self, x):
-        return self._args.get(x)
-
+        return self.arg_dict.get(x)
 
 class RequestFrameArgs(RequestArgs):
-
     schema = {
         'freq': fields.Str(required=True),
-        'names': fields.Str(required=False),
+        'name': fields.Str(required=False),
         'start_date': fields.Date(required=False),
-        'end_date': fields.Date(required=False),
-    }
-    validate_with = make_func_list(
-        ['start_is_not_in_future',
-         'end_date_after_start_date',
-         'freq_exist',
-         'names_are_valid'])
+        'end_date': fields.Date(required=False)
+        }
 
     query_keys = ['names', 'freq', 'start_date', 'end_date']
 
+
     def __init__(self, request=flask.request):
-        self._args = parser.parse(self.schema,
-                                  req=request,
-                                  validate=self.validate_with)
-        names = self._args.get('names')
-        if names:
-            self._args['names'] = names.split(',')
+        super().__init__(request)
+        # convert names 
+        names = convert_name_string_to_list(self.arg_dict.get('name'))
+        if not names:
+            names = Allowed.names(self.freq) 
+        self.arg_dict['names'] = names
 
 
 class SimplifiedArgs(RequestArgs):
@@ -246,7 +233,6 @@ if __name__ == "__main__":  # pragma: no cover
     assert args.freq == 'a'
     assert args.start_date is None
     assert args.end_date is None
-    assert args.format == 'csv'
 
     incoming_args = dict(name='BRENT',
                          freq='d',
@@ -254,11 +240,12 @@ if __name__ == "__main__":  # pragma: no cover
                          end_date='2017-02-28')
     req = SimRequest(**incoming_args)
     args = RequestArgs(req)
-    assert args.freq == 'd'
     assert args.name == 'BRENT'
+    assert args.freq == 'd'
     assert args.start_date == arrow.get(2017, 1, 1).date()
     assert args.end_date == arrow.get(2017, 2, 28).date()
-    assert args.query_param
+    assert args.get_query_parameters()
+    
 
     import pytest
     from werkzeug.exceptions import HTTPException
@@ -267,6 +254,7 @@ if __name__ == "__main__":  # pragma: no cover
     with pytest.raises(HTTPException):
         args = RequestArgs(req)
 
-    incoming_args = dict(names="GDP_yoy,CPI_rog", freq='a')
+    incoming_args = dict(name="GDP_yoy,CPI_rog", freq='a')
     req = SimRequest(**incoming_args)
-    args = RequestFrameArgs(req)
+    args = RequestArgs(req)
+    assert args.names == ['GDP_yoy', 'CPI_rog']

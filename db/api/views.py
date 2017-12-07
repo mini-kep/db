@@ -6,9 +6,10 @@ from flask.views import MethodView
 import db.api.utils as utils
 from db import db
 from db.api.errors import CustomError400
-from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs, \
-    DescriptionArgs
-from db.api.queries import All, Allowed, DatapointOperations, DescriptionOperations
+from db.api.parameters import (RequestArgs, RequestFrameArgs, 
+                               SimplifiedArgs, DescriptionArgs)
+from db.api.queries import (All, Allowed, DatapointOperations, 
+                            DescriptionOperations)
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -39,24 +40,6 @@ def handle_invalid_usage(error):
     response = jsonify(error.dict)
     response.status_code = error.status_code
     return response
-
-# PROPOSED ENHANCEMENT: Can use this fucntion as decorator for DatapointsAPI.post() amd .delete methods()
-#                       Currently authorise() used inside these methods.
-#                       Decorator can help abstract database logic inside a method from access infrastructure
-#
-#                       Current problem - not sure how to add a decorator to individual class methods.
-#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how
-#                       to add decorators to all of class, but warns the 'traditional' decoraots wont
-#                       work on individual methods:
-#
-#                                class UserAPI(MethodView):
-#                                    decorators = [user_required]
-#
-#                                > Due to the implicit self from the caller’s perspective you cannot use
-#                                > regular view decorators on the individual methods of the view
-#                                > <http://flask.pocoo.org/docs/0.12/views/#decorating-views>
-#
-#  Decision: for now plain call to authorise seems cleanest available solution.
 
 
 def authorise():
@@ -95,7 +78,7 @@ class DatapointsAPI(MethodView):
                 Sent json.
        """
         args = RequestArgs()
-        data = DatapointOperations.select(**args.query_param)
+        data = DatapointOperations.select(**args.get_query_parameters())
         return publish_json(data)
 
     def delete(self):
@@ -110,7 +93,7 @@ class DatapointsAPI(MethodView):
 
         authorise()
         args = SimplifiedArgs()
-        DatapointOperations.delete(**args.query_param)
+        DatapointOperations.delete(**args.get_query_parameters())
         return jsonify({})
 
     def post(self):
@@ -174,16 +157,16 @@ def get_series():
         422:
             Bad arguments, eg start_date > end_date
         200:
-            Sent json.
+            Sent csv.
    """
     args = RequestArgs()
-    data = DatapointOperations.select(**args.query_param)
+    data = DatapointOperations.select(**args.get_query_parameters())
     return publish_csv(data)
 
 
 @api_bp.route('/frame', methods=['GET'])
 def get_dataframe():
-    """Get csv file readable as pd.DataFrame based on many of all variabel names.
+    """Get csv file readable as pd.DataFrame based on variable names.
 
     URL examples:
 
@@ -191,17 +174,10 @@ def get_dataframe():
          api/frame?freq=a&start_date=2013-12-31
          api/frame?freq=a
 
-    FIXME:
-        Application hangs on a large query like
-
-        api/frame?freq=q
     """
     args = RequestFrameArgs()
-    param = args.query_param
-    if not args.names:
-        param['names'] = Allowed.names(args.freq)
-    data = DatapointOperations.select_frame(**param)
-    csv_str = utils.DictionaryRepresentation(data, param['names']).to_csv()
+    data = DatapointOperations.select_frame(**args.get_query_parameters())
+    csv_str = utils.DictionaryRepresentation(data, args.names).to_csv()
     return no_download(csv_str)
 
 
