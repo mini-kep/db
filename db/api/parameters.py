@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import flask
+from flask import json
 from webargs.flaskparser import parser
 from webargs import fields, ValidationError
 
@@ -168,6 +169,57 @@ class SimplifiedArgs(RequestArgs):
     }
     validate_with = make_func_list(['not_all_are_none'])
     query_keys = ['name', 'freq', 'start_date', 'end_date']
+
+
+def process_json(response):
+    return json.loads(response.decode('utf-8'))
+
+
+class DescriptionArgs:
+
+    # @staticmethod
+    # def process_json(response):
+    #     return json.loads(response.get_data().decode('utf-8'))
+
+    @staticmethod
+    def validate_abbr(abbr):
+        load = {'abbr': abbr}
+        if not abbr:
+            raise ArgError('Error: abbr parameter should be given', load)
+
+    @staticmethod
+    def get_and_delete_params():
+        # params should be like 'abbr=GDP'
+        abbr = flask.request.args.get('abbr')
+        # DescriptionArgs.validate_abbr(abbr)
+        return {
+            'abbr': abbr
+        }
+
+    @staticmethod
+    def post_params():
+        """
+        Payload should be like
+        [
+            dict(abbr='BRENT', ru='Цена нефти Brent', en='Brent oil price'),
+            dict(abbr='GDP', ru='Валовый внутренний продукт', en='Gross domestic product'),
+            dict(abbr='rog', ru='темп роста к пред. периоду', en='rate of growth to previous period'),
+            dict(abbr='yoy', ru='темп роста за 12 месяцев', en='year-on-year rate of growth')
+        ]
+        """
+        descriptions = process_json(flask.request.data)
+        if len(descriptions) == 0:
+            raise ArgError('Error: no data given.', descriptions)
+        for description in descriptions:
+            abbr = description.get('abbr')
+            DescriptionArgs.validate_abbr(abbr)
+            ru = description.get('ru')
+            en = description.get('en')
+            if not (ru or en):
+                raise ArgError("Error: at least one of 'ru' or 'en' keys required.",
+                               description)
+            description['abbr'] = abbr
+        return descriptions
 
 
 if __name__ == "__main__":  # pragma: no cover

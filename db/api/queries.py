@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from db.api.models import Datapoint
+from db.api.errors import CustomError400
+from db.api.models import Datapoint, Description
 from db import db
 
 
@@ -21,7 +22,6 @@ def date_as_str(dt):
 
 
 class DatapointOperations:
-
     @staticmethod
     def _base_select(freq: str, start_date, end_date):
         data = Datapoint.query.order_by(Datapoint.date)
@@ -162,6 +162,43 @@ def get_boundary_date(freq, name, direction):
     return date_as_str(dt.date)
 
 
+class DescriptionOperations:
+    @staticmethod
+    def get_one(abbr):
+        description = Description.query.filter_by(abbr=abbr).first()
+        if not description:
+            return None
+
+        return description
+
+    @staticmethod
+    def add_descriptions(descriptions):
+        for decs in descriptions:
+            abbr = decs['abbr']
+            description_already_exists = DescriptionOperations.get_one(abbr)
+            if description_already_exists:
+                raise CustomError400(f"Error: Description for variable {repr(abbr)} "
+                                     "already exists.")
+            ru = decs.get('ru')
+            en = decs.get('en')
+            description = Description(abbr, ru, en)
+            db.session.add(description)
+        db.session.commit()
+
+    @staticmethod
+    def remove_one(abbr):
+        description = DescriptionOperations.get_one(abbr)
+        if not description:
+            raise CustomError400("Error: Can not delete description. "
+                                 f"No record for variable {repr(abbr)} found.")
+        try:
+            db.session.delete(description)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise CustomError400("Error on deleting.")
+
+
 # 'pragma: no cover' exludes code block from coverage
 if __name__ == '__main__':  # pragma: no cover
     from db import create_app
@@ -177,7 +214,7 @@ if __name__ == '__main__':  # pragma: no cover
     with app.app_context():
         dr = DateRange('q', 'GDP_yoy')
         print(dr.min)
-        #delete_datapoints("a", None, None, None)
+        # delete_datapoints("a", None, None, None)
         q = DatapointOperations.select(freq='d',
                                        name=None,
                                        start_date=None,
@@ -185,6 +222,7 @@ if __name__ == '__main__':  # pragma: no cover
         print(q.count())
 
         from datetime import date
+
         param = dict(freq='m',
                      name='CPI_ALCOHOL_rog',
                      start_date=date(year=2016, month=6, day=1),
