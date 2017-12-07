@@ -1,12 +1,3 @@
-# coding: utf-8
-"""Testing flask app
-
-
-Testing guidelines at
-    <https://github.com/mini-kep/testing_guidelines/blob/master/README.md>.
-
-"""
-
 import pytest
 import json
 
@@ -84,7 +75,6 @@ class Test_API_Frame(TestCaseBase):
         self.assertEqual(request.status_code, self.HTTP_OK_CODE)
 
 
-# TODO: these test should relate to something else not covered in query.py
 
 class TestDatapointsAPI(TestCaseBase):
 
@@ -113,11 +103,6 @@ class TestDatapointsAPI(TestCaseBase):
 
     error_code = 422
 
-    error_dict = {
-        "allowed": ["json", "csv"],
-        "messages": ["Invalid format parameter"]
-    }
-
     params = dict(
         name='USDRUR_CB',
         freq='d',
@@ -127,17 +112,10 @@ class TestDatapointsAPI(TestCaseBase):
     def _get_response(self):
         return self.client.get('api/datapoints', query_string=self.params)
 
-    def test_get_on_json_format_arg_returns_expected_json(self):
-        # method under test: get
-        # context or arguments: string, dict
-        # expected result of behavior: returns expected json
-
-        # test setup
-        format_arg = 'json'
-
+    def test_get_on_valid_arg_returns_expected_json(self):
         # call
-        result_dict = json.loads(self._get_response().data)
-
+        resp = self.client.get('api/datapoints', query_string=self.params)
+        result_dict = json.loads(resp.data)
         # check
         assert self.data_dicts == result_dict
 

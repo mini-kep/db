@@ -147,8 +147,9 @@ class RequestFrameArgs(RequestArgs):
 
     def __init__(self, request=flask.request):
         super().__init__(request)
-        # convert names 
-        names = convert_name_string_to_list(self.arg_dict.get('name'))
+        # convert names
+        name_str = self.arg_dict.get('name')
+        names = convert_name_string_to_list(name_str)
         if not names:
             names = Allowed.names(self.freq)
         self.arg_dict['names'] = names
