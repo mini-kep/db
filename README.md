@@ -9,7 +9,7 @@ This API allows to update and query a database of macroeconomic indicators.
 # Quickstart
 
 [This link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
-returns quarterly year-on-year Russian GDP growth rate as csv file, readable by R/pandas.
+returns quarterly year-on-year Russian GDP growth rate as csv file, readable by `R` or `pandas`.
 
 ```
 ,GDP_yoy
@@ -21,9 +21,9 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 2017-06-30,102.5
 ```
 
-# User access code
+# User interface
 
-The data can be imported as following:
+User can import data as following:
 
 ```python 
 import pandas as pd
