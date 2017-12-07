@@ -24,6 +24,10 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 # User interface
 
 User can import data as following:
+- [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplier, function-based code, good for ipython notebooks
+- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options, to be used in other python programs 
+
+Example: read data at annual frequency
 
 ```python 
 import pandas as pd
@@ -46,15 +50,11 @@ def get_frame(freq):
 # annual data example
 dfa = get_frame('a')  
 ```
-
-More access code:
-- [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplier, function-based code, good for ipython notebooks
-- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options, to be used in other python programs 
   
 # API description 
 
 Initial specification for database API is published [here](https://mini-kep.github.io/documentation/database/),
-the rest is documented below.
+reulting API is documented below.
 
 #### Endpoints:
 
