@@ -67,8 +67,8 @@ the rest is documented below.
 
 #### Experimental:
   
-  - `api/spline`(#get-spline) - return png image for one variable  
-  - `api/desc`(#get-desc) - descriptions for variable names, units of measurement and concepts in Russian and English  
+  - [`api/spline`](#get-spline) - return png image for one variable  
+  - [`api/desc`](#get-desc) - descriptions for variable names, units of measurement and concepts in Russian and English  
 
 #### Under development:
 
