@@ -26,7 +26,6 @@ Note here we test GET methods only, not POST or DELETE.
 """
 
 import random
-
 import access
 
 
@@ -39,10 +38,19 @@ freq = random.choice(frequencies)
 names = access.get_names(freq)
 name = random.choice(names)
 assert isinstance(name, str)
-# TODO: 'name' starts with a capital letter
+assert name[0].isupper()
 
 # 'api/info'
 info = access.get_info(freq, name)
+
+start_date = info['start_date']
+latest_date = info['latest_date']
+
+assert parse(start_date).date().isoformat() == start_date
+assert parse(latest_date).date().isoformat() == latest_date
+
+assert access.get_unit_id(name) == info['unit_id']
+assert access.get_var_id(name) == info['var_id']
 start_date = info[freq]['start_date']
 latest_date = info[freq]['latest_date']
 # WONTFIX: access.get_info(freq, name) should retrun a more flat data structure
@@ -73,6 +81,21 @@ series_list = [access.get_ts(freq=freq, name=name) for name in names]
 df2 = access.join_df([ts.to_frame() for ts in series_list])
 assert all(df1 == df2)
 
+# pick 3 random names
+random_names = [random.choice(names) for i in range(1, 3)]
+
+#  get result from api/datapoints, concat ts
+series_list = [MiniKEP.datapoints_csv(freq=freq, name=name).to_frame() for name in random_names]
+
+df1 = access.join_df([ts.to_frame() for ts in series_list])
+
+# get frame
+df2 = MiniKEP.frame(freq=freq, names=random_names)
+
+# compare
+assert all(df1 == df2)
+    
+=======
 # TODO: pick 3 random names from names, get result from api/frame,
 #       get result from api/datapoints, concat ts, compare.
 #       can use access2.py for this
