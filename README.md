@@ -64,18 +64,11 @@ the rest is documented below.
   - [`api/datapoints`](#get-datapoints) - data for one variable as json    
   - [`api/series`](#get-series) - data for one variable as csv 
   - [`api/frame`](#get-frame) - data for several variables as csv
+  - [`api/spline`](#get-spline) - return png image for one variable (experimental)  
+  - [`api/desc`](#get-desc) - descriptions for variable names, units of measurement and concepts in Russian and English (experimental)     - `api/categories` - list variables by category (todo) 
+  - `api/countries` - list all country codes (todo)
 
-#### Experimental:
-  
-  - [`api/spline`](#get-spline) - return png image for one variable  
-  - [`api/desc`](#get-desc) - descriptions for variable names, units of measurement and concepts in Russian and English  
-
-#### Under development:
-
-  - `api/categories` - list variables by category 
-  - `api/countries` - list all country codes
-
-See also [discussion here](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
+See also [discussion about new methods](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
 
 #### GET ```freq```:
 
