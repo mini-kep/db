@@ -27,7 +27,7 @@ User can import data as following:
 - [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplier, function-based code, good for ipython notebooks
 - [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options, to be used in other python programs 
 
-Example: read data at annual frequency
+#### Example: read data at annual frequency
 
 ```python 
 import pandas as pd
@@ -54,18 +54,19 @@ dfa = get_frame('a')
 # API description 
 
 Initial specification for database API is published [here](https://mini-kep.github.io/documentation/database/),
-reulting API is documented below.
+resulting API is documented below.
 
 #### Endpoints:
 
   - [`api/freq`](#get-freq) - list available frequencies
   - [`api/names/{freq}`](#get-names) - variable names for specified frequency 
   - [`api/info/?name={name}`](#get-info) - additional information about a variable
+  - [`api/desc`](#get-desc) - descriptions for variable names, units of measurement and categories in Russian and English (todo)
   - [`api/datapoints`](#get-datapoints) - data for one variable as json    
   - [`api/series`](#get-series) - data for one variable as csv 
   - [`api/frame`](#get-frame) - data for several variables as csv
   - [`api/spline`](#get-spline) - return png image for one variable (experimental)  
-  - [`api/desc`](#get-desc) - descriptions for variable names, units of measurement and concepts in Russian and English (experimental)     - `api/categories` - list variables by category (todo) 
+  - `api/categories` - list variables by category (todo) 
   - `api/countries` - list all country codes (todo)
 
 See also [discussion about new methods](https://github.com/mini-kep/db/issues/8#issuecomment-336152762).
@@ -97,7 +98,9 @@ Get a dictionary with variable description, allowed dates and latest values.
 
 #### GET ```desc```
 
-Method description goes here.
+Descriptions for variable names, units of measurement and concepts in Russian and English
+
+Not implemented.
  
 
 #### GET ```datapoints```:
@@ -127,7 +130,7 @@ Parameter errors:
 
 Get data for one variable as csv. 
 
-Arguments and error codes are similar to GET ```datapoints```.
+Arguments and error codes are same as in GET ```datapoints```.
 
 Examples:
 
@@ -168,15 +171,13 @@ Note: the value is be skipped if there's no data for specified name and date (eg
 
 #### GET ```spline```
 
-Method description goes here.
+Return png image for one variable (experimental)  
+
+Arguments and error codes are same as in GET ```datapoints```.
 
 Examples:
-
-- [api/spline?name=CPI_rog&freq=m](https://minikep-db.herokuapp.com/api/spline?name=CPI_rog&freq=m)
 - [api/spline?name=GDP_yoy&freq=q](https://minikep-db.herokuapp.com/api/spline?name=GDP_yoy&freq=q)
-- [api/spline?name=BRENT&freq=d&start_date=2017-01-01](https://minikep-db.herokuapp.com/api/spline?name=BRENT&freq=d&start_date=2017-01-01)
 - [api/spline?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01](https://minikep-db.herokuapp.com/api/spline?name=USDRUR_CB&freq=d&start_date=2017-08-01&end_date=2017-10-01)
-
 
 # Updating database
 
