@@ -8,11 +8,6 @@
     
 """
 
-# TODO: Refactoring, involving API change
-# 1. Datapoints should have no format, just json both for input and output
-# 2. csv for one variable should be read at new endpoint 'api/series?freq=a&name=GDP_yoy'
-# 3. changes should be reflected in 'db' repo tests + in readme.md + at api_requests.py
-
 #NOT TODO:
 #  1. google-style <https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments>
 #     docstrings for methods/classes above:
@@ -45,12 +40,11 @@ class Caller:
 
     @property 
     def url(self):
-        param_str = urlencode(self.param_dict)
         pr = ParseResult(scheme='http', 
                         netloc=self.base, 
                         path=self.endpoint, 
                         params=None,  
-                        query=param_str, 
+                        query=urlencode(self.param_dict), 
                         fragment=None)
         return urlunparse(pr)  
 
@@ -63,62 +57,46 @@ class Caller:
     def text(self):
         return self.response().text
 
-
-class Parameters:
-    def __init__(self, freq):
-        self.dict = dict(freq=freq)
         
-    def _add(self, key, value):
-        if value:
-            self.dict[key]=value
-    
-    def add_name(self, value):
-        self._add('name', value)
-    
-    def add_names(self, value):
-        self._add('names', value)
+def make_dict(**kwargs):
+    for key in ('start_date', 'end_date'):
+        if key in kwargs.keys() and not kwargs.get(key):
+            del kwargs[key]
+    return kwargs
 
-    def add_dates(self, start_date, end_date):
-        self._add('start_date', start_date)
-        self._add('end_date', end_date)
-        
 
-def make_dict(freq, name, start_date, end_date):
-    param = Parameters(freq)
-    param.add_name(name)
-    param.add_dates(start_date, end_date)
-    return param.dict
-    
-class MiniKEP:
+assert make_dict(a=1) == {'a': 1}
+assert make_dict(start_date=1) == {'start_date': 1}
+assert make_dict(start_date=None) == {}
 
-    def freq():
-        return Caller('api/freq').json()    
-    
-    def names(freq):
-        endpoint = 'api/names/{}'.format(freq)
-        return Caller(endpoint).json()
+# API access methods:
 
-    def info(name, freq):
-        # TODO: simplify API, call by 'name' only
-        param = Parameters(freq)
-        param.add_name(name)
-        return Caller('api/info', param.dict).json()
-    
-    #TODO: with api shange this should be datapoints()
-    def datapoints_json(freq, name, start_date=None, end_date=None):
-        param_dict = make_dict(freq, name, start_date, end_date)
-        return Caller('api/datapoints', param_dict).json()
+def freq():
+    return Caller('api/freq').json()    
 
-    #TODO: with api shange this should be series()
-    def datapoints_csv(freq, name, start_date=None, end_date=None):
-        param_dict = make_dict(freq, name, start_date, end_date)
-        return Caller('api/series', param_dict).text()
+def names(freq):
+    endpoint = 'api/names/{}'.format(freq)
+    return Caller(endpoint).json()
 
-    def frame(freq, names, start_date=None, end_date=None):
-        param = Parameters(freq)
-        param.add_names(names)
-        param.add_dates(start_date, end_date)
-        return Caller('api/frame', param.dict).text()        
+def info(name, freq):
+    # TODO: simplify API, call by 'name' only
+    param = make_dict(name=name, freq=freq)
+    return Caller('api/info', param).json()
+
+def datapoints(freq, name, start_date=None, end_date=None):
+    param = make_dict(freq=freq, name=name, 
+                      start_date=start_date, end_date=end_date)
+    return Caller('api/datapoints', param).json()
+
+def series(freq, name, start_date=None, end_date=None):
+    param = make_dict(freq=freq, name=name, 
+                      start_date=start_date, end_date=end_date)
+    return Caller('api/series', param).text()
+
+def frame(freq, names, start_date=None, end_date=None):
+    param = make_dict(freq=freq, names=names, 
+                      start_date=start_date, end_date=end_date)
+    return Caller('api/frame', param).text()        
 
 class CustomAPI:
     def __init__(self, inner_str):
@@ -131,22 +109,29 @@ class CustomAPI:
     def text(self):
         return Caller(self.endpoint).text()
 
+def get_frame_url(freq, names, start_date=None, end_date=None):
+    param = make_dict(freq=freq, names=names, 
+                      start_date=start_date, end_date=end_date)
+    return Caller('api/frame', param).url
+
+
 class VarInfo:
     """Convenience class to get info about variable"""
     def __init__(self, freq, name):
         self.freq = freq
-        self.info = MiniKEP.info(name, freq)
+        self.info = info(name, freq)
         
     def __getattr__(self, x):
         return self.info[self.freq].get(x)
+
 
 if __name__ == '__main__': 
     assert Caller('api/print', dict(a=1)).url == \
         'http://minikep-db.herokuapp.com/api/print?a=1'
     assert Caller('api/print').url == 'http://minikep-db.herokuapp.com/api/print'   
 
-    assert MiniKEP.datapoints_json(freq='a', name='GDP_yoy')
-    assert MiniKEP.datapoints_csv(freq='a', name='GDP_yoy')
+    assert datapoints(freq='a', name='GDP_yoy')
+    assert series(freq='a', name='GDP_yoy')
     
     vi = VarInfo(freq='a', name='GDP_yoy')
     assert vi.start_date 
@@ -159,4 +144,4 @@ if __name__ == '__main__':
     assert c_api.text()
     
     assert CustomAPI('ru/series/GDP_yoy/a').text() == \
-MiniKEP.datapoints_csv(freq='a', name='GDP_yoy')
+           series(freq='a', name='GDP_yoy')
