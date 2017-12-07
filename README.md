@@ -31,7 +31,7 @@ import pandas as pd
 BASE_URL = 'http://minikep-db.herokuapp.com/'
 
 def read_df_from_url(url):
-    """Read pandas dataframe from *source_url*."""
+    """Read pandas dataframe from *url*."""
     return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0)
 
 def get_frame(freq):
@@ -42,7 +42,8 @@ def get_frame(freq):
     """
     url = BASE_URL + 'api/frame?freq={}'.format(freq)
     return read_df_from_url(url)
-    
+
+# annual data example
 dfa = get_frame('a')  
 ```
 
@@ -57,7 +58,7 @@ the rest is documented below.
 
 #### Endpoints:
 
-  - `api/freq` - list available frequencies
+  - [`api/freq`](#api-freq) - list available frequencies
   - `api/names/{freq}` - variable names for specified frequency 
   - `api/info/?name={name}` - additional information about a variable
   - `api/datapoints` - data for one variable as json    
