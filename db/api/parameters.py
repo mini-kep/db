@@ -84,7 +84,7 @@ class Check:
         is_none = [
             (x is None) for x in [
                 self.freq,
-                self.name,
+                self.names,
                 self.start_date,
                 self.end_date]]
         return not all(is_none)
