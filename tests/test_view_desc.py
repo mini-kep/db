@@ -30,9 +30,12 @@ Tests for 'api/desc' post, get, delete methods
 # - parametrise tests
 
 import pytest
-from flask import json
+import json 
 
-from tests.test_basic import TestCaseBase
+# EP: why this?
+#from flask import json
+
+from test_basic import TestCaseBase
 
 DESC_URL = 'api/desc'
 
@@ -91,13 +94,13 @@ class Test_api_desc_GET_method(TestCaseBase):
             'ru': 'Цена нефти Brent',
             'en': 'Brent oil price'}
 
-    def test_get_on_valid_variable_successful_with_code_200(self):
+    def test_get_on_valid_variable_successful_with_code_200_repeated(self):
         params = dict(abbr='rog')
         response = self.client.get(DESC_URL, query_string=params)
 
         assert response.status_code == 200
 
-    def test_get_on_valid_variable_successful_returns_valid_data(self):
+    def test_get_on_valid_variable_successful_returns_valid_data_repeated(self):
         params = dict(abbr='rog')
         response = self.client.get(DESC_URL, query_string=params)
         data = process_json_response(response)
@@ -107,6 +110,7 @@ class Test_api_desc_GET_method(TestCaseBase):
 
 
 class Test_api_desc_POST_method(TestCaseBase):
+    
     @pytest.mark.xfail
     def test_post_method_without_params_fails(self):
         response = self.client.post(DESC_URL)
@@ -114,7 +118,8 @@ class Test_api_desc_POST_method(TestCaseBase):
 
     @pytest.mark.xfail
     def test_post_method_on_broken_data_returns_error_code(self):
-        response = self.client.post(DESC_URL, data="broken_data")
+        broken_data = json.dumps({'a':'broken_data'})
+        response = self.client.post(DESC_URL, data=broken_data)
         assert response.status_code != 200
 
     def test_post_method_on_duplicate_data_fails(self):
@@ -172,4 +177,7 @@ class Test_api_desc_DELETE_method(TestCaseBase):
 
 
 if __name__ == '__main__':  # pragma no cover
+    #t = Test_api_desc_POST_method()
+    #t.setUp()
+    #t.test_post_method_on_broken_data_returns_error_code()
     pytest.main([__file__])
