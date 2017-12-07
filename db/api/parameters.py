@@ -210,7 +210,6 @@ class DescriptionArgs:
             if not (ru or en):
                 raise ArgError("Error: at least one of 'ru' or 'en' keys required.",
                                description)
-            description['abbr'] = abbr
         return descriptions
 
 
