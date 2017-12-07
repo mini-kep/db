@@ -5,8 +5,9 @@ from flask.views import MethodView
 import db.api.utils as utils
 from db import db
 from db.api.errors import CustomError400
-from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs
-from db.api.queries import All, Allowed, DatapointOperations
+from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs, \
+    DescriptionArgs
+from db.api.queries import All, Allowed, DatapointOperations, DescriptionOperations
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -139,6 +140,30 @@ class DatapointsAPI(MethodView):
 api_bp.add_url_rule(
     '/datapoints',
     view_func=DatapointsAPI.as_view('datapoints_view'))
+
+
+class DescriptionAPI(MethodView):
+    def get(self):
+        args = DescriptionArgs.get_and_delete_params()
+        data = DescriptionOperations.get_one(**args)
+        if data:
+            return jsonify(data.serialized)
+        else:
+            return abort(400)
+
+    def post(self):
+        descriptions = DescriptionArgs.post_params()
+        DescriptionOperations.add_descriptions(descriptions)
+        return jsonify('Descriptions successfully added.')
+
+    def delete(self):
+        args = DescriptionArgs.get_and_delete_params()
+        DescriptionOperations.remove_one(**args)
+        return jsonify('Description successfully deleted.')
+
+api_bp.add_url_rule(
+    '/desc',
+    view_func=DescriptionAPI.as_view('description_view'))
 
 
 @api_bp.route('/frame', methods=['GET'])

@@ -64,14 +64,12 @@ class Test_api_desc_GET_method(TestCaseBase):
         response = self.client.get(DESC_URL, query_string=params)
         assert response.status_code != 200
 
-    @pytest.mark.xfail
     def test_get_on_valid_variable_successful_with_code_200(self):
         params = dict(abbr='GDP')
         response = self.client.get(DESC_URL, query_string=params)
 
         assert response.status_code == 200
 
-    @pytest.mark.xfail
     def test_get_on_valid_variable_successful_returns_valid_data(self):
         params = dict(abbr='GDP')
         response = self.client.get(DESC_URL, query_string=params)
@@ -79,34 +77,32 @@ class Test_api_desc_GET_method(TestCaseBase):
 
         assert data == {'abbr': 'GDP', 'ru': 'Цена нефти Brent', 'en': 'Brent oil price'}
 
-    @pytest.mark.xfail
     def test_get_on_valid_variable_successful_with_code_200(self):
         params = dict(abbr='rog')
         response = self.client.get(DESC_URL, query_string=params)
 
         assert response.status_code == 200
 
-    @pytest.mark.xfail
     def test_get_on_valid_variable_successful_returns_valid_data(self):
         params = dict(abbr='rog')
         response = self.client.get(DESC_URL, query_string=params)
         data = process_json_response(response)
 
-        assert data == {'unit': 'rog', 'en': 'rate of growth to previous period',
+        assert data == {'abbr': 'rog', 'en': 'rate of growth to previous period',
                         'ru': 'темп роста к пред. периоду'}
 
 
 class Test_api_desc_POST_method(TestCaseBase):
-
+    @pytest.mark.xfail
     def test_post_method_without_params_fails(self):
         response = self.client.post(DESC_URL)
         assert response.status_code != 200
 
+    @pytest.mark.xfail
     def test_post_method_on_broken_data_returns_error_code(self):
         response = self.client.post(DESC_URL, data="broken_data")
         assert response.status_code != 200
 
-    @pytest.mark.xfail
     def test_post_method_on_duplicate_data_fails(self):
         upload_json = json.dumps(sample_post_payload)
         response = self.client.post(DESC_URL, data=upload_json)
@@ -114,13 +110,11 @@ class Test_api_desc_POST_method(TestCaseBase):
         response = self.client.post(DESC_URL, data=upload_json)
         assert response.status_code != 200
 
-    @pytest.mark.xfail
     def test_post_method_on_new_data_successful_with_code_200(self):
         upload_json = json.dumps(sample_post_payload)
         response = self.client.post(DESC_URL, data=upload_json)
         assert response.status_code == 200
 
-    @pytest.mark.xfail
     def test_post_method_getting_posted_successful_returns_posted_data(self):
         upload_json = json.dumps(sample_post_payload)
         self.client.post(DESC_URL, data=upload_json)
@@ -142,18 +136,23 @@ class Test_api_desc_DELETE_method(TestCaseBase):
         response = self.client.delete(DESC_URL, query_string=params)
         assert response.status_code != 200
 
-    @pytest.mark.xfail
     def test_delete_variable_desc_successful_with_code_200(self):
+        upload_json = json.dumps(sample_post_payload)
+        self.client.post(DESC_URL, data=upload_json)
+
         params = dict(abbr='rog')
         response = self.client.delete(DESC_URL, query_string=params)
         assert response.status_code == 200
 
-    @pytest.mark.xfail
     def test_delete_posted_data_successful_with_code_200(self):
+        upload_json = json.dumps(sample_post_payload)
+        self.client.post(DESC_URL, data=upload_json)
+
         for desc in sample_post_payload:
             response = self.client.delete(DESC_URL,
                                           query_string={'abbr': desc.get('abbr')})
             assert response.status_code == 200
+
 
 if __name__ == '__main__': # pragma no cover
     pytest.main([__file__])

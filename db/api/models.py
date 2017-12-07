@@ -29,3 +29,23 @@ class Datapoint(db.Model):
             'date': datetime.strftime(self.date, "%Y-%m-%d"),
             'value': self.value
         }
+
+
+class Description(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    abbr = db.Column(db.String, nullable=False)
+    ru = db.Column(db.String, nullable=True)
+    en = db.Column(db.String, nullable=True)
+
+    def __init__(self, abbr=None, ru=None, en=None):
+        self.abbr = abbr
+        self.ru = ru
+        self.en = en
+
+    @property
+    def serialized(self):
+        return {
+            'abbr': self.abbr,
+            'ru': self.ru,
+            'en': self.en
+        }
