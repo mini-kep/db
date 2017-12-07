@@ -114,7 +114,7 @@ class TestDatapointsAPI(TestCaseBase):
     error_code = 422
 
     error_dict = {
-        "allowed": ["json","csv"],
+        "allowed": ["json", "csv"],
         "messages": ["Invalid format parameter"]
     }
 

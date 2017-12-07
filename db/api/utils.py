@@ -70,6 +70,7 @@ def serialiser(datapoint_query):
         result[dt] = this_date
     return result
 
+
 def variable_info(varname, freq):
     """
     Returns dictionary with variable information. E.g.:
@@ -104,7 +105,7 @@ def variable_info(varname, freq):
 
 
 class DictionaryRepresentation:
-    
+
     @staticmethod
     def transform_query_to_dicts(datapoints):
         """
@@ -121,8 +122,8 @@ class DictionaryRepresentation:
             #     result[date] = {}
             result.setdefault(date, {})
             result[date][point.name] = point.value
-        return collections.OrderedDict(sorted(result.items())) # would be sorted by result keys
-     
+        # would be sorted by result keys
+        return collections.OrderedDict(sorted(result.items()))
 
     def __init__(self, datapoint_query, names):
         self.data_dicts = self.transform_query_to_dicts(datapoint_query)
@@ -150,7 +151,6 @@ class DictionaryRepresentation:
         return '\n'.join(self.yield_rows())
 
 
-
 if __name__ == '__main__':  # pragma: no cover
 
     from db import create_app
@@ -160,7 +160,7 @@ if __name__ == '__main__':  # pragma: no cover
     app = create_app('config.DevelopmentConfig')
     app.register_blueprint(api)
 
-    #EP: works without db creation after done once
+    # EP: works without db creation after done once
 
     #from db import db
     # db.create_all(app=create_app('config.DevelopmentConfig'))
@@ -185,7 +185,8 @@ if __name__ == '__main__':  # pragma: no cover
 """
 
         assert m.header == ',CPI_rog,EXPORT_GOODS_bln_usd'
-        # TODO: test this result for daily frequency - note it has missing values, which is correct
+        # TODO: test this result for daily frequency - note it has missing
+        # values, which is correct
         """,BRENT,USDRUR_CB
 2016-06-01,48.81,65.9962
 2016-06-02,49.05,66.6156

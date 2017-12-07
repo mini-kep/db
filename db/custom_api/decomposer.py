@@ -116,7 +116,8 @@ class Tokens(object):
         tokens = [token.strip() for token in inner_path.split('/') if token]
         elements = ListElements(tokens)
         self.start_year, self.end_year = elements.get_years()
-        # order of assignment is important as .get_one() modifis state of 'elements'
+        # order of assignment is important as .get_one() modifis state of
+        # 'elements'
         self._fin = elements.get_one(ALLOWED_FINALISERS)
         self._rate = elements.get_one(ALLOWED_REAL_RATES)
         self._agg = elements.get_one(ALLOWED_AGGREGATORS)
@@ -167,7 +168,6 @@ def validate_frequency(freq):
 def validate_rate_and_agg(rate, agg):
     if rate and agg:
         raise CustomError400("Cannot combine rate and aggregation.")
-
 
 
 class Indicator(object):

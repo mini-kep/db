@@ -1,5 +1,5 @@
 """
-Tests for 'api/desc' post, get, delete methods 
+Tests for 'api/desc' post, get, delete methods
 
 
 #GET api/desc?abbr=GDP
@@ -37,11 +37,22 @@ from tests.test_basic import TestCaseBase
 DESC_URL = 'api/desc'
 
 sample_post_payload = [
-    dict(abbr='BRENT', ru='Цена нефти Brent', en='Brent oil price'),
-    dict(abbr='GDP', ru='Валовый внутренний продукт', en='Gross domestic product'),
-    dict(abbr='rog', ru='темп роста к пред. периоду', en='rate of growth to previous period'),
-    dict(abbr='yoy', ru='темп роста за 12 месяцев', en='year-on-year rate of growth')
-]
+    dict(
+        abbr='BRENT',
+        ru='Цена нефти Brent',
+        en='Brent oil price'),
+    dict(
+        abbr='GDP',
+        ru='Валовый внутренний продукт',
+        en='Gross domestic product'),
+    dict(
+        abbr='rog',
+        ru='темп роста к пред. периоду',
+        en='rate of growth to previous period'),
+    dict(
+        abbr='yoy',
+        ru='темп роста за 12 месяцев',
+        en='year-on-year rate of growth')]
 
 
 def process_json_response(response):
@@ -77,7 +88,10 @@ class Test_api_desc_GET_method(TestCaseBase):
         response = self.client.get(DESC_URL, query_string=params)
         data = process_json_response(response)
 
-        assert data == {'abbr': 'GDP', 'ru': 'Цена нефти Brent', 'en': 'Brent oil price'}
+        assert data == {
+            'abbr': 'GDP',
+            'ru': 'Цена нефти Brent',
+            'en': 'Brent oil price'}
 
     @pytest.mark.xfail
     def test_get_on_valid_variable_successful_with_code_200(self):
@@ -92,8 +106,10 @@ class Test_api_desc_GET_method(TestCaseBase):
         response = self.client.get(DESC_URL, query_string=params)
         data = process_json_response(response)
 
-        assert data == {'unit': 'rog', 'en': 'rate of growth to previous period',
-                        'ru': 'темп роста к пред. периоду'}
+        assert data == {
+            'unit': 'rog',
+            'en': 'rate of growth to previous period',
+            'ru': 'темп роста к пред. периоду'}
 
 
 class Test_api_desc_POST_method(TestCaseBase):
@@ -126,7 +142,9 @@ class Test_api_desc_POST_method(TestCaseBase):
         self.client.post(DESC_URL, data=upload_json)
 
         for desc in sample_post_payload:
-            response = self.client.get(DESC_URL, query_string={'abbr': desc.get('abbr')})
+            response = self.client.get(
+                DESC_URL, query_string={
+                    'abbr': desc.get('abbr')})
             assert desc == process_json_response(response)
 
 
@@ -151,9 +169,11 @@ class Test_api_desc_DELETE_method(TestCaseBase):
     @pytest.mark.xfail
     def test_delete_posted_data_successful_with_code_200(self):
         for desc in sample_post_payload:
-            response = self.client.delete(DESC_URL,
-                                          query_string={'abbr': desc.get('abbr')})
+            response = self.client.delete(
+                DESC_URL, query_string={
+                    'abbr': desc.get('abbr')})
             assert response.status_code == 200
 
-if __name__ == '__main__': # pragma no cover
+
+if __name__ == '__main__':  # pragma no cover
     pytest.main([__file__])

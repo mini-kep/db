@@ -1,4 +1,5 @@
-import json, datetime
+import json
+import datetime
 from io import BytesIO
 
 from flask import Blueprint, request, abort, jsonify, current_app, Response, make_response
@@ -45,22 +46,23 @@ def handle_invalid_usage(error):
     return response
 
 # PROPOSED ENHANCEMENT: Can use this fucntion as decorator for DatapointsAPI.post() amd .delete methods()
-#                       Currently authorise() used inside these methods. 
+#                       Currently authorise() used inside these methods.
 #                       Decorator can help abstract database logic inside a method from access infrastructure
 #
-#                       Current problem - not sure how to add a decorator to individual class methods. 
-#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how 
-#                       to add decorators to all of class, but warns the 'traditional' decoraots wont 
+#                       Current problem - not sure how to add a decorator to individual class methods.
+#                       <http://flask.pocoo.org/docs/0.12/views/#decorating-views> has example on how
+#                       to add decorators to all of class, but warns the 'traditional' decoraots wont
 #                       work on individual methods:
-#                             
+#
 #                                class UserAPI(MethodView):
 #                                    decorators = [user_required]
 #
-#                                > Due to the implicit self from the caller’s perspective you cannot use 
-#                                > regular view decorators on the individual methods of the view 
+#                                > Due to the implicit self from the caller’s perspective you cannot use
+#                                > regular view decorators on the individual methods of the view
 #                                > <http://flask.pocoo.org/docs/0.12/views/#decorating-views>
 #
 #  Decision: for now plain call to authorise seems cleanest available solution.
+
 
 def authorise():
     token_to_check = request.args.get(
@@ -212,7 +214,7 @@ def get_all_variable_names_for_frequency(freq):
 
 @api_bp.route('/info', methods=['GET'])
 def info():
-    # WONTFIX: can this method work without frequency? just by name? 
+    # WONTFIX: can this method work without frequency? just by name?
     varname = request.args.get('name')
     freq = request.args.get('freq')
     data = utils.variable_info(varname, freq)
@@ -220,7 +222,7 @@ def info():
 
 
 @api_bp.route('/spline', methods=['GET'])
-# FIXME: rename to spline() 
+# FIXME: rename to spline()
 # FIXME: split this fucntion to arg-data handling and utility function make_png(data)
 # DISCUSS: maybe make_png(data) need to be split too
 def splines():
@@ -232,8 +234,8 @@ def splines():
 
     args = RequestArgs()
     data = DatapointOperations.select(**args.query_param)
-    
-    # FIXME: this is double work, not clean 
+
+    # FIXME: this is double work, not clean
     json_data = publish_json(data)
     data_array = json.loads(json_data.response[0])
 
@@ -247,7 +249,7 @@ def splines():
     canvas = FigureCanvas(fig)
     png_output = BytesIO()
     canvas.print_png(png_output)
-    response=make_response(png_output.getvalue())
+    response = make_response(png_output.getvalue())
     response.headers['Content-Type'] = 'image/png'
     return response
 
