@@ -171,15 +171,13 @@ class SimplifiedArgs(RequestArgs):
     query_keys = ['name', 'freq', 'start_date', 'end_date']
 
 
-def process_json(response):
-    return json.loads(response.decode('utf-8'))
-
-
 class DescriptionArgs:
 
-    # @staticmethod
-    # def process_json(response):
-    #     return json.loads(response.get_data().decode('utf-8'))
+    @staticmethod
+    def process_json(response):
+        data = response.get_data()
+        if data:
+            return json.loads(data.decode('utf-8'))
 
     @staticmethod
     def validate_abbr(abbr):
@@ -191,7 +189,6 @@ class DescriptionArgs:
     def get_and_delete_params():
         # params should be like 'abbr=GDP'
         abbr = flask.request.args.get('abbr')
-        # DescriptionArgs.validate_abbr(abbr)
         return {
             'abbr': abbr
         }
@@ -207,8 +204,8 @@ class DescriptionArgs:
             dict(abbr='yoy', ru='темп роста за 12 месяцев', en='year-on-year rate of growth')
         ]
         """
-        descriptions = process_json(flask.request.data)
-        if len(descriptions) == 0:
+        descriptions = DescriptionArgs.process_json(flask.request)
+        if not descriptions:
             raise ArgError('Error: no data given.', descriptions)
         for description in descriptions:
             abbr = description.get('abbr')

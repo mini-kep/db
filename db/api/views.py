@@ -1,6 +1,4 @@
 import json
-import datetime
-from io import BytesIO
 
 from flask import Blueprint, request, abort, jsonify, current_app, Response, make_response
 from flask.views import MethodView
@@ -11,10 +9,6 @@ from db.api.errors import CustomError400
 from db.api.parameters import RequestArgs, RequestFrameArgs, SimplifiedArgs, \
     DescriptionArgs
 from db.api.queries import All, Allowed, DatapointOperations, DescriptionOperations
-
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.dates import DateFormatter
 
 api_bp = Blueprint('api_bp', __name__, url_prefix='/api')
 
@@ -247,36 +241,11 @@ def info():
 
 
 @api_bp.route('/spline', methods=['GET'])
-# FIXME: rename to spline()
-# FIXME: split this fucntion to arg-data handling and utility function make_png(data)
-# DISCUSS: maybe make_png(data) need to be split too
-def splines():
-
-    fig = Figure()
-    ax = fig.add_subplot(111)
-    x = []
-    y = []
-
+def spline():
     args = RequestArgs()
-    data = DatapointOperations.select(**args.query_param)
-
-    # FIXME: this is double work, not clean
-    json_data = publish_json(data)
-    data_array = json.loads(json_data.response[0])
-
-    for item in data_array:
-        x.append(datetime.datetime.strptime(item["date"], "%Y-%m-%d"))
-        y.append(item["value"])
-
-    ax.plot_date(x, y, '-')
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-    fig.autofmt_xdate()
-    canvas = FigureCanvas(fig)
-    png_output = BytesIO()
-    canvas.print_png(png_output)
-    response = make_response(png_output.getvalue())
+    data = utils.get_data_for_spline(args)
+    png_output = utils.make_png(data)
+    response = make_response(png_output)
     response.headers['Content-Type'] = 'image/png'
     return response
 
-
-# TODO:
