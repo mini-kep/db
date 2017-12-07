@@ -88,7 +88,7 @@ class Test_RequestFrameArgs(TestCaseBase):
         incoming_args = dict(freq='a')
         req = SimRequest(**incoming_args)
         args = RequestFrameArgs(req)
-        assert args.names is None
+        assert isinstance(args.names, list)
 
     def test_init_on_bad_args_fails_2(self):
         malformed_args = dict(names="GDP_yoy,DING_dong", freq='a')
