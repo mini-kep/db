@@ -2,7 +2,7 @@ import requests
 from time import sleep
 import json
 
-UPLOAD_API_TOKEN = '1234'
+UPLOAD_API_TOKEN = 'insert token here'
 UPLOAD_URL = 'http://minikep-db.herokuapp.com/api/desc'
 
 
