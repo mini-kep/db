@@ -228,7 +228,7 @@ def series(freq, name, start_date=None, end_date=None):
 
 
 def frame(freq, names, start_date=None, end_date=None):
-    param = make_dict(freq=freq, names=names,
+    param = make_dict(freq=freq, name=names,
                       start_date=start_date, end_date=end_date)
     return Caller('api/frame', param).text()
 
@@ -248,7 +248,7 @@ class CustomAPI:
 
 
 def get_frame_url(freq, names, start_date=None, end_date=None):
-    param = make_dict(freq=freq, names=','.join(names),
+    param = make_dict(freq=freq, name=','.join(names),
                       start_date=start_date, end_date=end_date)
     return Caller('api/frame', param).url
 

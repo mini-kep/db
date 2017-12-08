@@ -146,16 +146,16 @@ Get data for several variables as csv.
 
 Args:
 - `freq` - one of `a`, `q`, `m`, or `d` 
-- `names` - one variable name or several variable names separated by comma. Lists all variables, if omitted.
+- `name` - one variable name or several variable names separated by comma. Lists all variables, if omitted.
 - `start_date` (optional) - start date, ex: `2017-10-25`
 - `end_date` (optional) - end date, ex: `2018-03-20`
 
 Examples:
 
 - [api/frame?freq=a](http://minikep-db.herokuapp.com/api/frame?freq=a)
-- [api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog](http://minikep-db.herokuapp.com/api/frame?freq=m&names=CPI_rog,CPI_SERVICES_rog)
-- [api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01](http://minikep-db.herokuapp.com/api/frame?freq=q&names=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01)
-- [api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10](http://minikep-db.herokuapp.com/api/frame?freq=d&names=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10)
+- [api/frame?freq=m&name=CPI_rog,CPI_SERVICES_rog](http://minikep-db.herokuapp.com/api/frame?freq=m&name=CPI_rog,CPI_SERVICES_rog)
+- [api/frame?freq=q&name=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01](http://minikep-db.herokuapp.com/api/frame?freq=q&name=CPI_FOOD_rog,CPI_ALCOHOL_rog&start_date=2015-01-01)
+- [api/frame?freq=d&name=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10](http://minikep-db.herokuapp.com/api/frame?freq=d&name=BRENT,USDRUR_CB&start_date=2017-10-01&end_date=2017-10-10)
 
 ```,BRENT,USDRUR_CB
 2017-10-02,55.67,
