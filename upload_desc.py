@@ -2,8 +2,9 @@ import requests
 from time import sleep
 import json
 
-UPLOAD_API_TOKEN = 'insert token here'
+UPLOAD_API_TOKEN = '1234'
 UPLOAD_URL = 'http://minikep-db.herokuapp.com/api/desc'
+
 
 def post(data, token=UPLOAD_API_TOKEN, endpoint=UPLOAD_URL):
     """
@@ -13,7 +14,7 @@ def post(data, token=UPLOAD_API_TOKEN, endpoint=UPLOAD_URL):
     json_data = json.dumps(data)
     return requests.post(url=endpoint,
                          data=json_data,
-                         headers={'API_TOKEN': token}).status_code
+                         headers={'API_TOKEN': token})
 
 
 if __name__ == "__main__": # pragma: no cover
