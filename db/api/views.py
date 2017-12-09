@@ -4,6 +4,7 @@ from flask import Blueprint, request, abort, jsonify, current_app, Response, mak
 from flask.views import MethodView
 
 import db.api.utils as utils
+import db.api.image as image
 from db import db
 from db.api.errors import CustomError400
 from db.api.parameters import (RequestArgs, RequestFrameArgs, 
@@ -218,7 +219,7 @@ def info():
 def spline():
     args = RequestArgs()
     data = DatapointOperations.select(**args.get_query_parameters())
-    png_output = utils.make_png(data)
+    png_output = image.make_png(data)
     response = make_response(png_output)
     response.headers['Content-Type'] = 'image/png'
     return response

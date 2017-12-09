@@ -1,10 +1,10 @@
 #FIXME: msut use https://github.com/mini-kep/guidelines/blob/master/testing.md
 
 import pytest
-from datetime import datetime, date
+from datetime import date
 from io import BytesIO
 
-import db.api.utils as utils
+import db.api.image as image
 from db.api.parameters import RequestArgs
 from db.api.queries import DatapointOperations
 
@@ -50,7 +50,7 @@ class Test_Utils_Spline(TestCaseBase):
         args = RequestArgs(req)
         query_data = DatapointOperations.select(**args.get_query_parameters())
         # call
-        data = utils.get_data_for_spline(query_data)
+        data = image.get_data_for_spline(query_data)
         # check
         assert date(2016, 10, 29) in data["x"]
         assert 62.9037 in data["y"]
@@ -62,7 +62,16 @@ class Test_Utils_Spline(TestCaseBase):
             date = date(2016, 10, 29)
             value = 62.9037
         data = [Item()]
-        png_output = utils.make_png(data)
+        png_output = image.make_png(data)
+        params = dict(freq='d', name='USDRUR_CB',
+                      start_date='2016-10-29', end_date='2016-10-29')
+        response = self.client.get('/api/spline', query_string=params)
+        assert response.data == png_output
+
+    def test_create_png_from_dict_spline(self):
+        data = dict(x=[date(2016, 10, 29)],
+                    y=[62.9037])
+        png_output = image.create_png_from_dict(data, image.SPLINE_GPARAMS)
         params = dict(freq='d', name='USDRUR_CB',
                       start_date='2016-10-29', end_date='2016-10-29')
         response = self.client.get('/api/spline', query_string=params)
