@@ -90,7 +90,7 @@ series_list = [MiniKEP.datapoints_csv(freq=freq, name=name).to_frame() for name 
 df1 = access.join_df([ts.to_frame() for ts in series_list])
 
 # get frame
-df2 = MiniKEP.frame(freq=freq, names=random_names)
+df2 = MiniKEP.frame(freq=freq, name=random_names)
 
 # compare
 assert all(df1 == df2)
