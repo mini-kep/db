@@ -18,3 +18,4 @@ flasgger
 webargs
 arrow
 matplotlib
+pandas
