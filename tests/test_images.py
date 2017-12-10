@@ -2,7 +2,6 @@
 
 import pytest
 from datetime import date
-from io import BytesIO
 
 import db.api.image as image
 from db.api.parameters import RequestArgs
