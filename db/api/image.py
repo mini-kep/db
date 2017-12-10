@@ -28,7 +28,6 @@ def get_data_for_spline(query_data):
             "y":[]
         )
     """
-    print(query_data)
     return dict(x=[item.date for item in query_data],
                 y=[item.value for item in query_data])
 
