@@ -6,7 +6,7 @@
 From this API an end can get macroeconomic indicators as JSON or CSV. An administrator can update the database. 
 
 For example, [by this link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
-an administrator returns quarterly year-on-year Russian GDP growth rate as csv file, readable by `R` or `pandas`.
+returns quarterly year-on-year Russian GDP growth rate as csv file, readable by `R` or `pandas`.
 
 ```
 ,GDP_yoy
