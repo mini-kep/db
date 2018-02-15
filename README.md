@@ -2,14 +2,11 @@
 [![Assertible status](https://assertible.com/apis/56e34b07-ae3a-4248-937e-fef69d8ec2f2/status?api_token=VkiQoHOdjWU3vGv2)](https://assertible.com/dashboard#/services/56e34b07-ae3a-4248-937e-fef69d8ec2f2/results)
 [![Coverage badge](https://codecov.io/gh/mini-kep/db/branch/master/graphs/badge.svg)](https://codecov.io/gh/mini-kep/db)
 
-# Concept
+# Introduction 
+From this API an end can get macroeconomic indicators as JSON or CSV. An administrator can update the database. 
 
-This API allows to update and query a database of macroeconomic indicators. 
-
-# Quickstart
-
-[This link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
-returns quarterly year-on-year Russian GDP growth rate as csv file, readable by `R` or `pandas`.
+For example, [by this link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
+an administrator returns quarterly year-on-year Russian GDP growth rate as csv file, readable by `R` or `pandas`.
 
 ```
 ,GDP_yoy
@@ -21,11 +18,10 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 2017-06-30,102.5
 ```
 
-# User interface
+#### Python interface
 
-User can import data as following:
-- [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplier, function-based code, good for ipython notebooks
-- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options, to be used in other python programs 
+- [access.py](https://github.com/mini-kep/db/blob/master/integration/access.py) - simplified, function-based code, good for ipython notebooks
+- [minikep.py](https://github.com/mini-kep/db/blob/master/integration/minikep.py) - code based on classes with slightly richer options
 
 #### Example: read data at annual frequency
 
