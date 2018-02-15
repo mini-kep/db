@@ -3,7 +3,8 @@
 [![Coverage badge](https://codecov.io/gh/mini-kep/db/branch/master/graphs/badge.svg)](https://codecov.io/gh/mini-kep/db)
 
 # Introduction 
-From this API an end can get macroeconomic indicators as JSON or CSV. An administrator can update the database. 
+
+This is an API to get macroeconomic indicators as JSON or CSV. An administrator can update the database. 
 
 For example, [this link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
 returns quarterly year-on-year Russian GDP growth rate as CSV file, readable by `R` or `pandas`. Try it in browser!
