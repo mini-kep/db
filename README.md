@@ -5,8 +5,8 @@
 # Introduction 
 From this API an end can get macroeconomic indicators as JSON or CSV. An administrator can update the database. 
 
-For example, [by this link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
-returns quarterly year-on-year Russian GDP growth rate as csv file, readable by `R` or `pandas`.
+For example, [this link](https://minikep-db.herokuapp.com/api/series?name=GDP_yoy&freq=q&start_date=2016-01-01)
+returns quarterly year-on-year Russian GDP growth rate as CSV file, readable by `R` or `pandas`. Try it in browser!
 
 ```
 ,GDP_yoy
@@ -28,22 +28,16 @@ returns quarterly year-on-year Russian GDP growth rate as csv file, readable by 
 ```python 
 import pandas as pd
 
-BASE_URL = 'http://minikep-db.herokuapp.com/'
-
-def read_df_from_url(url):
-    """Read pandas dataframe from *url*."""
-    return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0)
-
 def get_frame(freq):
     """Return pandas dataframe with annual, quarterly, monthly or daily data.
        
        Arg:
-         freq - 'a', 'q', 'm', 'd'
+         freq - 'a', 'q', 'm' or 'd' literal
     """
-    url = BASE_URL + 'api/frame?freq={}'.format(freq)
-    return read_df_from_url(url)
+    url = 'http://minikep-db.herokuapp.com/api/frame?freq={}'.format(freq)
+    return pd.read_csv(url, converters={0: pd.to_datetime}, index_col=0)
 
-# annual data example
+# get annual data 
 dfa = get_frame('a')  
 ```
   
